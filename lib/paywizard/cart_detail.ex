@@ -8,6 +8,7 @@ defmodule Paywizard.CartDetail.Item do
     :asset
   ]
 
+  # creates a Subscription Item (free trial is applicable for some subscriptions)
   def new(%{
         "cost" => amount_and_currency,
         "quantity" => quantity,
@@ -24,6 +25,7 @@ defmodule Paywizard.CartDetail.Item do
     }
   end
 
+  # creates a PPV Item (free trial not applicable for PPV)
   def new(%{
         "cost" => amount_and_currency,
         "quantity" => quantity,
@@ -36,7 +38,6 @@ defmodule Paywizard.CartDetail.Item do
       quantity: quantity,
       item_id: item_id,
       item_name: name,
-      eligible_for_free_trial: false,
       asset: to_asset(item_data)
     }
   end
@@ -45,6 +46,7 @@ defmodule Paywizard.CartDetail.Item do
   defp to_asset(asset_data), do: %Paywizard.Asset{id: asset_data["id"], title: asset_data["name"]}
   defp cost(%{"amount" => cost}), do: cost
   defp free_trial?(%{"applied" => free}), do: free
+  defp free_trial?(_), do: nil
 end
 
 defmodule Paywizard.CartDetail do
