@@ -55,7 +55,7 @@ defmodule Paywizard.ClientTest do
                 address_post_code: "Postcode",
                 custom_attributes: [%{name: "accepted_cmore_terms", value: "2018-09-25"}],
                 email: "paywizard_purchase_test2@cmore.se",
-                external_unique_id: 100_471_887,
+                external_unique_id: "100471887",
                 first_name: "Paywizard_purchase_test2@cmore.se",
                 last_name: "Paywizard_purchase_test2@cmore.se",
                 username: "paywizard_purchase_test2@cmore.se"
@@ -557,6 +557,8 @@ defmodule Paywizard.ClientTest do
              status_code: 200,
              body:
                %{
+                 # TODO: Validate this after PW release of order_id.
+                 "orderId" => "order_id_123",
                  "contractDetails" => %{
                    "contractId" => 18978,
                    "itemCode" => "6D3A56FF5065478ABD61",
@@ -592,6 +594,8 @@ defmodule Paywizard.ClientTest do
              ) ==
                {:ok,
                 %CartDetail{
+                  # TODO: Validate this after PW release of order_id.
+                  order_id: "order_id_123",
                   currency: :SEK,
                   total_cost: "0.00",
                   items: [

@@ -19,7 +19,7 @@ defmodule Paywizard.Customer do
   def new(response) do
     %Paywizard.Customer{
       customer_id: Map.get(response, "customerId"),
-      external_unique_id: Map.get(response, "externalUniqueIdentifier"),
+      external_unique_id: Map.get(response, "externalUniqueIdentifier") |> to_string(),
       username: Map.get(response, "username"),
       first_name: Map.get(response, "firstName"),
       last_name: Map.get(response, "lastName"),

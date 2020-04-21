@@ -52,7 +52,7 @@ end
 defmodule Paywizard.CartDetail do
   alias Paywizard.CartDetail.Item
 
-  defstruct [:total_cost, :currency, items: []]
+  defstruct [:order_id, :total_cost, :currency, items: []]
 
   @type t :: %__MODULE__{currency: Paywizard.Client.currency()}
 
@@ -63,6 +63,7 @@ defmodule Paywizard.CartDetail do
     } = fetch_cart_payload["totalCost"]
 
     %__MODULE__{
+      order_id: fetch_cart_payload["orderId"],
       total_cost: amount,
       currency: String.to_atom(currency),
       items: Enum.map(fetch_cart_payload["items"], &Item.new/1)
