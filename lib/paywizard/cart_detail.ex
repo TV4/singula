@@ -1,8 +1,15 @@
+defmodule Paywizard.CartDetail.Item.Trial do
+  defstruct [
+    :free_trial,
+    :first_payment_date
+  ]
+end
+
 defmodule Paywizard.CartDetail.Item do
   defstruct [
     :cost,
     :quantity,
-    :eligible_for_free_trial,
+    :trial,
     :item_id,
     :item_name,
     :asset
@@ -21,7 +28,7 @@ defmodule Paywizard.CartDetail.Item do
       quantity: quantity,
       item_id: item_id,
       item_name: name,
-      eligible_for_free_trial: free_trial?(trial)
+      trial: free_trial?(trial)
     }
   end
 
@@ -45,7 +52,11 @@ defmodule Paywizard.CartDetail.Item do
   defp to_asset(""), do: nil
   defp to_asset(asset_data), do: %Paywizard.Asset{id: asset_data["id"], title: asset_data["name"]}
   defp cost(%{"amount" => cost}), do: cost
-  defp free_trial?(%{"applied" => free}), do: free
+
+  defp free_trial?(%{"applied" => applied, "firstPaymentDate" => paymentDate}),
+    do: %Paywizard.CartDetail.Item.Trial{free_trial: applied, first_payment_date: paymentDate}
+
+  defp free_trial?(%{"applied" => applied}), do: %Paywizard.CartDetail.Item.Trial{free_trial: applied}
   defp free_trial?(_), do: nil
 end
 

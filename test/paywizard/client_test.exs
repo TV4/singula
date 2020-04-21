@@ -559,7 +559,10 @@ defmodule Paywizard.ClientTest do
                     %CartDetail.Item{
                       item_id: "6D3A56FF5065478ABD61",
                       cost: "0.00",
-                      eligible_for_free_trial: true,
+                      trial: %CartDetail.Item.Trial{
+                        free_trial: true,
+                        first_payment_date: "2020-04-05T00:00:00+02:00"
+                      },
                       item_name: "C More TV4",
                       quantity: 1
                     }
@@ -602,7 +605,7 @@ defmodule Paywizard.ClientTest do
                     %CartDetail.Item{
                       item_id: "4151C241C3DD41529A87",
                       cost: "449.00",
-                      eligible_for_free_trial: nil,
+                      trial: nil,
                       item_name: "C More All Sport",
                       quantity: 1
                     }
@@ -643,7 +646,7 @@ defmodule Paywizard.ClientTest do
                     %CartDetail.Item{
                       item_id: "A2D895F14D6B4F2DA03C",
                       item_name: "PPV - 249",
-                      eligible_for_free_trial: nil,
+                      trial: nil,
                       cost: "149.00",
                       quantity: 1,
                       asset: %Asset{id: 10_255_800, title: "Rögle BK - Växjö Lakers HC"}
