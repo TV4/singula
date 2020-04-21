@@ -1,5 +1,32 @@
+defmodule Paywizard.ContractDetails do
+  defstruct [:id, :item_name, :recurring_billing, :status]
+
+  @type t :: %__MODULE__{}
+
+  def new(response) do
+    %__MODULE__{
+      id: response["contractId"],
+      item_name: response["name"],
+      recurring_billing:
+        get_in(response, ["billing", "recurring"]) |> Map.merge(get_in(response, ["billing", "frequency"])),
+      status: response["status"]
+    }
+  end
+end
+
 defmodule Paywizard.Client do
-  alias Paywizard.{CartDetail, Contract, Customer, DibsPaymentMethod, MetaData, KlarnaPaymentMethod, PPV, Digest}
+  alias Paywizard.{
+    CartDetail,
+    Contract,
+    ContractDetails,
+    Customer,
+    DibsPaymentMethod,
+    MetaData,
+    KlarnaPaymentMethod,
+    PPV,
+    Digest
+  }
+
   require Logger
 
   @type currency :: :DKK | :NOK | :SEK
@@ -37,6 +64,20 @@ defmodule Paywizard.Client do
            http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract") do
       {:ok, response} = Jason.decode(body)
       {:ok, Contract.new(response)}
+    else
+      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+        {:ok, %{"errorCode" => 500}} = Jason.decode(body)
+        {:paywizard_error, :customer_not_found}
+    end
+  end
+
+  @callback customer_contract(Customer.customer_id(), contract_id :: integer) ::
+              {:ok, ContractDetails.t()} | {:paywizard_error, :customer_not_found}
+  def customer_contract(customer_id, contract_id) do
+    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+           http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}") do
+      {:ok, response} = Jason.decode(body)
+      {:ok, ContractDetails.new(response)}
     else
       {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
