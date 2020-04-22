@@ -552,6 +552,7 @@ defmodule Paywizard.ClientTest do
                {:ok,
                 %CartDetail{
                   # TODO: Validate this after PW release of order_id.
+                  contract_id: 18978,
                   order_id: "order_id_123",
                   currency: :SEK,
                   total_cost: "0.00",
