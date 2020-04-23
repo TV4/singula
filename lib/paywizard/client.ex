@@ -1,19 +1,3 @@
-defmodule Paywizard.ContractDetails do
-  defstruct [:id, :item_name, :recurring_billing, :status]
-
-  @type t :: %__MODULE__{}
-
-  def new(response) do
-    %__MODULE__{
-      id: response["contractId"],
-      item_name: response["name"],
-      recurring_billing:
-        get_in(response, ["billing", "recurring"]) |> Map.merge(get_in(response, ["billing", "frequency"])),
-      status: response["status"]
-    }
-  end
-end
-
 defmodule Paywizard.Client do
   alias Paywizard.{
     CartDetail,
