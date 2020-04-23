@@ -1,0 +1,7 @@
+os: linux
+language: elixir
+elixir: 1.10.2
+otp_release: 22.3.2
+script:
+  - mix format --check-formatted
+  - mix test --trace
