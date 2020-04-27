@@ -147,9 +147,10 @@ defmodule Paywizard.ClientTest do
                 id: 9_622_082,
                 item_name: "Field Sales - All Sport 12 plus 12",
                 recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 24},
+                minimum_term: %{frequency: :MONTH, length: 24},
                 status: :ACTIVE,
                 start_date: ~D[2020-04-22],
-                minimum_term: %{frequency: :MONTH, length: 24}
+                paid_up_to_date: ~D[2020-04-22]
               }}
   end
 

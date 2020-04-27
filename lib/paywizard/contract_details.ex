@@ -1,5 +1,5 @@
 defmodule Paywizard.ContractDetails do
-  defstruct [:id, :item_name, :recurring_billing, :status, :start_date, :minimum_term]
+  defstruct [:id, :item_name, :recurring_billing, :minimum_term, :status, :start_date, :paid_up_to_date]
 
   @type t :: %__MODULE__{}
 
@@ -8,9 +8,10 @@ defmodule Paywizard.ContractDetails do
       id: response["contractId"],
       item_name: response["name"],
       recurring_billing: recurring_billing(response["billing"]),
+      minimum_term: minimum_term(response["minimumTerm"]),
       status: String.to_atom(response["status"]),
       start_date: Date.from_iso8601!(response["startDate"]),
-      minimum_term: minimum_term(response["minimumTerm"])
+      paid_up_to_date: Date.from_iso8601!(response["paidUpToDate"])
     }
   end
 
