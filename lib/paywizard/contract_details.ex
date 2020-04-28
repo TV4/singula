@@ -1,5 +1,5 @@
 defmodule Paywizard.ContractDetails do
-  defstruct [:id, :item_name, :recurring_billing, :minimum_term, :status, :start_date, :paid_up_to_date]
+  defstruct [:id, :item_name, :recurring_billing, :balance, :minimum_term, :status, :start_date, :paid_up_to_date]
 
   @type t :: %__MODULE__{}
 
@@ -7,26 +7,28 @@ defmodule Paywizard.ContractDetails do
     %__MODULE__{
       id: response["contractId"],
       item_name: response["name"],
+      balance: amount(response["balance"]),
       recurring_billing: recurring_billing(response["billing"]),
-      minimum_term: minimum_term(response["minimumTerm"]),
+      minimum_term: frequency(response["minimumTerm"]),
       status: String.to_atom(response["status"]),
       start_date: Date.from_iso8601!(response["startDate"]),
       paid_up_to_date: Date.from_iso8601!(response["paidUpToDate"])
     }
   end
 
-  defp recurring_billing(%{
-         "recurring" => %{"amount" => amount, "currency" => currency},
-         "frequency" => %{"frequency" => frequency, "length" => length}
-       }) do
-    %{amount: amount, currency: currency_term(currency), frequency: frequency_term(frequency), length: length}
+  defp amount(%{"amount" => amount, "currency" => currency}) do
+    %{amount: amount, currency: currency_term(currency)}
   end
 
-  defp minimum_term(%{"frequency" => frequency, "length" => length}) do
+  defp recurring_billing(%{"recurring" => recurring, "frequency" => frequency}) do
+    amount(recurring) |> Map.merge(frequency(frequency))
+  end
+
+  defp frequency(%{"frequency" => frequency, "length" => length}) do
     %{frequency: frequency_term(frequency), length: length}
   end
 
-  defp minimum_term(_), do: nil
+  defp frequency(_), do: nil
 
   defp frequency_term("MONTH"), do: :MONTH
   defp frequency_term("YEAR"), do: :YEAR

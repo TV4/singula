@@ -146,6 +146,7 @@ defmodule Paywizard.ClientTest do
               %Paywizard.ContractDetails{
                 id: 9_622_082,
                 item_name: "Field Sales - All Sport 12 plus 12",
+                balance: %{amount: "-399.00", currency: :SEK},
                 recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 24},
                 minimum_term: %{frequency: :MONTH, length: 24},
                 status: :ACTIVE,

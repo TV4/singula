@@ -34,6 +34,7 @@ defmodule Paywizard.ContractDetailsTest do
              id: 9_622_082,
              item_name: "Field Sales - All Sport 12 plus 12",
              minimum_term: %{frequency: :MONTH, length: 24},
+             balance: %{amount: "-399.00", currency: :SEK},
              recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 24},
              status: :ACTIVE,
              start_date: ~D[2020-04-22],
@@ -70,6 +71,7 @@ defmodule Paywizard.ContractDetailsTest do
     assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
              id: 9_719_738,
              item_name: "C More TV4",
+             balance: %{amount: "0.00", currency: :SEK},
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
              status: :ACTIVE,
              start_date: ~D[2020-04-20],
