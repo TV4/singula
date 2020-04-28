@@ -43,9 +43,9 @@ defmodule Paywizard.Client do
 
   @callback customer_contracts(Customer.customer_id()) ::
               {:ok, list(Contract.t())} | {:paywizard_error, :customer_not_found}
-  def customer_contracts(customer_id) do
+  def customer_contracts(customer_id, active_only \\ true) do
     with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
-           http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract") do
+           http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract?activeOnly=#{active_only}") do
       {:ok, response} = Jason.decode(body)
       {:ok, Contract.new(response)}
     else
@@ -55,7 +55,7 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback customer_contract(Customer.customer_id(), contract_id :: integer) ::
+  @callback customer_contract(Customer.customer_id(), Contract.contract_id()) ::
               {:ok, ContractDetails.t()} | {:paywizard_error, :customer_not_found}
   def customer_contract(customer_id, contract_id) do
     with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
@@ -67,6 +67,17 @@ defmodule Paywizard.Client do
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
+  end
+
+  @callback cancel_contract(Customer.customer_id(), Contract.contract_id()) :: {:ok, cancellation_date :: Date.t()}
+  def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
+    {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
+      http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
+        "cancelDate" => cancel_date
+      })
+
+    {:ok, %{"cancellationDate" => cancellation_date}} = Jason.decode(body)
+    Date.from_iso8601(cancellation_date)
   end
 
   @callback customer_purchases_ppv(Customer.customer_id()) ::
@@ -294,15 +305,6 @@ defmodule Paywizard.Client do
 
     {:ok, ids}
   end
-
-  # def contract_customer_cancel(customer_id, contract_id, cancel_date \\ "") do
-  #   {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
-  #     http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
-  #       "cancelDate" => cancel_date
-  #     })
-
-  #   {:ok, _response} = Jason.decode(body)
-  # end
 
   # def customer_is_username_available(username) do
   #   {:ok, %HTTPoison.Response{body: body, status_code: 200}} =

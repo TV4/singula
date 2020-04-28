@@ -1,7 +1,8 @@
 defmodule Paywizard.Contract do
   defstruct [:contract_id, :item_id, :item_name, :active]
 
-  @type t :: %__MODULE__{active: boolean, item_id: binary}
+  @type contract_id :: integer | binary
+  @type t :: %__MODULE__{contract_id: contract_id, active: boolean, item_id: binary}
 
   def new(%{"contractCount" => 0}), do: []
 

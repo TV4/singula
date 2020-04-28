@@ -57,7 +57,7 @@ defmodule Paywizard.ClientTest do
 
   test "get contracts" do
     MockPaywizardHTTPClient
-    |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract" ->
+    |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true" ->
       {:ok,
        %HTTPoison.Response{
          body:
@@ -82,7 +82,7 @@ defmodule Paywizard.ClientTest do
            |> Jason.encode!(),
          request: %HTTPoison.Request{
            url:
-             "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract"
+             "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true"
          },
          status_code: 200
        }}
@@ -152,6 +152,26 @@ defmodule Paywizard.ClientTest do
                 start_date: ~D[2020-04-22],
                 paid_up_to_date: ~D[2020-04-22]
               }}
+  end
+
+  test "cancel contract" do
+    MockPaywizardHTTPClient
+    |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
+                        %{"cancelDate" => ""} ->
+      {:ok,
+       %HTTPoison.Response{
+         body:
+           %{"status" => "CUSTOMER_CANCELLED", "cancellationDate" => "2020-05-12"}
+           |> Jason.encode!(),
+         request: %HTTPoison.Request{
+           url:
+             "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel"
+         },
+         status_code: 200
+       }}
+    end)
+
+    assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
   end
 
   describe "create cart" do
