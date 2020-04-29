@@ -175,6 +175,63 @@ defmodule Paywizard.ClientTest do
     assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
   end
 
+  describe "withdraw cancel contract" do
+    test "succeeds" do
+      MockPaywizardHTTPClient
+      |> expect(
+        :post,
+        fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
+          {:ok,
+           %HTTPoison.Response{
+             body:
+               %{
+                 "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
+                 "rel" => "Get contract details",
+                 "type" => "application/json"
+               }
+               |> Jason.encode!(),
+             request: %HTTPoison.Request{
+               url:
+                 "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw"
+             },
+             status_code: 200
+           }}
+        end
+      )
+
+      assert Client.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == :ok
+    end
+
+    test "fails" do
+      MockPaywizardHTTPClient
+      |> expect(
+        :post,
+        fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
+          {:ok,
+           %HTTPoison.Response{
+             body:
+               %{
+                 "developerMessage" => "Contract cannot be cancelled at this time",
+                 "errorCode" => 90017,
+                 "moreInfo" =>
+                   "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+                 "userMessage" => "Contract cannot be changed at this time"
+               }
+               |> Jason.encode!(),
+             request: %HTTPoison.Request{
+               url:
+                 "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw"
+             },
+             status_code: 400
+           }}
+        end
+      )
+
+      assert Client.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
+               {:paywizard_error, :cancellation_withdrawal_fault}
+    end
+  end
+
   describe "create cart" do
     test "without meta data" do
       MockPaywizardHTTPClient

@@ -80,6 +80,20 @@ defmodule Paywizard.Client do
     Date.from_iso8601(cancellation_date)
   end
 
+  @callback withdraw_cancel_contract(Customer.customer_id(), Contract.contract_id()) ::
+              :ok | {:paywizard_error, :cancellation_withdrawal_fault}
+  def withdraw_cancel_contract(customer_id, contract_id) do
+    with {:ok, %HTTPoison.Response{status_code: 200}} <-
+           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel/withdraw", %{}) do
+      :ok
+    else
+      {:ok, %HTTPoison.Response{body: body}} ->
+        case Jason.decode(body) do
+          {:ok, %{"errorCode" => 90017}} -> {:paywizard_error, :cancellation_withdrawal_fault}
+        end
+    end
+  end
+
   @callback customer_purchases_ppv(Customer.customer_id()) ::
               {:ok, list(PPV.t())} | {:paywizard_error, :customer_not_found}
   def customer_purchases_ppv(customer_id) do
