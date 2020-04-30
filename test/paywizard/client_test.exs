@@ -67,6 +67,7 @@ defmodule Paywizard.ClientTest do
                %{
                  "active" => true,
                  "contractId" => 9_719_738,
+                 "orderId" => 112_233,
                  "itemCode" => "6D3A56FF5065478ABD61",
                  "link" => %{
                    "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
@@ -95,7 +96,8 @@ defmodule Paywizard.ClientTest do
                   active: true,
                   contract_id: 9_719_738,
                   item_id: "6D3A56FF5065478ABD61",
-                  item_name: "C More TV4"
+                  item_name: "C More TV4",
+                  order_id: 112_233
                 }
               ]}
   end
@@ -804,6 +806,7 @@ defmodule Paywizard.ClientTest do
                %{
                  "entitlements" => 5961,
                  "itemData" => %{"id" => 1, "name" => 1},
+                 "orderId" => 112_233,
                  "purchaseDate" => "2020-04-01T13:04:29+02:00",
                  "salesItemCode" => "A2D895F14D6B4F2DA03C",
                  "salesItemName" => "PPV - 249",
@@ -829,6 +832,7 @@ defmodule Paywizard.ClientTest do
                %{
                  "entitlements" => 5961,
                  "itemData" => %{"id" => 2, "name" => 2},
+                 "orderId" => 445_566,
                  "purchaseDate" => "2020-04-01T13:10:10+02:00",
                  "salesItemCode" => "A2D895F14D6B4F2DA03C",
                  "salesItemName" => "PPV - 249",
@@ -847,8 +851,8 @@ defmodule Paywizard.ClientTest do
     assert Client.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
              {:ok,
               [
-                %Paywizard.PPV{asset_id: "1", item_id: "A2D895F14D6B4F2DA03C"},
-                %Paywizard.PPV{asset_id: "2", item_id: "A2D895F14D6B4F2DA03C"}
+                %Paywizard.PPV{order_id: 112_233, asset_id: "1", item_id: "A2D895F14D6B4F2DA03C"},
+                %Paywizard.PPV{order_id: 445_566, asset_id: "2", item_id: "A2D895F14D6B4F2DA03C"}
               ]}
   end
 end

@@ -1,14 +1,15 @@
 defmodule Paywizard.PPV do
-  defstruct [:item_id, :asset_id]
+  defstruct [:order_id, :item_id, :asset_id]
 
-  @type t :: %__MODULE__{item_id: binary, asset_id: binary}
+  @type t :: %__MODULE__{order_id: integer, item_id: binary, asset_id: binary}
 
-  def new(items) do
-    items
-    |> Enum.map(fn ppv_item ->
+  def new(purchases) do
+    purchases
+    |> Enum.map(fn purchase ->
       %__MODULE__{
-        item_id: ppv_item["salesItemCode"],
-        asset_id: ppv_item["itemData"]["id"] |> to_string
+        order_id: purchase["orderId"],
+        item_id: purchase["salesItemCode"],
+        asset_id: purchase["itemData"]["id"] |> to_string
       }
     end)
   end

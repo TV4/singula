@@ -1,8 +1,8 @@
 defmodule Paywizard.Contract do
-  defstruct [:contract_id, :item_id, :item_name, :active]
+  defstruct [:contract_id, :order_id, :item_id, :item_name, :active]
 
   @type contract_id :: integer | binary
-  @type t :: %__MODULE__{contract_id: contract_id, active: boolean, item_id: binary}
+  @type t :: %__MODULE__{contract_id: contract_id, order_id: integer, item_id: binary, active: boolean}
 
   def new(%{"contractCount" => 0}), do: []
 
@@ -11,6 +11,7 @@ defmodule Paywizard.Contract do
     |> Enum.map(fn contract ->
       %__MODULE__{
         contract_id: contract["contractId"],
+        order_id: contract["orderId"],
         item_id: contract["itemCode"],
         item_name: contract["name"],
         active: contract["active"]
