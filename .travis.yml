@@ -2,6 +2,10 @@ os: linux
 language: elixir
 elixir: 1.10.3
 otp_release: 22.3.2
+cache:
+  directories:
+    - _build
+    - deps
 script:
-  - mix format --check-formatted
+  - mix format --check-formatted || travis_terminate 1
   - mix test --trace
