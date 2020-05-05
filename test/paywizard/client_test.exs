@@ -604,7 +604,6 @@ defmodule Paywizard.ClientTest do
            status_code: 200,
            body:
              %{
-               # TODO: Validate this after PW release of order_id.
                "orderId" => "order_id_123",
                "contractDetails" => %{
                  "contractId" => 18978,
@@ -636,7 +635,6 @@ defmodule Paywizard.ClientTest do
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:ok,
                 %CartDetail{
-                  # TODO: Validate this after PW release of order_id.
                   contract_id: 18978,
                   order_id: "order_id_123",
                   currency: :SEK,
@@ -647,7 +645,7 @@ defmodule Paywizard.ClientTest do
                       cost: "0.00",
                       trial: %CartDetail.Item.Trial{
                         free_trial: true,
-                        first_payment_date: "2020-04-05T00:00:00+02:00"
+                        first_payment_date: ~D[2020-04-05]
                       },
                       item_name: "C More TV4",
                       quantity: 1

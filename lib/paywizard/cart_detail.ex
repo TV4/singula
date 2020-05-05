@@ -53,8 +53,11 @@ defmodule Paywizard.CartDetail.Item do
   defp to_asset(asset_data), do: %Paywizard.Asset{id: asset_data["id"], title: asset_data["name"]}
   defp cost(%{"amount" => cost}), do: cost
 
-  defp free_trial?(%{"applied" => applied, "firstPaymentDate" => paymentDate}),
-    do: %Paywizard.CartDetail.Item.Trial{free_trial: applied, first_payment_date: paymentDate}
+  defp free_trial?(%{"applied" => applied, "firstPaymentDate" => paymentDate}) do
+    {:ok, payment_date, utc_offset} = DateTime.from_iso8601(paymentDate)
+    first_payment_date = payment_date |> DateTime.add(utc_offset) |> DateTime.to_date()
+    %Paywizard.CartDetail.Item.Trial{free_trial: applied, first_payment_date: first_payment_date}
+  end
 
   defp free_trial?(%{"applied" => applied}), do: %Paywizard.CartDetail.Item.Trial{free_trial: applied}
   defp free_trial?(_), do: nil
