@@ -290,7 +290,7 @@ defmodule Paywizard.Client do
   end
 
   @callback customer_cart_checkout(Customer.customer_id(), binary, integer) ::
-              {:ok, CartDetail.t()} | {:paywizard_error, :cart_not_found}
+              {:ok, CartDetail.t()} | {:paywizard_error, :cart_not_found | :payment_authorisation_fault}
   def customer_cart_checkout(customer_id, cart_id, payment_method_id) do
     with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
            http_client().post(
