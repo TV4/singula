@@ -303,6 +303,10 @@ defmodule Paywizard.Client do
       {:ok, %HTTPoison.Response{body: body, status_code: 404}} ->
         {:ok, %{"errorCode" => 90040}} = Jason.decode(body)
         {:paywizard_error, :cart_not_found}
+
+      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+        {:ok, %{"errorCode" => 90045}} = Jason.decode(body)
+        {:paywizard_error, :payment_authorisation_fault}
     end
   end
 

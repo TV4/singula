@@ -213,11 +213,11 @@ defmodule Paywizard.ClientTest do
            %HTTPoison.Response{
              body:
                %{
-                 "developerMessage" => "Contract cannot be cancelled at this time",
                  "errorCode" => 90017,
+                 "userMessage" => "Contract cannot be changed at this time",
+                 "developerMessage" => "Contract cannot be cancelled at this time",
                  "moreInfo" =>
-                   "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-                 "userMessage" => "Contract cannot be changed at this time"
+                   "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
                }
                |> Jason.encode!(),
              request: %HTTPoison.Request{
@@ -512,7 +512,8 @@ defmodule Paywizard.ClientTest do
              %{
                "developerMessage" => "Token not generated",
                "errorCode" => 90047,
-               "moreInfo" => "http://apis.paywizard.com/rest/errors.html#90047",
+               "moreInfo" =>
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
                "userMessage" => "Payment method creation failure"
              }
              |> Jason.encode!(),
@@ -535,7 +536,8 @@ defmodule Paywizard.ClientTest do
                "errorCode" => 90054,
                "userMessage" => "Payment provider cannot complete transaction",
                "developerMessage" => "Authorisation failed",
-               "moreInfo" => "http://apis.paywizard.com/rest/errors.html#90054"
+               "moreInfo" =>
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
              }
              |> Jason.encode!(),
            status_code: 400
@@ -751,7 +753,8 @@ defmodule Paywizard.ClientTest do
                errorCode: 90040,
                userMessage: "Cart ID provided is incorrect or does not exist",
                developerMessage: "No cart found with given ID",
-               moreInfo: "http://apis.paywizard.com/rest/errors.html#90040"
+               moreInfo:
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
              }
              |> Jason.encode!()
          }}
@@ -759,6 +762,30 @@ defmodule Paywizard.ClientTest do
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:paywizard_error, :cart_not_found}
+    end
+
+    test "payment authorization fault" do
+      MockPaywizardHTTPClient
+      |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
+                          %{"paymentMethodId" => 26574} ->
+        {:ok,
+         %HTTPoison.Response{
+           status_code: 400,
+           body:
+             %{
+               errorCode: 90045,
+               userMessage: "Payment attempt failed",
+               developerMessage:
+                 "Unable to authorise payment: PaymentAttemptFailedException server_error PSP error: 402",
+               moreInfo:
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+             }
+             |> Jason.encode!()
+         }}
+      end)
+
+      assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
+               {:paywizard_error, :payment_authorisation_fault}
     end
   end
 
