@@ -647,7 +647,8 @@ defmodule Paywizard.ClientTest do
                       cost: "0.00",
                       trial: %CartDetail.Item.Trial{
                         free_trial: true,
-                        first_payment_date: ~D[2020-04-05]
+                        first_payment_date: ~D[2020-04-05],
+                        first_payment_amount: "139.00"
                       },
                       item_name: "C More TV4",
                       quantity: 1

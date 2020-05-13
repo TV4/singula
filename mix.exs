@@ -28,6 +28,7 @@ defmodule Paywizard.MixProject do
       {:jason, "~> 1.0"},
       {:httpoison, "~> 1.6"},
       {:elixir_uuid, "~> 1.2"},
+      {:timex, "~> 3.6"},
       {:mix_test_watch, "~> 1.0", only: :test},
       {:hammox, "~> 0.2", only: :test}
     ]

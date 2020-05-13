@@ -195,6 +195,40 @@ defmodule SmokeTest.PaywizardClientApi do
   end
 
   describe "Fetching cart details" do
+    test "returns no free trial subscription", %{
+      customer_id: customer_id,
+      currency: currency,
+      no_free_trial_item_id: subscription_item_id
+    } do
+      {:ok, %Response{body: body, status_code: 201}} =
+        HTTPClient.post(
+          "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
+          %{items: [%{itemCode: subscription_item_id}]}
+        )
+
+      data = Jason.decode!(body)
+      %{"href" => href} = data
+      cart_id = String.split(href, "/") |> List.last() |> String.to_integer()
+
+      {:ok, %Response{body: body, status_code: 200}} =
+        HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}")
+
+      assert Jason.decode!(body) == %{
+               "discountCode" => %{"campaignCode" => "NONE", "promoCode" => "NONE", "sourceCode" => "NONE"},
+               "id" => cart_id,
+               "items" => [
+                 %{
+                   "cost" => %{"amount" => "449.00", "currency" => "SEK"},
+                   "itemCode" => "4151C241C3DD41529A87",
+                   "itemData" => "",
+                   "itemName" => "C More All Sport",
+                   "quantity" => 1
+                 }
+               ],
+               "totalCost" => %{"amount" => "449.00", "currency" => "SEK"}
+             }
+    end
+
     test "returns added subscription", %{
       customer_id: customer_id,
       cart_id: cart_id,
@@ -203,8 +237,7 @@ defmodule SmokeTest.PaywizardClientApi do
       {:ok, %Response{body: body, status_code: 200}} =
         HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}")
 
-      assert Jason.decode!(body)
-             |> update_in(["items", Access.at(0), "freeTrial"], fn trial -> Map.delete(trial, "firstPaymentDate") end) ==
+      assert Jason.decode!(body) ==
                %{
                  "discountCode" => %{
                    "campaignCode" => "NONE",
@@ -221,7 +254,8 @@ defmodule SmokeTest.PaywizardClientApi do
                          "amount" => "139.00",
                          "currency" => "SEK"
                        },
-                       "numberOfDays" => 14
+                       "numberOfDays" => 14,
+                       "firstPaymentDate" => "#{Date.utc_today() |> Date.add(14)}T00:00:00+02:00"
                      },
                      "itemCode" => subscription_item_id,
                      "itemData" => "",
@@ -723,6 +757,7 @@ defmodule SmokeTest.PaywizardClientApi do
     [
       currency: :SEK,
       subscription_item_id: "6D3A56FF5065478ABD61",
+      no_free_trial_item_id: "4151C241C3DD41529A87",
       no_discount_item_id: "180B2AD9332349E6A7A4",
       ppv_item_id: "8F9AA56706904775AD7F",
       payment_method_receipt: 602_229_546,
