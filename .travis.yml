@@ -9,4 +9,4 @@ cache:
 script:
   - mix format --check-formatted || travis_terminate 1
   - mix test --trace || travis_terminate 1
-  - mix smoke || travis_terminate 1
+  - mix smoke_test || travis_terminate 1

@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Smoke do
+defmodule Mix.Tasks.SmokeTest do
   use Mix.Task
 
   @shortdoc "Run smoke tests"
