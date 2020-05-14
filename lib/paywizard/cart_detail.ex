@@ -72,7 +72,7 @@ end
 defmodule Paywizard.CartDetail do
   alias Paywizard.CartDetail.Item
 
-  defstruct [:order_id, :contract_id, :total_cost, :currency, :discount, items: []]
+  defstruct [:id, :order_id, :contract_id, :total_cost, :currency, :discount, items: []]
 
   @type t :: %__MODULE__{currency: Paywizard.Client.currency()}
 
@@ -89,6 +89,7 @@ defmodule Paywizard.CartDetail do
       end
 
     %__MODULE__{
+      id: cart_payload["id"],
       contract_id: get_in(cart_payload, ["contractDetails", "contractId"]),
       order_id: cart_payload["orderId"],
       total_cost: amount,

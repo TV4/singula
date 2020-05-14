@@ -23,6 +23,7 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_385,
                currency: :SEK,
                items: [
                  %Paywizard.CartDetail.Item{
@@ -54,6 +55,7 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_357,
                currency: :SEK,
                items: [
                  %Paywizard.CartDetail.Item{
@@ -93,6 +95,7 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_357,
                currency: :SEK,
                items: [
                  %Paywizard.CartDetail.Item{
@@ -132,6 +135,7 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_418,
                currency: :SEK,
                items: [
                  %Paywizard.CartDetail.Item{
@@ -170,6 +174,7 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_435,
                discount: %Paywizard.CartDetail.Discount{
                  discount_end_date: ~D[2022-02-02],
                  discount_amount: "50.00"
@@ -225,6 +230,7 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_448,
                discount: %Paywizard.CartDetail.Discount{
                  discount_end_date: nil,
                  discount_amount: "69.50"

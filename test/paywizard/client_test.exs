@@ -686,6 +686,7 @@ defmodule Paywizard.ClientTest do
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:ok,
                 %CartDetail{
+                  id: 119_469,
                   currency: :SEK,
                   total_cost: "449.00",
                   items: [
