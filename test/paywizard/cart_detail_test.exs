@@ -192,7 +192,7 @@ defmodule Paywizard.CartDetailTest do
              }
     end
 
-    test "subscription with indefinite discount" do
+    test "subscription with trial and indefinite discount" do
       payload = %{
         "discount" => %{
           "discountAmount" => %{"amount" => "69.50", "currency" => "SEK"},
@@ -233,6 +233,68 @@ defmodule Paywizard.CartDetailTest do
                id: 121_448,
                discount: %Paywizard.CartDetail.Discount{
                  discount_end_date: nil,
+                 discount_amount: "69.50"
+               },
+               items: [
+                 %Paywizard.CartDetail.Item{
+                   cost: "0.00",
+                   item_id: "6D3A56FF5065478ABD61",
+                   item_name: "C More TV4",
+                   quantity: 1,
+                   trial: %Paywizard.CartDetail.Item.Trial{
+                     first_payment_amount: "69.50",
+                     first_payment_date: ~D[2020-05-27],
+                     free_trial: true
+                   }
+                 }
+               ],
+               currency: :SEK,
+               total_cost: "0.00"
+             }
+    end
+
+    test "subscription with trial and expiring discount" do
+      payload = %{
+        "discount" => %{
+          "discountAmount" => %{"amount" => "69.50", "currency" => "SEK"},
+          "discountCode" => %{
+            "campaignCode" => "TESTWITHCAMPAIGN",
+            "promoCode" => "PROMO1",
+            "sourceCode" => "TESTWITHSOURCE"
+          },
+          "discountName" => "TestGatedDiscount50%Off",
+          "indefinite" => false,
+          "itemCode" => "6D3A56FF5065478ABD61",
+          "numberOfOccurrences" => 24
+        },
+        "discountCode" => %{
+          "campaignCode" => "TESTWITHCAMPAIGN",
+          "promoCode" => "PROMO1",
+          "sourceCode" => "TESTWITHSOURCE"
+        },
+        "id" => 121_448,
+        "items" => [
+          %{
+            "cost" => %{"amount" => "0.00", "currency" => "SEK"},
+            "freeTrial" => %{
+              "applied" => true,
+              "firstPaymentAmount" => %{"amount" => "69.50", "currency" => "SEK"},
+              "firstPaymentDate" => "2020-05-27T00:00:00+02:00",
+              "numberOfDays" => 14
+            },
+            "itemCode" => "6D3A56FF5065478ABD61",
+            "itemData" => "",
+            "itemName" => "C More TV4",
+            "quantity" => 1
+          }
+        ],
+        "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
+      }
+
+      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_448,
+               discount: %Paywizard.CartDetail.Discount{
+                 discount_end_date: ~D[2022-02-02],
                  discount_amount: "69.50"
                },
                items: [
