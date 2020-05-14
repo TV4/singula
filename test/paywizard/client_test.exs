@@ -853,113 +853,40 @@ defmodule Paywizard.ClientTest do
               ]}
   end
 
-  describe "get item" do
-    test "service with free trial" do
-      MockPaywizardHTTPClient
-      |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
-        {:ok,
-         %HTTPoison.Response{
-           body:
-             %{
-               "active" => true,
-               "categoryId" => 101,
-               "description" => "C More TV4",
-               "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
-               "freeTrial" => %{"active" => true, "numberOfDays" => 14},
-               "itemId" => "6D3A56FF5065478ABD61",
-               "itemType" => "SERVICE",
-               "name" => "C More TV4",
-               "pricing" => %{
-                 "frequency" => %{"frequency" => "MONTH", "length" => 1},
-                 "initial" => %{"amount" => "0.00", "currency" => "SEK"},
-                 "recurring" => %{"amount" => "139.00", "currency" => "SEK"}
-               }
+  test "get item" do
+    MockPaywizardHTTPClient
+    |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
+      {:ok,
+       %HTTPoison.Response{
+         body:
+           %{
+             "active" => true,
+             "categoryId" => 101,
+             "description" => "C More TV4",
+             "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+             "freeTrial" => %{"active" => true, "numberOfDays" => 14},
+             "itemId" => "6D3A56FF5065478ABD61",
+             "itemType" => "SERVICE",
+             "name" => "C More TV4",
+             "pricing" => %{
+               "frequency" => %{"frequency" => "MONTH", "length" => 1},
+               "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+               "recurring" => %{"amount" => "139.00", "currency" => "SEK"}
              }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
-      end)
+           }
+           |> Jason.encode!(),
+         status_code: 200
+       }}
+    end)
 
-      assert Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
-               {:ok,
-                %Paywizard.Item{
-                  id: "6D3A56FF5065478ABD61",
-                  currency: :SEK,
-                  name: "C More TV4",
-                  entitlements: [5960],
-                  recurring_billing: %{amount: "139.00", month_count: 1}
-                }}
-    end
-
-    test "service with minimum term" do
-      MockPaywizardHTTPClient
-      |> expect(:get, fn "/apis/catalogue/v1/item/4FC7D926073348038362?currency=SEK" ->
-        {:ok,
-         %HTTPoison.Response{
-           body:
-             %{
-               "active" => true,
-               "categoryId" => 226,
-               "description" =>
-                 "Field Sales - All Sport 12 months for 199 SEK and then 12 months (rest of subscruption) for 399 SEK. ",
-               "entitlements" => [%{"id" => 5963, "name" => "C More All Sport"}],
-               "itemId" => "4FC7D926073348038362",
-               "itemType" => "SERVICE",
-               "minimumTerm" => %{"frequency" => "MONTH", "length" => 24},
-               "name" => "Field Sales - All Sport 12 plus 12",
-               "pricing" => %{
-                 "frequency" => %{"frequency" => "MONTH", "length" => 1},
-                 "initial" => %{"amount" => "0.00", "currency" => "SEK"},
-                 "recurring" => %{"amount" => "399.00", "currency" => "SEK"}
-               }
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
-      end)
-
-      assert Client.item_by_id_and_currency("4FC7D926073348038362", :SEK) ==
-               {:ok,
-                %Paywizard.Item{
-                  id: "4FC7D926073348038362",
-                  currency: :SEK,
-                  name: "Field Sales - All Sport 12 plus 12",
-                  entitlements: [5963],
-                  recurring_billing: %{amount: "399.00", month_count: 1},
-                  minimum_term_month_count: 24
-                }}
-    end
-
-    test "ppv" do
-      MockPaywizardHTTPClient
-      |> expect(:get, fn "/apis/catalogue/v1/item/A2D895F14D6B4F2DA03C?currency=SEK" ->
-        {:ok,
-         %HTTPoison.Response{
-           body:
-             %{
-               "active" => true,
-               "categoryId" => 213,
-               "description" => "PPV - 249",
-               "entitlements" => [%{"id" => 5961, "name" => "Matchbiljett 249 kr"}],
-               "itemId" => "A2D895F14D6B4F2DA03C",
-               "itemType" => "PPV",
-               "name" => "PPV - 249",
-               "pricing" => %{"oneOff" => %{"amount" => "149.00", "currency" => "SEK"}}
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
-      end)
-
-      assert Client.item_by_id_and_currency("A2D895F14D6B4F2DA03C", :SEK) ==
-               {:ok,
-                %Paywizard.Item{
-                  id: "A2D895F14D6B4F2DA03C",
-                  currency: :SEK,
-                  name: "PPV - 249",
-                  entitlements: [5961],
-                  price: "149.00"
-                }}
-    end
+    assert Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
+             {:ok,
+              %Paywizard.Item{
+                id: "6D3A56FF5065478ABD61",
+                currency: :SEK,
+                name: "C More TV4",
+                entitlements: [5960],
+                recurring_billing: %{amount: "139.00", month_count: 1}
+              }}
   end
 end
