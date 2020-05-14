@@ -5,10 +5,11 @@ defmodule Paywizard.Client do
     ContractDetails,
     Customer,
     DibsPaymentMethod,
-    MetaData,
+    Digest,
+    Item,
     KlarnaPaymentMethod,
-    PPV,
-    Digest
+    MetaData,
+    PPV
   }
 
   require Logger
@@ -310,18 +311,13 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback entitlements(binary, currency) :: {:ok, entitlements :: list(integer)}
-  def entitlements(item_id, currency) do
+  @callback item_by_id_and_currency(binary, currency) :: {:ok, Item.t()}
+  def item_by_id_and_currency(item_id, currency) do
     {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
       http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}")
 
-    {:ok, %{"entitlements" => entitlements}} = Jason.decode(body)
-
-    ids =
-      entitlements
-      |> Enum.map(fn entitlement -> entitlement["id"] end)
-
-    {:ok, ids}
+    {:ok, data} = Jason.decode(body)
+    {:ok, Item.new(data)}
   end
 
   # def customer_is_username_available(username) do
