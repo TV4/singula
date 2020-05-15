@@ -1,5 +1,5 @@
 defmodule Paywizard.Item do
-  defstruct [:id, :currency, :name, :recurring_billing, :price, :minimum_term_month_count, entitlements: []]
+  defstruct [:id, :currency, :name, :recurring_billing, :one_off_price, :minimum_term_month_count, entitlements: []]
 
   @type t :: %__MODULE__{}
 
@@ -9,7 +9,7 @@ defmodule Paywizard.Item do
       currency: currency(pricing),
       name: name,
       recurring_billing: recurring_billing(pricing),
-      price: price(pricing),
+      one_off_price: one_off_price(pricing),
       entitlements: entitlements(entitlements),
       minimum_term_month_count: month_count(payload["minimumTerm"])
     }
@@ -24,8 +24,10 @@ defmodule Paywizard.Item do
   defp month_count(%{"frequency" => "YEAR", "length" => years}), do: years * 12
   defp month_count(_), do: nil
 
-  defp price(%{"oneOff" => %{"amount" => amount}}), do: amount
-  defp price(_), do: nil
+  defp one_off_price(%{"oneOff" => %{"amount" => amount}}), do: amount
+  defp one_off_price(%{"initial" => %{"amount" => "0.00"}}), do: nil
+  defp one_off_price(%{"initial" => %{"amount" => amount}}), do: amount
+  defp one_off_price(_), do: nil
 
   defp recurring_billing(%{"recurring" => recurring, "frequency" => frequency}) do
     %{

@@ -19,7 +19,7 @@ defmodule Paywizard.ItemTest do
              currency: :SEK,
              name: "PPV - 249",
              entitlements: [5961],
-             price: "149.00"
+             one_off_price: "149.00"
            }
   end
 
@@ -74,6 +74,35 @@ defmodule Paywizard.ItemTest do
              entitlements: [5963],
              recurring_billing: %{amount: "399.00", month_count: 1},
              minimum_term_month_count: 24
+           }
+  end
+
+  test "service with initial price" do
+    payload = %{
+      "active" => true,
+      "categoryId" => 226,
+      "description" =>
+        "Field Sales - All Sport 12 months for 199 SEK and then 12 months (rest of subscription) for 399 SEK and Apple TV full price (1990 SEK). ",
+      "entitlements" => [%{"id" => 5963, "name" => "C More All Sport"}],
+      "itemId" => "8FB4E247D57B40E09FA7",
+      "itemType" => "SERVICE",
+      "minimumTerm" => %{"frequency" => "MONTH", "length" => 24},
+      "name" => "Field Sales - All Sport 12 plus 12 Apple TV full price",
+      "pricing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "1990.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "399.00", "currency" => "SEK"}
+      }
+    }
+
+    assert Item.new(payload) == %Paywizard.Item{
+             currency: :SEK,
+             entitlements: [5963],
+             id: "8FB4E247D57B40E09FA7",
+             minimum_term_month_count: 24,
+             name: "Field Sales - All Sport 12 plus 12 Apple TV full price",
+             one_off_price: "1990.00",
+             recurring_billing: %{amount: "399.00", month_count: 1}
            }
   end
 end
