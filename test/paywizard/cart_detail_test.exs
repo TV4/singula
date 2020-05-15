@@ -256,30 +256,21 @@ defmodule Paywizard.CartDetailTest do
     test "subscription with trial and expiring discount" do
       payload = %{
         "discount" => %{
-          "discountAmount" => %{"amount" => "69.50", "currency" => "SEK"},
-          "discountCode" => %{
-            "campaignCode" => "TESTWITHCAMPAIGN",
-            "promoCode" => "PROMO1",
-            "sourceCode" => "TESTWITHSOURCE"
-          },
-          "discountName" => "TestGatedDiscount50%Off",
+          "discountAmount" => %{"amount" => "139.00", "currency" => "SEK"},
+          "discountName" => "3 occurrences 100% off",
           "indefinite" => false,
           "itemCode" => "6D3A56FF5065478ABD61",
-          "numberOfOccurrences" => 24
+          "numberOfOccurrences" => 3
         },
-        "discountCode" => %{
-          "campaignCode" => "TESTWITHCAMPAIGN",
-          "promoCode" => "PROMO1",
-          "sourceCode" => "TESTWITHSOURCE"
-        },
-        "id" => 121_448,
+        "discountCode" => %{"campaignCode" => "NONE", "promoCode" => "NONE", "sourceCode" => "NONE"},
+        "id" => 121_071,
         "items" => [
           %{
             "cost" => %{"amount" => "0.00", "currency" => "SEK"},
             "freeTrial" => %{
               "applied" => true,
-              "firstPaymentAmount" => %{"amount" => "69.50", "currency" => "SEK"},
-              "firstPaymentDate" => "2020-05-27T00:00:00+02:00",
+              "firstPaymentAmount" => %{"amount" => "0.00", "currency" => "SEK"},
+              "firstPaymentDate" => "2020-02-16T00:00:00+02:00",
               "numberOfDays" => 14
             },
             "itemCode" => "6D3A56FF5065478ABD61",
@@ -292,10 +283,10 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
-               id: 121_448,
+               id: 121_071,
                discount: %Paywizard.CartDetail.Discount{
-                 discount_end_date: ~D[2022-02-02],
-                 discount_amount: "69.50"
+                 discount_end_date: ~D[2020-05-16],
+                 discount_amount: "139.00"
                },
                items: [
                  %Paywizard.CartDetail.Item{
@@ -304,8 +295,8 @@ defmodule Paywizard.CartDetailTest do
                    item_name: "C More TV4",
                    quantity: 1,
                    trial: %Paywizard.CartDetail.Item.Trial{
-                     first_payment_amount: "69.50",
-                     first_payment_date: ~D[2020-05-27],
+                     first_payment_amount: "0.00",
+                     first_payment_date: ~D[2020-02-16],
                      free_trial: true
                    }
                  }

@@ -79,11 +79,16 @@ defmodule Paywizard.CartDetail do
   def new(cart_payload) do
     %{"amount" => amount, "currency" => currency} = cart_payload["totalCost"]
 
+    items = Enum.map(cart_payload["items"], &Item.new/1)
+
     discount =
       if discount = cart_payload["discount"] do
+        item = items |> Enum.find(fn item -> item.item_id == discount["itemCode"] end)
+        first_payment_date = (Map.get(item, :trial) || %{}) |> Map.get(:first_payment_date, today())
+
         %Paywizard.CartDetail.Discount{
           discount_end_date:
-            unless(discount["indefinite"], do: Timex.shift(today(), months: discount["numberOfOccurrences"])),
+            unless(discount["indefinite"], do: Timex.shift(first_payment_date, months: discount["numberOfOccurrences"])),
           discount_amount: get_in(discount, ["discountAmount", "amount"])
         }
       end
@@ -94,7 +99,7 @@ defmodule Paywizard.CartDetail do
       order_id: cart_payload["orderId"],
       total_cost: amount,
       currency: String.to_atom(currency),
-      items: Enum.map(cart_payload["items"], &Item.new/1),
+      items: items,
       discount: discount
     }
   end
