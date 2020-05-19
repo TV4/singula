@@ -179,4 +179,60 @@ defmodule Paywizard.ContractDetailsTest do
              status: :ACTIVE
            }
   end
+
+  test "parse with initial cost and expiring discount" do
+    payload = %{
+      "active" => true,
+      "auditInfo" => %{
+        "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "creationDate" => "2020-05-19T13:32:20+02:00",
+        "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "modifiedDate" => "2020-05-19T13:32:20+02:00"
+      },
+      "balance" => %{"amount" => "-2189.00", "currency" => "SEK"},
+      "billing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "1990.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "399.00", "currency" => "SEK"},
+        "upcoming" => %{"amount" => "0.00", "currency" => "SEK"}
+      },
+      "contractId" => 19848,
+      "discount" => %{
+        "discountAmount" => %{"amount" => "200.00", "currency" => "SEK"},
+        "discountEndDate" => "2021-04-19",
+        "discountName" => "Fields Sales - 200 SEK off for 12 months",
+        "indefinite" => false,
+        "itemCode" => "8FB4E247D57B40E09FA7",
+        "numberOfOccurrences" => 12
+      },
+      "discountCode" => "",
+      "entitlements" => [%{"id" => 5963, "name" => "C More All Sport"}],
+      "itemCode" => "8FB4E247D57B40E09FA7",
+      "lastPaymentDate" => "2020-05-19",
+      "minimumTerm" => %{"frequency" => "MONTH", "length" => 24},
+      "name" => "Field Sales - All Sport 12 plus 12 Apple TV full price",
+      "nextPaymentDate" => "2020-05-19",
+      "orderId" => 112_868,
+      "paidUpToDate" => "2020-05-19",
+      "paymentMethodId" => 27545,
+      "startDate" => "2020-05-19",
+      "status" => "ACTIVE"
+    }
+
+    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+             balance: %{amount: "-2189.00", currency: :SEK},
+             id: 19848,
+             item_name: "Field Sales - All Sport 12 plus 12 Apple TV full price",
+             minimum_term: %{frequency: :MONTH, length: 24},
+             paid_up_to_date: ~D[2020-05-19],
+             recurring_billing: %{
+               amount: "399.00",
+               currency: :SEK,
+               frequency: :MONTH,
+               length: 1
+             },
+             start_date: ~D[2020-05-19],
+             status: :ACTIVE
+           }
+  end
 end

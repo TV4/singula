@@ -485,5 +485,48 @@ defmodule Paywizard.CartDetailTest do
                total_cost: "0.00"
              }
     end
+
+    test "subscription with initial cost and expiring discount" do
+      payload = %{
+        "discount" => %{
+          "discountAmount" => %{"amount" => "200.00", "currency" => "SEK"},
+          "discountName" => "Fields Sales - 200 SEK off for 12 months",
+          "indefinite" => false,
+          "itemCode" => "8FB4E247D57B40E09FA7",
+          "numberOfOccurrences" => 12
+        },
+        "discountCode" => %{
+          "campaignCode" => "NONE",
+          "promoCode" => "NONE",
+          "sourceCode" => "NONE"
+        },
+        "id" => 121_320,
+        "items" => [
+          %{
+            "cost" => %{"amount" => "2389.00", "currency" => "SEK"},
+            "itemCode" => "8FB4E247D57B40E09FA7",
+            "itemData" => "",
+            "itemName" => "Field Sales - All Sport 12 plus 12 Apple TV full price",
+            "quantity" => 1
+          }
+        ],
+        "totalCost" => %{"amount" => "2189.00", "currency" => "SEK"}
+      }
+
+      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: 121_320,
+               currency: :SEK,
+               discount: %Paywizard.CartDetail.Discount{discount_amount: "200.00", discount_end_date: ~D[2021-02-02]},
+               items: [
+                 %Paywizard.CartDetail.Item{
+                   cost: "2389.00",
+                   item_id: "8FB4E247D57B40E09FA7",
+                   item_name: "Field Sales - All Sport 12 plus 12 Apple TV full price",
+                   quantity: 1
+                 }
+               ],
+               total_cost: "2189.00"
+             }
+    end
   end
 end
