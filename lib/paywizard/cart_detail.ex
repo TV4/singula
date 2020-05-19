@@ -84,7 +84,7 @@ defmodule Paywizard.CartDetail do
     discount =
       if discount = cart_payload["discount"] do
         item = items |> Enum.find(fn item -> item.item_id == discount["itemCode"] end)
-        first_payment_date = (Map.get(item, :trial) || %{}) |> Map.get(:first_payment_date, today())
+        first_payment_date = (Map.get(item, :trial) || %{}) |> Map.get(:first_payment_date) || today()
 
         %Paywizard.CartDetail.Discount{
           discount_end_date:

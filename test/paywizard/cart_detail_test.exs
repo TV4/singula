@@ -192,7 +192,7 @@ defmodule Paywizard.CartDetailTest do
              }
     end
 
-    test "subscription with trial and indefinite discount" do
+    test "subscription with free trial and indefinite discount" do
       payload = %{
         "discount" => %{
           "discountAmount" => %{"amount" => "69.50", "currency" => "SEK"},
@@ -253,7 +253,7 @@ defmodule Paywizard.CartDetailTest do
              }
     end
 
-    test "subscription with trial and expiring discount" do
+    test "subscription with free trial and expiring discount" do
       payload = %{
         "discount" => %{
           "discountAmount" => %{"amount" => "139.00", "currency" => "SEK"},
@@ -262,15 +262,19 @@ defmodule Paywizard.CartDetailTest do
           "itemCode" => "6D3A56FF5065478ABD61",
           "numberOfOccurrences" => 3
         },
-        "discountCode" => %{"campaignCode" => "NONE", "promoCode" => "NONE", "sourceCode" => "NONE"},
-        "id" => 121_071,
+        "discountCode" => %{
+          "campaignCode" => "NONE",
+          "promoCode" => "NONE",
+          "sourceCode" => "NONE"
+        },
+        "id" => 121_312,
         "items" => [
           %{
             "cost" => %{"amount" => "0.00", "currency" => "SEK"},
             "freeTrial" => %{
               "applied" => true,
               "firstPaymentAmount" => %{"amount" => "0.00", "currency" => "SEK"},
-              "firstPaymentDate" => "2020-02-16T00:00:00+02:00",
+              "firstPaymentDate" => "2020-06-02T00:00:00+02:00",
               "numberOfDays" => 14
             },
             "itemCode" => "6D3A56FF5065478ABD61",
@@ -283,9 +287,9 @@ defmodule Paywizard.CartDetailTest do
       }
 
       assert CartDetail.new(payload) == %Paywizard.CartDetail{
-               id: 121_071,
+               id: 121_312,
                discount: %Paywizard.CartDetail.Discount{
-                 discount_end_date: ~D[2020-05-16],
+                 discount_end_date: ~D[2020-09-02],
                  discount_amount: "139.00"
                },
                items: [
@@ -296,12 +300,188 @@ defmodule Paywizard.CartDetailTest do
                    quantity: 1,
                    trial: %Paywizard.CartDetail.Item.Trial{
                      first_payment_amount: "0.00",
-                     first_payment_date: ~D[2020-02-16],
+                     first_payment_date: ~D[2020-06-02],
                      free_trial: true
                    }
                  }
                ],
                currency: :SEK,
+               total_cost: "0.00"
+             }
+    end
+
+    test "checked out subscription with free trial and expiring discount" do
+      payload = %{
+        "contractDetails" => %{
+          "contractId" => 19844,
+          "itemCode" => "6D3A56FF5065478ABD61",
+          "itemName" => "C More TV4",
+          "status" => "ACTIVE"
+        },
+        "discount" => %{
+          "discountAmount" => %{"amount" => "139.00", "currency" => "SEK"},
+          "discountName" => "3 occurrences 100% off",
+          "indefinite" => false,
+          "itemCode" => "6D3A56FF5065478ABD61",
+          "numberOfOccurrences" => 3
+        },
+        "discountCode" => %{
+          "campaignCode" => "NONE",
+          "promoCode" => "NONE",
+          "sourceCode" => "NONE"
+        },
+        "items" => [
+          %{
+            "cost" => %{"amount" => "0.00", "currency" => "SEK"},
+            "freeTrial" => %{
+              "applied" => true,
+              "firstPaymentAmount" => %{"amount" => "0.00", "currency" => "SEK"},
+              "firstPaymentDate" => "2020-06-02T00:00:00+02:00",
+              "numberOfDays" => 14
+            },
+            "itemCode" => "6D3A56FF5065478ABD61",
+            "itemData" => "",
+            "itemName" => "C More TV4",
+            "quantity" => 1
+          }
+        ],
+        "orderId" => 112_863,
+        "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
+      }
+
+      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: nil,
+               order_id: 112_863,
+               contract_id: 19844,
+               discount: %Paywizard.CartDetail.Discount{
+                 discount_end_date: ~D[2020-09-02],
+                 discount_amount: "139.00"
+               },
+               items: [
+                 %Paywizard.CartDetail.Item{
+                   cost: "0.00",
+                   item_id: "6D3A56FF5065478ABD61",
+                   item_name: "C More TV4",
+                   quantity: 1,
+                   trial: %Paywizard.CartDetail.Item.Trial{
+                     first_payment_amount: "0.00",
+                     first_payment_date: ~D[2020-06-02],
+                     free_trial: true
+                   }
+                 }
+               ],
+               currency: :SEK,
+               total_cost: "0.00"
+             }
+    end
+
+    test "subscription with used free trial and expiring discount" do
+      payload = %{
+        "discount" => %{
+          "discountAmount" => %{"amount" => "139.00", "currency" => "SEK"},
+          "discountName" => "3 occurrences 100% off",
+          "indefinite" => false,
+          "itemCode" => "6D3A56FF5065478ABD61",
+          "numberOfOccurrences" => 3
+        },
+        "discountCode" => %{
+          "campaignCode" => "NONE",
+          "promoCode" => "NONE",
+          "sourceCode" => "NONE"
+        },
+        "id" => 121_314,
+        "items" => [
+          %{
+            "cost" => %{"amount" => "139.00", "currency" => "SEK"},
+            "freeTrial" => %{
+              "applied" => false,
+              "reason" => "Customer is not eligible for free trial"
+            },
+            "itemCode" => "6D3A56FF5065478ABD61",
+            "itemData" => "",
+            "itemName" => "C More TV4",
+            "quantity" => 1
+          }
+        ],
+        "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
+      }
+
+      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               currency: :SEK,
+               discount: %Paywizard.CartDetail.Discount{
+                 discount_amount: "139.00",
+                 discount_end_date: ~D[2020-05-02]
+               },
+               id: 121_314,
+               items: [
+                 %Paywizard.CartDetail.Item{
+                   cost: "139.00",
+                   item_id: "6D3A56FF5065478ABD61",
+                   item_name: "C More TV4",
+                   quantity: 1,
+                   trial: %Paywizard.CartDetail.Item.Trial{
+                     free_trial: false
+                   }
+                 }
+               ],
+               total_cost: "0.00"
+             }
+    end
+
+    test "checked out subscription with used free trial and expiring discount" do
+      payload = %{
+        "contractDetails" => %{
+          "contractId" => 19846,
+          "itemCode" => "6D3A56FF5065478ABD61",
+          "itemName" => "C More TV4",
+          "status" => "ACTIVE"
+        },
+        "discount" => %{
+          "discountAmount" => %{"amount" => "139.00", "currency" => "SEK"},
+          "discountName" => "3 occurrences 100% off",
+          "indefinite" => false,
+          "itemCode" => "6D3A56FF5065478ABD61",
+          "numberOfOccurrences" => 3
+        },
+        "discountCode" => %{
+          "campaignCode" => "NONE",
+          "promoCode" => "NONE",
+          "sourceCode" => "NONE"
+        },
+        "items" => [
+          %{
+            "cost" => %{"amount" => "139.00", "currency" => "SEK"},
+            "freeTrial" => %{
+              "applied" => false,
+              "reason" => "Customer is not eligible for free trial"
+            },
+            "itemCode" => "6D3A56FF5065478ABD61",
+            "itemData" => "",
+            "itemName" => "C More TV4",
+            "quantity" => 1
+          }
+        ],
+        "orderId" => 112_865,
+        "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
+      }
+
+      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+               id: nil,
+               order_id: 112_865,
+               contract_id: 19846,
+               currency: :SEK,
+               discount: %Paywizard.CartDetail.Discount{discount_amount: "139.00", discount_end_date: ~D[2020-05-02]},
+               items: [
+                 %Paywizard.CartDetail.Item{
+                   cost: "139.00",
+                   item_id: "6D3A56FF5065478ABD61",
+                   item_name: "C More TV4",
+                   quantity: 1,
+                   trial: %Paywizard.CartDetail.Item.Trial{
+                     free_trial: false
+                   }
+                 }
+               ],
                total_cost: "0.00"
              }
     end

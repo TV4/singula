@@ -78,4 +78,105 @@ defmodule Paywizard.ContractDetailsTest do
              paid_up_to_date: ~D[2020-05-04]
            }
   end
+
+  test "parse with free trial and expiring discount" do
+    payload = %{
+      "active" => true,
+      "auditInfo" => %{
+        "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "creationDate" => "2020-05-19T10:42:10+02:00",
+        "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "modifiedDate" => "2020-05-19T10:42:10+02:00"
+      },
+      "balance" => %{"amount" => "0.00", "currency" => "SEK"},
+      "billing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "139.00", "currency" => "SEK"},
+        "upcoming" => %{"amount" => "0.00", "currency" => "SEK"}
+      },
+      "contractId" => 19844,
+      "discount" => %{
+        "discountAmount" => %{"amount" => "139.00", "currency" => "SEK"},
+        "discountEndDate" => "2020-08-02",
+        "discountName" => "3 occurrences 100% off",
+        "discountPercentage" => 100,
+        "indefinite" => false,
+        "itemCode" => "6D3A56FF5065478ABD61",
+        "numberOfOccurrences" => 3
+      },
+      "discountCode" => "",
+      "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+      "itemCode" => "6D3A56FF5065478ABD61",
+      "name" => "C More TV4",
+      "nextPaymentDate" => "2020-06-02",
+      "orderId" => 112_863,
+      "paidUpToDate" => "2020-06-02",
+      "paymentMethodId" => 27541,
+      "startDate" => "2020-05-19",
+      "status" => "ACTIVE"
+    }
+
+    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+             balance: %{amount: "0.00", currency: :SEK},
+             id: 19844,
+             item_name: "C More TV4",
+             minimum_term: nil,
+             paid_up_to_date: ~D[2020-06-02],
+             recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+             start_date: ~D[2020-05-19],
+             status: :ACTIVE
+           }
+  end
+
+  test "parse with used free trial and expiring discount" do
+    payload = %{
+      "active" => true,
+      "auditInfo" => %{
+        "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "creationDate" => "2020-05-19T11:06:27+02:00",
+        "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "modifiedDate" => "2020-05-19T11:06:27+02:00"
+      },
+      "balance" => %{"amount" => "0.00", "currency" => "SEK"},
+      "billing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "139.00", "currency" => "SEK"},
+        "upcoming" => %{"amount" => "0.00", "currency" => "SEK"}
+      },
+      "contractId" => 19846,
+      "discount" => %{
+        "discountAmount" => %{"amount" => "139.00", "currency" => "SEK"},
+        "discountEndDate" => "2020-07-19",
+        "discountName" => "3 occurrences 100% off",
+        "discountPercentage" => 100,
+        "indefinite" => false,
+        "itemCode" => "6D3A56FF5065478ABD61",
+        "numberOfOccurrences" => 3
+      },
+      "discountCode" => "",
+      "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+      "itemCode" => "6D3A56FF5065478ABD61",
+      "lastPaymentDate" => "2020-05-19",
+      "name" => "C More TV4",
+      "nextPaymentDate" => "2020-05-19",
+      "orderId" => 112_865,
+      "paidUpToDate" => "2020-05-19",
+      "paymentMethodId" => 27543,
+      "startDate" => "2020-05-19",
+      "status" => "ACTIVE"
+    }
+
+    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+             balance: %{amount: "0.00", currency: :SEK},
+             id: 19846,
+             item_name: "C More TV4",
+             minimum_term: nil,
+             paid_up_to_date: ~D[2020-05-19],
+             recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+             start_date: ~D[2020-05-19],
+             status: :ACTIVE
+           }
+  end
 end
