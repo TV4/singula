@@ -854,40 +854,98 @@ defmodule Paywizard.ClientTest do
               ]}
   end
 
-  test "get item" do
-    MockPaywizardHTTPClient
-    |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
-      {:ok,
-       %HTTPoison.Response{
-         body:
-           %{
-             "active" => true,
-             "categoryId" => 101,
-             "description" => "C More TV4",
-             "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
-             "freeTrial" => %{"active" => true, "numberOfDays" => 14},
-             "itemId" => "6D3A56FF5065478ABD61",
-             "itemType" => "SERVICE",
-             "name" => "C More TV4",
-             "pricing" => %{
-               "frequency" => %{"frequency" => "MONTH", "length" => 1},
-               "initial" => %{"amount" => "0.00", "currency" => "SEK"},
-               "recurring" => %{"amount" => "139.00", "currency" => "SEK"}
+  describe "get item -" do
+    test "when success" do
+      MockPaywizardHTTPClient
+      |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
+        {:ok,
+         %HTTPoison.Response{
+           body:
+             %{
+               "active" => true,
+               "categoryId" => 101,
+               "description" => "C More TV4",
+               "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+               "freeTrial" => %{"active" => true, "numberOfDays" => 14},
+               "itemId" => "6D3A56FF5065478ABD61",
+               "itemType" => "SERVICE",
+               "name" => "C More TV4",
+               "pricing" => %{
+                 "frequency" => %{"frequency" => "MONTH", "length" => 1},
+                 "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+                 "recurring" => %{"amount" => "139.00", "currency" => "SEK"}
+               }
              }
-           }
-           |> Jason.encode!(),
-         status_code: 200
-       }}
-    end)
+             |> Jason.encode!(),
+           status_code: 200
+         }}
+      end)
 
-    assert Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
-             {:ok,
-              %Paywizard.Item{
-                id: "6D3A56FF5065478ABD61",
-                currency: :SEK,
-                name: "C More TV4",
-                entitlements: [5960],
-                recurring_billing: %{amount: "139.00", month_count: 1}
-              }}
+      assert Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
+               {:ok,
+                %Paywizard.Item{
+                  id: "6D3A56FF5065478ABD61",
+                  currency: :SEK,
+                  name: "C More TV4",
+                  entitlements: [5960],
+                  recurring_billing: %{amount: "139.00", month_count: 1}
+                }}
+    end
+
+    test "when success but incomplete item" do
+      MockPaywizardHTTPClient
+      |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
+        {:ok,
+         %HTTPoison.Response{
+           body:
+             %{
+               "active" => true,
+               "categoryId" => 101,
+               "description" => "C More TV4",
+               "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+               "freeTrial" => %{"active" => true, "numberOfDays" => 14},
+               "itemId" => "6D3A56FF5065478ABD61",
+               "itemType" => "SERVICE",
+               "name" => "C More TV4"
+             }
+             |> Jason.encode!(),
+           status_code: 200
+         }}
+      end)
+
+      try do
+        Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
+      rescue
+        e ->
+          assert %RuntimeError{} = e
+          assert e.message =~ "Incomming item payload was incomplete:"
+      end
+    end
+
+    test "when not an successful response" do
+      MockPaywizardHTTPClient
+      |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
+        {:ok,
+         %HTTPoison.Response{
+           body:
+             %{
+               "errorCode" => 500,
+               "userMessage" => "System Failure - please retry later.",
+               "moreInfo" =>
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+             }
+             |> Jason.encode!(),
+           status_code: 500
+         }}
+      end)
+
+      try do
+        Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
+      rescue
+        e ->
+          assert %RuntimeError{} = e
+          assert e.message =~ "item_by_id_and_currency did not get an successful response. Error:"
+      end
+    end
   end
 end

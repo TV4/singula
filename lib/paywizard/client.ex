@@ -313,11 +313,14 @@ defmodule Paywizard.Client do
 
   @callback item_by_id_and_currency(binary, currency) :: {:ok, Item.t()}
   def item_by_id_and_currency(item_id, currency) do
-    {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
-      http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}")
-
-    {:ok, data} = Jason.decode(body)
-    {:ok, Item.new(data)}
+    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+           http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}") do
+      {:ok, data} = Jason.decode(body)
+      {:ok, Item.new(data)}
+    else
+      error ->
+        raise "item_by_id_and_currency did not get an successful response. Error: #{inspect(error)}"
+    end
   end
 
   # def customer_is_username_available(username) do
