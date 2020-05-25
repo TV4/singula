@@ -12,15 +12,15 @@ defmodule Paywizard.DibsPaymentMethod do
 
   @type t :: %__MODULE__{}
 
-  def new(report) do
+  def new(transactionId, receipt, dibs_ccPart, dibs_ccPrefix, dibs_ccType, dibs_expM, dibs_expY) do
     %__MODULE__{
-      transactionId: report.transactionId,
-      receipt: report.verifyId,
-      dibs_ccPart: report.ccPart,
-      dibs_ccPrefix: report.ccPrefix,
-      dibs_ccType: report.ccType,
-      dibs_expM: report.expM,
-      dibs_expY: report.expY
+      transactionId: transactionId,
+      receipt: receipt,
+      dibs_ccPart: dibs_ccPart,
+      dibs_ccPrefix: dibs_ccPrefix,
+      dibs_ccType: dibs_ccType,
+      dibs_expM: dibs_expM,
+      dibs_expY: dibs_expY
     }
   end
 end

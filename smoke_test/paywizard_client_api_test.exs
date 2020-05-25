@@ -15,7 +15,7 @@ defmodule SmokeTest.PaywizardClientApi do
         api_secret: System.get_env("PAYWIZARD_API_SECRET"),
         client_name: System.get_env("PAYWIZARD_CLIENT_NAME"),
         merchant_password: System.get_env("PAYWIZARD_MERCHANT_PASSWORD"),
-        timeout_ms: System.get_env("PAYWIZARD_TIMEOUT_MS") |> String.to_integer()
+        timeout_ms: System.get_env("PAYWIZARD_TIMEOUT_MS", "10000") |> String.to_integer()
       ]
     )
   end
