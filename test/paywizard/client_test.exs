@@ -397,7 +397,15 @@ defmodule Paywizard.ClientTest do
        }}
     end)
 
-    assert Client.customer_redirect_dibs("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK) ==
+    # TODO: set production values once known.
+    redirect_data = %{
+      itemDescription: "REGISTER_CARD",
+      amount: "1.00",
+      payment_method: "cc.test",
+      billing_city: "Stockholm"
+    }
+
+    assert Client.customer_redirect_dibs("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, redirect_data) ==
              {:ok,
               %{
                 "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b",
@@ -419,7 +427,7 @@ defmodule Paywizard.ClientTest do
                  %{key: :countryCode, value: "SE"},
                  %{key: :currency, value: :SEK},
                  %{key: :duration, value: 12},
-                 %{key: :itemDescription, value: "REGISTER_CARD"},
+                 %{key: :itemDescription, value: "C More"},
                  %{key: :productIdentifier, value: "test"},
                  %{key: :purchase_country, value: "SE"},
                  %{key: :subscription, value: true},
@@ -447,7 +455,21 @@ defmodule Paywizard.ClientTest do
        }}
     end)
 
-    assert Client.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK) ==
+    redirect_data = %{
+      itemDescription: "C More",
+      countryCode: "SE",
+      amount: "1.00",
+      currency: :SEK,
+      subscription: true,
+      duration: 12,
+      productIdentifier: "test",
+      authorisation: false,
+      tax_amount: 0,
+      purchase_country: "SE",
+      tax_rate: 0
+    }
+
+    assert Client.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, redirect_data) ==
              {:ok,
               %{
                 "type" => "klarnaSession",

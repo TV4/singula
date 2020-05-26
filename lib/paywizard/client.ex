@@ -222,14 +222,14 @@ defmodule Paywizard.Client do
     {:ok, discounts}
   end
 
-  @callback customer_redirect_dibs(Customer.customer_id(), currency) ::
+  @callback customer_redirect_dibs(Customer.customer_id(), currency, map) ::
               {:ok, map}
               | {:paywizard_error, :customer_not_found}
-  def customer_redirect_dibs(customer_id, currency) do
+  def customer_redirect_dibs(customer_id, currency, redirect_data) do
     with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
            http_client().post(
              "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
-             Digest.generate(:DIBS, currency, dibs_redirect_data())
+             Digest.generate(:DIBS, currency, redirect_data)
            ) do
       {:ok, _response} = Jason.decode(body)
     else
@@ -239,14 +239,14 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback customer_redirect_klarna(Customer.customer_id(), currency) ::
+  @callback customer_redirect_klarna(Customer.customer_id(), currency, map) ::
               {:ok, map}
               | {:paywizard_error, :customer_not_found}
-  def customer_redirect_klarna(customer_id, currency) do
+  def customer_redirect_klarna(customer_id, currency, redirect_data) do
     with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
            http_client().post(
              "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
-             Digest.generate(:KLARNA, currency, klarna_redirect_data(currency))
+             Digest.generate(:KLARNA, currency, redirect_data)
            ) do
       {:ok, _response} = Jason.decode(body)
     else
@@ -321,42 +321,6 @@ defmodule Paywizard.Client do
       error ->
         raise "item_by_id_and_currency did not get an successful response. Error: #{inspect(error)}"
     end
-  end
-
-  # def customer_is_username_available(username) do
-  #   {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
-  #     http_client().post(
-  #       "/apis/customers/v1/customer/isusernameavailable",
-  #       %{"username" => username}
-  #     )
-
-  #   {:ok, _response} = Jason.decode(body)
-  # end
-
-  defp dibs_redirect_data do
-    # TODO: set production values once known.
-    %{
-      itemDescription: "REGISTER_CARD",
-      amount: "1.00",
-      payment_method: "cc.test",
-      billing_city: "Stockholm"
-    }
-  end
-
-  defp klarna_redirect_data(currency) do
-    %{
-      itemDescription: "REGISTER_CARD",
-      countryCode: "SE",
-      amount: "1.00",
-      currency: currency,
-      subscription: true,
-      duration: 12,
-      productIdentifier: "test",
-      authorisation: false,
-      tax_amount: 0,
-      purchase_country: "SE",
-      tax_rate: 0
-    }
   end
 
   defp http_client, do: Application.get_env(:paywizard, :http_client, Paywizard.HTTPClient)
