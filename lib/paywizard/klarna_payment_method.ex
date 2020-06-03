@@ -28,7 +28,7 @@ defmodule Paywizard.KlarnaPaymentMethod do
 
   def to_provider_data(%__MODULE__{} = struct) do
     struct
-    |> Map.take([:receipt, :transactionId, :redirectUrl])
+    |> Map.take([:receipt, :transactionId, :redirectUrl, :locale])
     |> Map.put(:order_lines, Jason.encode!(struct.order_lines))
   end
 
