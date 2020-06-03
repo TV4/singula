@@ -1,5 +1,5 @@
 defmodule Paywizard.KlarnaPaymentMethod do
-  defstruct [:receipt, :transactionId, :redirectUrl, order_lines: []]
+  defstruct [:receipt, :transactionId, :redirectUrl, order_lines: [], locale: "sv-SE"]
 
   alias Paywizard.CartDetail
 
