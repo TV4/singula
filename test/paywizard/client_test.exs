@@ -579,6 +579,7 @@ defmodule Paywizard.ClientTest do
         assert data == %{
                  "currencyCode" => :SEK,
                  "data" => [
+                   %{key: :locale, value: "sv-SE"},
                    %{
                      key: :order_lines,
                      value:
