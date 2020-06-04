@@ -908,6 +908,7 @@ defmodule Paywizard.ClientTest do
                {:ok,
                 %Paywizard.Item{
                   id: "6D3A56FF5065478ABD61",
+                  category_id: 101,
                   currency: :SEK,
                   name: "C More TV4",
                   entitlements: [5960],

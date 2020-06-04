@@ -1,12 +1,30 @@
 defmodule Paywizard.Item do
-  defstruct [:id, :currency, :name, :recurring_billing, :one_off_price, :minimum_term_month_count, entitlements: []]
+  defstruct [
+    :id,
+    :currency,
+    :category_id,
+    :name,
+    :recurring_billing,
+    :one_off_price,
+    :minimum_term_month_count,
+    entitlements: []
+  ]
 
   @type t :: %__MODULE__{}
 
-  def new(%{"itemId" => id, "name" => name, "pricing" => pricing, "entitlements" => entitlements} = payload) do
+  def new(
+        %{
+          "itemId" => id,
+          "categoryId" => category_id,
+          "name" => name,
+          "pricing" => pricing,
+          "entitlements" => entitlements
+        } = payload
+      ) do
     %__MODULE__{
       id: id,
       currency: currency(pricing),
+      category_id: category_id,
       name: name,
       recurring_billing: recurring_billing(pricing),
       one_off_price: one_off_price(pricing),

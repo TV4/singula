@@ -17,6 +17,7 @@ defmodule Paywizard.ItemTest do
     assert Item.new(payload) == %Paywizard.Item{
              id: "A2D895F14D6B4F2DA03C",
              currency: :SEK,
+             category_id: 213,
              name: "PPV - 249",
              entitlements: [5961],
              one_off_price: "149.00"
@@ -43,6 +44,7 @@ defmodule Paywizard.ItemTest do
     assert Item.new(payload) == %Paywizard.Item{
              id: "6D3A56FF5065478ABD61",
              currency: :SEK,
+             category_id: 101,
              name: "C More TV4",
              entitlements: [5960],
              recurring_billing: %{amount: "139.00", month_count: 1}
@@ -70,6 +72,7 @@ defmodule Paywizard.ItemTest do
     assert Item.new(payload) == %Paywizard.Item{
              id: "4FC7D926073348038362",
              currency: :SEK,
+             category_id: 226,
              name: "Field Sales - All Sport 12 plus 12",
              entitlements: [5963],
              recurring_billing: %{amount: "399.00", month_count: 1},
@@ -96,13 +99,14 @@ defmodule Paywizard.ItemTest do
     }
 
     assert Item.new(payload) == %Paywizard.Item{
-             currency: :SEK,
-             entitlements: [5963],
              id: "8FB4E247D57B40E09FA7",
-             minimum_term_month_count: 24,
+             currency: :SEK,
+             category_id: 226,
              name: "Field Sales - All Sport 12 plus 12 Apple TV full price",
+             entitlements: [5963],
+             recurring_billing: %{amount: "399.00", month_count: 1},
              one_off_price: "1990.00",
-             recurring_billing: %{amount: "399.00", month_count: 1}
+             minimum_term_month_count: 24
            }
   end
 end
