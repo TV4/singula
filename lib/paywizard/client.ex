@@ -101,6 +101,17 @@ defmodule Paywizard.Client do
     items_pager("/apis/purchases/v1", "/customer/#{customer_id}/purchases/1", %{type: "PPV"})
   end
 
+  def fetch_promocode_singleuse(promocode) do
+    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+           http_client().get("/apis/purchases/v1/promocode/#{promocode}") do
+      {:ok, _response} = Jason.decode(body)
+    else
+      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+        {:ok, %{"errorCode" => 90123}} = Jason.decode(body)
+        {:paywizard_error, :promocode_not_found}
+    end
+  end
+
   defp items_pager(path_prefix, path, payload, acc \\ []) do
     with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <- http_client().post(path_prefix <> path, payload),
          {:ok, data} <- Jason.decode(body) do
