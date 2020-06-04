@@ -1,11 +1,22 @@
 defmodule Paywizard.ContractDetails do
-  defstruct [:id, :item_name, :recurring_billing, :balance, :minimum_term, :status, :start_date, :paid_up_to_date]
+  defstruct [
+    :id,
+    :item_id,
+    :item_name,
+    :recurring_billing,
+    :balance,
+    :minimum_term,
+    :status,
+    :start_date,
+    :paid_up_to_date
+  ]
 
   @type t :: %__MODULE__{}
 
   def new(response) do
     %__MODULE__{
       id: response["contractId"],
+      item_id: response["itemCode"],
       item_name: response["name"],
       balance: amount(response["balance"]),
       recurring_billing: recurring_billing(response["billing"]),
