@@ -1,7 +1,9 @@
 defmodule Paywizard.PPV do
-  defstruct [:order_id, :item_id, :asset_id]
+  alias Paywizard.Asset
 
-  @type t :: %__MODULE__{order_id: integer, item_id: binary, asset_id: binary}
+  defstruct [:order_id, :item_id, :asset]
+
+  @type t :: %__MODULE__{order_id: integer, item_id: binary, asset: Asset.t()}
 
   def new(purchases) do
     purchases
@@ -9,7 +11,7 @@ defmodule Paywizard.PPV do
       %__MODULE__{
         order_id: purchase["orderId"],
         item_id: purchase["salesItemCode"],
-        asset_id: purchase["itemData"]["id"] |> to_string
+        asset: %Asset{id: purchase["itemData"]["id"], title: purchase["itemData"]["name"]}
       }
     end)
   end

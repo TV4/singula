@@ -428,7 +428,7 @@ defmodule SmokeTest.PaywizardClientApi do
       assert Paywizard.Client.customer_purchases_ppv(customer_id) ==
                {:ok,
                 [
-                  %Paywizard.PPV{asset_id: to_string(asset.id), item_id: item_id, order_id: order_id}
+                  %Paywizard.PPV{asset: asset, item_id: item_id, order_id: order_id}
                 ]}
     end
   end
