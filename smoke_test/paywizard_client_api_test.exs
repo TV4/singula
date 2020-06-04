@@ -25,88 +25,48 @@ defmodule SmokeTest.PaywizardClientApi do
 
   describe "Searching external id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post("/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => vimond_id})
-
-      assert Jason.decode!(body)
-             |> Map.drop(["auditInfo", "referAFriend"]) ==
-               %{
-                 "active" => true,
-                 "addresses" => [
-                   %{"addressType" => "HOME", "countryCode" => "SWE", "line1" => "Address Line 1", "postCode" => 12220}
-                 ],
-                 "customAttributes" => [
-                   %{"name" => "Accepted Play Terms Date", "value" => "2020-02-25"},
-                   %{"name" => "Accepted Play Terms", "value" => "Telia"}
-                 ],
-                 "customerId" => customer_id,
-                 "email" => email,
-                 "externalUniqueIdentifier" => vimond_id,
-                 "firstName" => "Forename",
-                 "lastName" => "TV4 Media SmokeTest",
-                 "phone" => 0,
-                 "title" => "Mr",
-                 "username" => username
-               }
+      assert Paywizard.Client.customer_search(vimond_id) ==
+               {:ok,
+                %Paywizard.Customer{
+                  active: true,
+                  address_post_code: 12220,
+                  custom_attributes: [
+                    %{name: "Accepted Play Terms Date", value: "2020-02-25"},
+                    %{name: "Accepted Play Terms", value: "Telia"}
+                  ],
+                  customer_id: customer_id,
+                  date_of_birth: nil,
+                  email: email,
+                  external_unique_id: to_string(vimond_id),
+                  first_name: "Forename",
+                  last_name: "TV4 Media SmokeTest",
+                  username: username
+                }}
     end
 
     test "returns error 90068 when not finding customer" do
-      {:ok, %Response{body: body, status_code: 404}} =
-        HTTPClient.post("/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => 666})
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" => "Customer with external ID 666 not located",
-               "errorCode" => 90068,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "Customer cannot be located"
-             }
+      assert Paywizard.Client.customer_search(666) == {:paywizard_error, :customer_not_found}
     end
   end
 
   describe("Fetching customer contract") do
     test "returns 0 when no contracts", %{customer_id: customer_id} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.get("/apis/contracts/v1/customer/#{customer_id}/contract")
-
-      assert Jason.decode!(body) == %{"contractCount" => 0}
+      assert Paywizard.Client.customer_contracts(customer_id) == {:ok, []}
     end
 
     test "returns customer not found passing invalid UUID" do
-      {:ok, %Response{body: body, status_code: 500}} =
-        HTTPClient.get("/apis/contracts/v1/customer/non_existing_customer_id/contract")
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "errorCode" => 500,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "System Failure - please retry later."
-             }
+      assert Paywizard.Client.customer_contracts("non_existing_customer_id") == {:paywizard_error, :customer_not_found}
     end
   end
 
   describe("Fetching customer PPV") do
     test "returns 0 when no PPV's", %{customer_id: customer_id} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post("/apis/purchases/v1/customer/#{customer_id}/purchases/1", %{type: "PPV"})
-
-      assert Jason.decode!(body) == %{"totalResults" => 0}
+      assert Paywizard.Client.customer_purchases_ppv(customer_id) == {:ok, []}
     end
 
     test "returns customer not found passing invalid UUID" do
-      {:ok, %Response{body: body, status_code: 500}} =
-        HTTPClient.post("/apis/purchases/v1/customer/non_existing_customer_id/purchases/1", %{type: "PPV"})
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "errorCode" => 500,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "System Failure - please retry later."
-             }
+      assert Paywizard.Client.customer_purchases_ppv("non_existing_customer_id") ==
+               {:paywizard_error, :customer_not_found}
     end
   end
 
@@ -116,21 +76,7 @@ defmodule SmokeTest.PaywizardClientApi do
       subscription_item_id: subscription_item_id,
       currency: currency
     } do
-      {:ok, %Response{body: body, status_code: 201}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
-          %{items: [%{itemCode: subscription_item_id}]}
-        )
-
-      data = Jason.decode!(body)
-      %{"href" => href} = data
-      cart_id = String.split(href, "/") |> List.last() |> String.to_integer()
-
-      assert data == %{
-               "href" => "/customer/#{customer_id}/cart/#{cart_id}",
-               "rel" => "Get cart details",
-               "type" => "application/json"
-             }
+      assert {:ok, cart_id} = Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
 
       save_in_test_context(:cart_id, cart_id)
     end
@@ -141,56 +87,22 @@ defmodule SmokeTest.PaywizardClientApi do
       currency: currency,
       asset: asset
     } do
-      {:ok, %Response{body: body, status_code: 201}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
-          %{items: [%{itemCode: ppv_item_id, itemData: %{id: asset.id, name: asset.title}}]}
-        )
-
-      data = Jason.decode!(body)
-      %{"href" => href} = data
-      cart_id = String.split(href, "/") |> List.last() |> String.to_integer()
-
-      assert data == %{
-               "href" => "/customer/#{customer_id}/cart/#{cart_id}",
-               "rel" => "Get cart details",
-               "type" => "application/json"
-             }
+      assert {:ok, cart_id} =
+               Paywizard.Client.create_cart_with_item(customer_id, ppv_item_id, currency, %Paywizard.MetaData{
+                 asset: asset
+               })
 
       save_in_test_context(:ppv_cart_id, cart_id)
     end
 
     test "returns customer not found passing invalid UUID", %{subscription_item_id: item_id, currency: currency} do
-      {:ok, %Response{body: body, status_code: 500}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/non_existing_customer_id/cart/currency/#{currency}",
-          %{items: [%{itemCode: item_id}]}
-        )
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "errorCode" => 500,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "System Failure - please retry later."
-             }
+      assert Paywizard.Client.create_cart_with_item("non_existing_customer_id", item_id, currency) ==
+               {:paywizard_error, :customer_not_found}
     end
 
     test "returns error 90069 for non-existing item code", %{customer_id: customer_id, currency: currency} do
-      {:ok, %Response{body: body, status_code: 404}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
-          %{items: [%{itemCode: "incorrect_item_id"}]}
-        )
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" => "Unable to find sales item with code: incorrect_item_id",
-               "errorCode" => 90069,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "No item could be found with the given code"
-             }
+      assert Paywizard.Client.create_cart_with_item(customer_id, "incorrect_item_id", currency) ==
+               {:paywizard_error, :incorrect_item}
     end
   end
 
@@ -200,33 +112,23 @@ defmodule SmokeTest.PaywizardClientApi do
       currency: currency,
       no_free_trial_item_id: subscription_item_id
     } do
-      {:ok, %Response{body: body, status_code: 201}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
-          %{items: [%{itemCode: subscription_item_id}]}
-        )
+      assert {:ok, cart_id} = Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
 
-      data = Jason.decode!(body)
-      %{"href" => href} = data
-      cart_id = String.split(href, "/") |> List.last() |> String.to_integer()
-
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}")
-
-      assert Jason.decode!(body) == %{
-               "discountCode" => %{"campaignCode" => "NONE", "promoCode" => "NONE", "sourceCode" => "NONE"},
-               "id" => cart_id,
-               "items" => [
-                 %{
-                   "cost" => %{"amount" => "449.00", "currency" => "SEK"},
-                   "itemCode" => "4151C241C3DD41529A87",
-                   "itemData" => "",
-                   "itemName" => "C More All Sport",
-                   "quantity" => 1
-                 }
-               ],
-               "totalCost" => %{"amount" => "449.00", "currency" => "SEK"}
-             }
+      assert Paywizard.Client.fetch_cart(customer_id, cart_id) ==
+               {:ok,
+                %Paywizard.CartDetail{
+                  currency: :SEK,
+                  id: String.to_integer(cart_id),
+                  items: [
+                    %Paywizard.CartDetail.Item{
+                      cost: "449.00",
+                      item_id: subscription_item_id,
+                      item_name: "C More All Sport",
+                      quantity: 1
+                    }
+                  ],
+                  total_cost: "449.00"
+                }}
     end
 
     test "returns added subscription", %{
@@ -234,89 +136,56 @@ defmodule SmokeTest.PaywizardClientApi do
       cart_id: cart_id,
       subscription_item_id: subscription_item_id
     } do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}")
-
-      assert Jason.decode!(body) ==
-               %{
-                 "discountCode" => %{
-                   "campaignCode" => "NONE",
-                   "promoCode" => "NONE",
-                   "sourceCode" => "NONE"
-                 },
-                 "id" => cart_id,
-                 "items" => [
-                   %{
-                     "cost" => %{"amount" => "0.00", "currency" => "SEK"},
-                     "freeTrial" => %{
-                       "applied" => true,
-                       "firstPaymentAmount" => %{
-                         "amount" => "139.00",
-                         "currency" => "SEK"
-                       },
-                       "numberOfDays" => 14,
-                       "firstPaymentDate" => "#{Date.utc_today() |> Date.add(14)}T00:00:00+02:00"
-                     },
-                     "itemCode" => subscription_item_id,
-                     "itemData" => "",
-                     "itemName" => "C More TV4",
-                     "quantity" => 1
-                   }
-                 ],
-                 "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
-               }
+      assert Paywizard.Client.fetch_cart(customer_id, cart_id) ==
+               {:ok,
+                %Paywizard.CartDetail{
+                  currency: :SEK,
+                  id: String.to_integer(cart_id),
+                  items: [
+                    %Paywizard.CartDetail.Item{
+                      cost: "0.00",
+                      item_id: subscription_item_id,
+                      item_name: "C More TV4",
+                      quantity: 1,
+                      trial: %Paywizard.CartDetail.Item.Trial{
+                        first_payment_amount: "139.00",
+                        first_payment_date: ~D[2020-06-18],
+                        free_trial: true
+                      }
+                    }
+                  ],
+                  total_cost: "0.00"
+                }}
     end
 
     test "returns added ppv", %{customer_id: customer_id, ppv_cart_id: cart_id, ppv_item_id: ppv_item_id, asset: asset} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}")
-
-      assert Jason.decode!(body) == %{
-               "discountCode" => %{
-                 "campaignCode" => "NONE",
-                 "promoCode" => "NONE",
-                 "sourceCode" => "NONE"
-               },
-               "id" => cart_id,
-               "items" => [
-                 %{
-                   "cost" => %{"amount" => "149.00", "currency" => "SEK"},
-                   "itemCode" => ppv_item_id,
-                   "itemData" => %{"id" => asset.id, "name" => asset.title},
-                   "itemName" => "PPV - 149",
-                   "quantity" => 1
-                 }
-               ],
-               "totalCost" => %{"amount" => "149.00", "currency" => "SEK"}
-             }
+      assert Paywizard.Client.fetch_cart(customer_id, cart_id) ==
+               {:ok,
+                %Paywizard.CartDetail{
+                  currency: :SEK,
+                  id: String.to_integer(cart_id),
+                  items: [
+                    %Paywizard.CartDetail.Item{
+                      asset: asset,
+                      cost: "149.00",
+                      item_id: ppv_item_id,
+                      item_name: "PPV - 149",
+                      quantity: 1
+                    }
+                  ],
+                  total_cost: "149.00"
+                }}
     end
 
     test "returns customer not found passing invalid UUID", %{cart_id: cart_id} do
-      {:ok, %Response{body: body, status_code: 500}} =
-        HTTPClient.get("/apis/purchases/v1/customer/non_existing_customer_id/cart/#{cart_id}")
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "errorCode" => 500,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "System Failure - please retry later."
-             }
+      assert Paywizard.Client.fetch_cart("non_existing_customer_id", cart_id) == {:paywizard_error, :customer_not_found}
     end
 
     test "returns error 90040 for non-existing cart", %{customer_id: customer_id} do
-      {:ok, %Response{body: body, status_code: 404}} =
-        HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/666")
+      assert Paywizard.Client.fetch_cart(customer_id, 666) == {:paywizard_error, :cart_not_found}
+    end
 
-      assert Jason.decode!(body) == %{
-               "developerMessage" => "Unable to get cart 666 for customer #{customer_id}",
-               "errorCode" => 90040,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "Cart ID provided is incorrect or does not exist"
-             }
-
+    test "unhandled error for invalid cart id ", %{customer_id: customer_id} do
       {:ok, %Response{body: body, status_code: 500}} =
         HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/non-numeric-cart")
 
@@ -327,15 +196,18 @@ defmodule SmokeTest.PaywizardClientApi do
                  "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
                "userMessage" => "System Failure - please retry later."
              }
+
+      assert Paywizard.Client.fetch_cart(customer_id, "non-numeric-cart") == {:paywizard_error, :customer_not_found}
     end
   end
 
   describe "Fetching item on sale" do
-    test "returns discount codes for item", %{subscription_item_id: item_id, currency: currency} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.get("/apis/catalogue/v1/item/#{item_id}/discounts?currency=#{currency}")
+    test "returns empty list for item without discount", %{no_discount_item_id: item_id, currency: currency} do
+      assert Paywizard.Client.fetch_item_discounts(item_id, currency) == {:ok, []}
+    end
 
-      {:ok, %{"discounts" => discounts}} = Jason.decode(body)
+    test "returns discount codes for item", %{subscription_item_id: item_id, currency: currency} do
+      assert {:ok, discounts} = Paywizard.Client.fetch_item_discounts(item_id, currency)
 
       discount = Enum.find(discounts, fn discount -> discount["id"] == 10125 end)
       campaign = Enum.find(discount["linkedCombos"], fn campaign -> campaign["campaign"] == "TESTWITHCAMPAIGN" end)
@@ -346,56 +218,58 @@ defmodule SmokeTest.PaywizardClientApi do
                "source" => "TESTWITHSOURCE"
              }
 
-      save_in_test_context(:discount, campaign)
+      save_in_test_context(:discount, %Paywizard.Discount{
+        campaign: "TESTWITHCAMPAIGN",
+        promotion: "PROMO1",
+        source: "TESTWITHSOURCE"
+      })
     end
 
-    test "returns empty list for item without discount", %{no_discount_item_id: item_id, currency: currency} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.get("/apis/catalogue/v1/item/#{item_id}/discounts?currency=#{currency}")
+    test "returns subscription with gated multi use discount", %{
+      customer_id: customer_id,
+      currency: currency,
+      no_free_trial_item_id: subscription_item_id,
+      discount: discount
+    } do
+      assert {:ok, cart_id} =
+               Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Paywizard.MetaData{
+                 discount: discount
+               })
 
-      assert Jason.decode(body) == {:ok, %{"discounts" => []}}
-    end
-
-    test "returns discount codes for given campaign", %{discount: discount, customer_id: customer_id, cart_id: cart_id} do
-      keys_sort = &(&1 |> Map.values() |> Enum.sort())
-      date_delete = &(&1 |> Map.delete("startDate") |> Map.delete("endDate"))
-
-      data = %{
-        "campaignCode" => discount["campaign"],
-        "sourceCode" => discount["source"],
-        "promoCode" => discount["promotion"]
-      }
-
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}/setdiscountcode", data)
-
-      added_discount =
-        Jason.decode!(body)
-        |> get_in(["discount", "discountCode"])
-
-      discount = date_delete.(discount)
-      added_discount = date_delete.(added_discount)
-
-      assert keys_sort.(discount) == keys_sort.(added_discount)
-    end
-
-    test "returns error 90022 for non-existing discount code", %{customer_id: customer_id, cart_id: cart_id} do
-      data = %{
-        "campaignCode" => "wrong_campaign",
-        "sourceCode" => "broken_source",
-        "promoCode" => "invalid_promotion"
-      }
-
-      {:ok, %Response{body: body, status_code: 404}} =
-        HTTPClient.post("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}/setdiscountcode", data)
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" => "Invalid discount code for cart",
-               "errorCode" => 90022,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "Discount does not exist"
+      assert Paywizard.Client.fetch_cart(customer_id, cart_id) == {
+               :ok,
+               %Paywizard.CartDetail{
+                 currency: :SEK,
+                 discount: %Paywizard.CartDetail.Discount{
+                   discount_amount: "224.50",
+                   discount_end_date: nil
+                 },
+                 id: String.to_integer(cart_id),
+                 items: [
+                   %Paywizard.CartDetail.Item{
+                     cost: "449.00",
+                     item_id: "4151C241C3DD41529A87",
+                     item_name: "C More All Sport",
+                     quantity: 1
+                   }
+                 ],
+                 total_cost: "224.50"
+               }
              }
+    end
+
+    test "returns error 90022 for non-existing discount code", %{
+      customer_id: customer_id,
+      currency: currency,
+      no_free_trial_item_id: subscription_item_id
+    } do
+      assert Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Paywizard.MetaData{
+               discount: %Paywizard.Discount{
+                 campaign: "wrong_campaign",
+                 source: "broken_source",
+                 promotion: "invalid_promotion"
+               }
+             }) == {:paywizard_error, :discount_not_found}
     end
   end
 
@@ -403,9 +277,6 @@ defmodule SmokeTest.PaywizardClientApi do
     test "redirect returns an transaction_id with redirect URL", %{customer_id: customer_id, currency: currency} do
       # BUG: Can return: "com.mgt.util.exception.system.SystemException: Error connecting to provider"
 
-      # The value of the `redirectURL` field will soon match its name.
-      # The project needs to provide Paywizard with the desired format.
-      # A first draft is ready to be acknowledged internally before hand-off.
       dibs_redirect_data = %{
         itemDescription: "REGISTER_CARD",
         amount: "1.00",
@@ -413,17 +284,14 @@ defmodule SmokeTest.PaywizardClientApi do
         billing_city: "Stockholm"
       }
 
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post(
-          "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
-          Paywizard.Digest.generate(:DIBS, currency, dibs_redirect_data)
-        )
+      assert {:ok,
+              %{
+                "digest" => _digest,
+                "redirectURL" => _redirect_form,
+                "transactionId" => transaction_id,
+                "type" => "redirect"
+              }} = Paywizard.Client.customer_redirect_dibs(customer_id, currency, dibs_redirect_data)
 
-      {:ok, data} = Jason.decode(body)
-
-      assert data == Map.merge(Map.take(data, ["digest", "redirectURL", "transactionId"]), %{"type" => "redirect"})
-
-      %{"transactionId" => transaction_id} = data
       save_in_test_context(:transaction_id, transaction_id)
     end
 
@@ -435,20 +303,8 @@ defmodule SmokeTest.PaywizardClientApi do
         billing_city: "Stockholm"
       }
 
-      {:ok, %Response{body: body, status_code: 500}} =
-        HTTPClient.post(
-          "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect",
-          Paywizard.Digest.generate(:DIBS, currency, dibs_redirect_data)
-        )
-
-      assert Jason.decode!(body) == %{
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "errorCode" => 500,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "System Failure - please retry later."
-             }
+      assert Paywizard.Client.customer_redirect_dibs("non_existing_customer_id", currency, dibs_redirect_data) ==
+               {:paywizard_error, :customer_not_found}
     end
 
     test "setting up a dibs payment method returns a payment_method_id",
@@ -461,7 +317,7 @@ defmodule SmokeTest.PaywizardClientApi do
       # TODO: The receipt is returned once the pre-populated form-data gets submitted.
       #       A hard coded receipt is used for testing until its properly received.
 
-      dibs_payment_method = %{
+      dibs_payment_method = %Paywizard.DibsPaymentMethod{
         dibs_ccPart: "**** **** **** 0000",
         dibs_ccPrefix: "457110",
         dibs_ccType: "Visa",
@@ -471,13 +327,8 @@ defmodule SmokeTest.PaywizardClientApi do
         transactionId: transaction_id
       }
 
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post(
-          "/apis/payment-methods/v1/customer/#{customer_id}/paymentmethod",
-          Paywizard.Digest.generate(:DIBS, currency, dibs_payment_method)
-        )
-
-      %{"paymentMethodId" => payment_method_id} = Jason.decode!(body)
+      assert {:ok, payment_method_id} =
+               Paywizard.Client.customer_payment_method(customer_id, currency, dibs_payment_method)
 
       save_in_test_context(:payment_method_id, payment_method_id)
     end
@@ -488,57 +339,34 @@ defmodule SmokeTest.PaywizardClientApi do
       payment_method_id: payment_method_id,
       subscription_item_id: item_id
     } do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}/checkout",
-          %{"paymentMethodId" => payment_method_id}
-        )
+      assert {:ok, %Paywizard.CartDetail{contract_id: contract_id, order_id: order_id} = cart} =
+               Paywizard.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
 
-      assert Jason.decode!(body)
-             |> update_in(["items", Access.at(0), "freeTrial"], fn trial -> Map.delete(trial, "firstPaymentDate") end)
-             |> update_in(["contractDetails"], fn contract -> Map.delete(contract, "contractId") end)
-             |> Map.delete("orderId") ==
-               %{
-                 "contractDetails" => %{
-                   "itemCode" => item_id,
-                   "itemName" => "C More TV4",
-                   "status" => "ACTIVE"
-                 },
-                 "discount" => %{
-                   "discountAmount" => %{"amount" => "69.50", "currency" => "SEK"},
-                   "discountCode" => %{
-                     "campaignCode" => "TESTWITHCAMPAIGN",
-                     "promoCode" => "PROMO1",
-                     "sourceCode" => "TESTWITHSOURCE"
-                   },
-                   "discountName" => "TestGatedDiscount50%Off",
-                   "indefinite" => true,
-                   "itemCode" => item_id
-                 },
-                 "discountCode" => %{
-                   "campaignCode" => "TESTWITHCAMPAIGN",
-                   "promoCode" => "PROMO1",
-                   "sourceCode" => "TESTWITHSOURCE"
-                 },
-                 "items" => [
-                   %{
-                     "cost" => %{"amount" => "0.00", "currency" => "SEK"},
-                     "freeTrial" => %{
-                       "applied" => true,
-                       "firstPaymentAmount" => %{
-                         "amount" => "69.50",
-                         "currency" => "SEK"
-                       },
-                       "numberOfDays" => 14
-                     },
-                     "itemCode" => item_id,
-                     "itemData" => "",
-                     "itemName" => "C More TV4",
-                     "quantity" => 1
+      assert cart == %Paywizard.CartDetail{
+               contract_id: contract_id,
+               currency: :SEK,
+               items: [
+                 %Paywizard.CartDetail.Item{
+                   cost: "0.00",
+                   item_id: item_id,
+                   item_name: "C More TV4",
+                   quantity: 1,
+                   trial: %Paywizard.CartDetail.Item.Trial{
+                     first_payment_amount: "139.00",
+                     first_payment_date: ~D[2020-06-18],
+                     free_trial: true
                    }
-                 ],
-                 "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
-               }
+                 }
+               ],
+               order_id: order_id,
+               total_cost: "0.00"
+             }
+
+      refute contract_id == nil
+      refute order_id == nil
+
+      save_in_test_context(:contract_id, contract_id)
+      save_in_test_context(:order_id, order_id)
     end
 
     test "checking out ppv cart returns cart details", %{
@@ -548,76 +376,60 @@ defmodule SmokeTest.PaywizardClientApi do
       ppv_item_id: item_id,
       asset: asset
     } do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}/checkout",
-          %{"paymentMethodId" => payment_method_id}
-        )
+      assert {:ok, %Paywizard.CartDetail{order_id: order_id} = cart} =
+               Paywizard.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
 
-      assert Jason.decode!(body)
-             |> Map.delete("orderId") == %{
-               "items" => [
-                 %{
-                   "cost" => %{"amount" => "149.00", "currency" => "SEK"},
-                   "itemCode" => item_id,
-                   "itemData" => %{"id" => asset.id, "name" => asset.title},
-                   "itemName" => "PPV - 149",
-                   "quantity" => 1
+      assert cart == %Paywizard.CartDetail{
+               currency: :SEK,
+               items: [
+                 %Paywizard.CartDetail.Item{
+                   cost: "149.00",
+                   item_id: item_id,
+                   item_name: "PPV - 149",
+                   asset: asset,
+                   quantity: 1
                  }
                ],
-               "totalCost" => %{"amount" => "149.00", "currency" => "SEK"}
+               order_id: order_id,
+               total_cost: "149.00"
              }
+
+      refute order_id == nil
+      save_in_test_context(:ppv_order_id, order_id)
     end
   end
 
   describe "Fetching customer contracts after checkout" do
-    test "returns purchased subscription", %{customer_id: customer_id, subscription_item_id: item_id} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.get("/apis/contracts/v1/customer/#{customer_id}/contract")
-
-      {contract_id, data} =
-        Jason.decode!(body)
-        |> pop_in(["contracts", Access.at(0), "contractId"])
-
-      assert data
-             |> update_in(["contracts", Access.at(0)], fn contract ->
-               Map.drop(contract, ["link", "startDate", "orderId"])
-             end) ==
-               %{
-                 "contractCount" => 1,
-                 "contracts" => [
-                   %{
-                     "active" => true,
-                     "itemCode" => item_id,
-                     "name" => "C More TV4",
-                     "status" => "ACTIVE"
-                   }
-                 ]
-               }
-
-      save_in_test_context(:contract_id, contract_id)
+    test "returns purchased subscription", %{
+      customer_id: customer_id,
+      subscription_item_id: item_id,
+      contract_id: contract_id,
+      order_id: order_id
+    } do
+      assert Paywizard.Client.customer_contracts(customer_id) ==
+               {:ok,
+                [
+                  %Paywizard.Contract{
+                    active: true,
+                    contract_id: contract_id,
+                    item_id: item_id,
+                    item_name: "C More TV4",
+                    order_id: order_id
+                  }
+                ]}
     end
 
-    test "returns purchased pay per view", %{customer_id: customer_id, ppv_item_id: item_id, asset: asset} do
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post("/apis/purchases/v1/customer/#{customer_id}/purchases/1", %{type: "PPV"})
-
-      assert Jason.decode!(body)
-             |> update_in(["items", Access.at(0)], fn item -> Map.drop(item, ["purchaseDate", "orderId"]) end) ==
-               %{
-                 "currentPage" => 1,
-                 "items" => [
-                   %{
-                     "entitlements" => [%{"id" => 5967, "name" => "Matchbiljett 149 kr"}],
-                     "itemData" => %{"id" => asset.id, "name" => asset.title},
-                     "salesItemCode" => item_id,
-                     "salesItemName" => "PPV - 149",
-                     "type" => "PPV"
-                   }
-                 ],
-                 "numberOfPages" => 1,
-                 "totalResults" => 1
-               }
+    test "returns purchased pay per view", %{
+      customer_id: customer_id,
+      ppv_item_id: item_id,
+      asset: asset,
+      ppv_order_id: order_id
+    } do
+      assert Paywizard.Client.customer_purchases_ppv(customer_id) ==
+               {:ok,
+                [
+                  %Paywizard.PPV{asset_id: to_string(asset.id), item_id: item_id, order_id: order_id}
+                ]}
     end
   end
 
@@ -630,21 +442,8 @@ defmodule SmokeTest.PaywizardClientApi do
       customer_id = create_test_customer(external_id, user_id, email)
       delete_test_customer(customer_id)
 
-      item = %{itemCode: item_id}
-
-      {:ok, %Response{body: body, status_code: 400}} =
-        HTTPClient.post(
-          "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
-          %{items: [item]}
-        )
-
-      assert Jason.decode!(body) == %{
-               "errorCode" => 90062,
-               "userMessage" => "Items could not be added",
-               "developerMessage" => "Unable to add sales item with code: null",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
+      assert Paywizard.Client.create_cart_with_item(customer_id, item_id, currency) ==
+               {:paywizard_error, :item_not_added_to_cart}
     end
   end
 
@@ -664,14 +463,14 @@ defmodule SmokeTest.PaywizardClientApi do
         tax_rate: 0
       }
 
-      {:ok, %Response{body: body, status_code: 200}} =
-        HTTPClient.post(
-          "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
-          Paywizard.Digest.generate(:KLARNA, currency, klarna_redirect_data)
-        )
-
-      assert Jason.decode!(body)
-             |> Map.keys() == ["clientToken", "digest", "sessionId", "transactionId", "type"]
+      assert {:ok,
+              %{
+                "clientToken" => _client_token,
+                "digest" => _digest,
+                "sessionId" => _session_id,
+                "transactionId" => _transaction_id,
+                "type" => "klarnaSession"
+              }} = Paywizard.Client.customer_redirect_klarna(customer_id, currency, klarna_redirect_data)
     end
   end
 
@@ -684,23 +483,7 @@ defmodule SmokeTest.PaywizardClientApi do
     customer_id = create_test_customer(external_id, user_id, email)
     Logger.info("Created smoke test user: #{customer_id}")
 
-    on_exit(fn ->
-      contract_id = state_get(:contract_id)
-
-      if contract_id do
-        # BUG: Inconsistent behavior calling cancel-endpoint. Will succeed most of the times,
-        # but sometimes returns error code 90006 ("Failed to cancel contract").
-        # A re-run will succeed...
-
-        cancel_date = Date.utc_today()
-        {:ok, ^cancel_date} = Paywizard.Client.cancel_contract(customer_id, contract_id, to_string(cancel_date))
-
-        Logger.info("Deleted contracts for test user: #{customer_id}")
-      end
-
-      {:ok, %Response{status_code: 200}} = delete_test_customer(customer_id)
-      Logger.info("Deleted smoke test user: #{customer_id}")
-    end)
+    on_exit(fn -> cancel_contracts(customer_id) end)
 
     %{
       customer_id: customer_id,
@@ -708,6 +491,36 @@ defmodule SmokeTest.PaywizardClientApi do
       username: user_id,
       vimond_id: external_id
     }
+  end
+
+  defp cancel_contracts(customer_id) do
+    {:ok, contracts} = Paywizard.Client.customer_contracts(customer_id)
+
+    Enum.each(contracts, fn %{contract_id: contract_id} ->
+      # BUG: Inconsistent behavior calling cancel-endpoint. Will succeed most of the times,
+      # but sometimes returns error code 90006 ("Failed to cancel contract").
+      # A re-run will succeed...
+      cancel_date = Date.utc_today()
+      {:ok, ^cancel_date} = Paywizard.Client.cancel_contract(customer_id, contract_id, to_string(cancel_date))
+
+      Logger.info("Deleted contract #{contract_id} for test user: #{customer_id}")
+    end)
+
+    delete_test_customer(customer_id)
+    |> case do
+      {:ok, %Response{status_code: 200}} ->
+        Logger.info("Deleted smoke test user: #{customer_id}")
+
+      {:ok,
+       %HTTPoison.Response{
+         body:
+           "{\"errorCode\":4644,\"developerMessage\":\"Contact has active subscription or is in credit control cycle\",\"moreInfo\":\"Documentation on this failure can be found in SwaggerHub (https:\\/\\/swagger.io\\/tools\\/swaggerhub\\/)\"}",
+         status_code: 400
+       }} ->
+        Logger.warn("Failed deleting smoke test user, retrying…")
+        :timer.sleep(1000)
+        cancel_contracts(customer_id)
+    end
   end
 
   defp create_test_customer(external_id, user_id, email) do
@@ -769,10 +582,6 @@ defmodule SmokeTest.PaywizardClientApi do
     {:ok, %Response{body: body}} = HTTPClient.post(path, data)
     {:ok, data} = Jason.decode(body)
     data
-  end
-
-  defp state_get(key) do
-    Agent.get(SmokeState, &Map.get(&1, key))
   end
 
   defp save_in_test_context(key, value) do

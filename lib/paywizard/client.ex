@@ -168,10 +168,10 @@ defmodule Paywizard.Client do
 
   defp add_discount(cart_data, nil), do: cart_data
 
-  @callback create_cart_with_item(Customer.customer_id(), binary, currency) ::
+  @callback create_cart_with_item(Customer.customer_id(), item_id :: binary, currency) ::
               {:ok, cart_id :: binary}
               | {:paywizard_error, :incorrect_item | :customer_not_found | :item_not_added_to_cart}
-  @callback create_cart_with_item(Customer.customer_id(), binary, currency, MetaData.t()) ::
+  @callback create_cart_with_item(Customer.customer_id(), item_id :: binary, currency, MetaData.t()) ::
               {:ok, cart_id :: binary}
               | {:paywizard_error,
                  :incorrect_item | :customer_not_found | :item_not_added_to_cart | :discount_not_found}
@@ -205,7 +205,7 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback fetch_cart(Customer.customer_id(), binary) ::
+  @callback fetch_cart(Customer.customer_id(), cart_id :: binary) ::
               {:ok, CartDetail.t()}
               | {:paywizard_error, :cart_not_found | :customer_not_found}
   def fetch_cart(customer_id, cart_id) do
@@ -224,7 +224,7 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback fetch_item_discounts(item_id :: binary, currency :: currency) :: {:ok, list}
+  @callback fetch_item_discounts(item_id :: binary, currency) :: {:ok, list}
   def fetch_item_discounts(item_id, currency) do
     {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
       http_client().get("/apis/catalogue/v1/item/#{item_id}/discounts?currency=#{currency}")
