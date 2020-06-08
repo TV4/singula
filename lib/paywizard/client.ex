@@ -18,12 +18,12 @@ defmodule Paywizard.Client do
 
   @callback customer_fetch(Customer.customer_id()) :: {:ok, Customer.t()} | {:paywizard_error, :customer_not_found}
   def customer_fetch(customer_id) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().get("/apis/customers/v1/customer/#{customer_id}") do
       {:ok, response} = Jason.decode(body)
       {:ok, Customer.new(response)}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 404}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 404}} ->
         {:ok, %{"errorCode" => 90068}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
@@ -31,12 +31,12 @@ defmodule Paywizard.Client do
 
   @callback customer_search(binary) :: {:ok, Customer.t()} | {:paywizard_error, :customer_not_found}
   def customer_search(external_id) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().post("/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => external_id}) do
       {:ok, response} = Jason.decode(body)
       {:ok, Customer.new(response)}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 404}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 404}} ->
         {:ok, %{"errorCode" => 90068}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
@@ -45,12 +45,12 @@ defmodule Paywizard.Client do
   @callback customer_contracts(Customer.customer_id()) ::
               {:ok, list(Contract.t())} | {:paywizard_error, :customer_not_found}
   def customer_contracts(customer_id, active_only \\ true) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract?activeOnly=#{active_only}") do
       {:ok, response} = Jason.decode(body)
       {:ok, Contract.new(response)}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
@@ -59,12 +59,12 @@ defmodule Paywizard.Client do
   @callback customer_contract(Customer.customer_id(), Contract.contract_id()) ::
               {:ok, ContractDetails.t()} | {:paywizard_error, :customer_not_found}
   def customer_contract(customer_id, contract_id) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}") do
       {:ok, response} = Jason.decode(body)
       {:ok, ContractDetails.new(response)}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
@@ -72,14 +72,14 @@ defmodule Paywizard.Client do
 
   @callback cancel_contract(Customer.customer_id(), Contract.contract_id()) :: {:ok, cancellation_date :: Date.t()}
   def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
              "cancelDate" => cancel_date
            }) do
       {:ok, %{"cancellationDate" => cancellation_date}} = Jason.decode(body)
       Date.from_iso8601(cancellation_date)
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 400}} ->
         {:ok, %{"errorCode" => 90006}} = Jason.decode(body)
         {:paywizard_error, :contract_cancellation_fault}
     end
@@ -88,11 +88,11 @@ defmodule Paywizard.Client do
   @callback withdraw_cancel_contract(Customer.customer_id(), Contract.contract_id()) ::
               :ok | {:paywizard_error, :cancellation_withdrawal_fault}
   def withdraw_cancel_contract(customer_id, contract_id) do
-    with {:ok, %HTTPoison.Response{status_code: 200}} <-
+    with {:ok, %Paywizard.Response{status_code: 200}} <-
            http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel/withdraw", %{}) do
       :ok
     else
-      {:ok, %HTTPoison.Response{body: body}} ->
+      {:ok, %Paywizard.Response{body: body}} ->
         case Jason.decode(body) do
           {:ok, %{"errorCode" => 90017}} -> {:paywizard_error, :cancellation_withdrawal_fault}
         end
@@ -107,11 +107,11 @@ defmodule Paywizard.Client do
 
   @callback fetch_single_use_promo_code(promo_code :: binary) :: {:ok, map} | {:paywizard_error, :promo_code_not_found}
   def fetch_single_use_promo_code(promo_code) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().get("/apis/purchases/v1/promocode/#{promo_code}") do
       {:ok, _response} = Jason.decode(body)
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 400}} ->
         {:ok, %{"errorCode" => 90123}} = Jason.decode(body)
         {:paywizard_error, :promo_code_not_found}
     end
@@ -125,7 +125,7 @@ defmodule Paywizard.Client do
               | {:paywizard_error,
                  :incorrect_item | :customer_not_found | :item_not_added_to_cart | :discount_not_found}
   def create_cart_with_item(customer_id, item_id, currency, meta_data \\ %MetaData{}) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 201}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 201}} <-
            http_client().post(
              "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
              cart_items_with_discount(item_id, meta_data)
@@ -134,22 +134,22 @@ defmodule Paywizard.Client do
       cart_id = String.split(href, "/") |> List.last()
       {:ok, cart_id}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 404}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 404}} ->
         Jason.decode(body)
         |> case do
           {:ok, %{"errorCode" => 90022}} -> {:paywizard_error, :discount_not_found}
           {:ok, %{"errorCode" => 90069}} -> {:paywizard_error, :incorrect_item}
         end
 
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
 
-      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 400}} ->
         Jason.decode(body)
         |> case do
           {:ok, %{"errorCode" => 90062}} -> {:paywizard_error, :item_not_added_to_cart}
-          {:ok, %{"userMessage" => "Discount criteria not matched"}} -> {:paywizard_error, :discount_not_found}
+          {:ok, %{"errorCode" => 90115}} -> {:paywizard_error, :discount_not_found}
         end
     end
   end
@@ -158,16 +158,16 @@ defmodule Paywizard.Client do
               {:ok, CartDetail.t()}
               | {:paywizard_error, :cart_not_found | :customer_not_found}
   def fetch_cart(customer_id, cart_id) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}") do
       {:ok, response} = Jason.decode(body)
       {:ok, CartDetail.new(response)}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 404}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 404}} ->
         {:ok, %{"errorCode" => 90040}} = Jason.decode(body)
         {:paywizard_error, :cart_not_found}
 
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
@@ -175,7 +175,7 @@ defmodule Paywizard.Client do
 
   @callback fetch_item_discounts(item_id :: binary, currency) :: {:ok, list}
   def fetch_item_discounts(item_id, currency) do
-    {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
+    {:ok, %Paywizard.Response{body: body, status_code: 200}} =
       http_client().get("/apis/catalogue/v1/item/#{item_id}/discounts?currency=#{currency}")
 
     {:ok, %{"discounts" => discounts}} = Jason.decode(body)
@@ -186,14 +186,14 @@ defmodule Paywizard.Client do
               {:ok, map}
               | {:paywizard_error, :customer_not_found}
   def customer_redirect_dibs(customer_id, currency, redirect_data) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().post(
              "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
              Digest.generate(:DIBS, currency, redirect_data)
            ) do
       {:ok, _response} = Jason.decode(body)
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
@@ -203,14 +203,14 @@ defmodule Paywizard.Client do
               {:ok, map}
               | {:paywizard_error, :customer_not_found}
   def customer_redirect_klarna(customer_id, currency, redirect_data) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().post(
              "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
              Digest.generate(:KLARNA, currency, redirect_data)
            ) do
       {:ok, _response} = Jason.decode(body)
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end
@@ -235,7 +235,7 @@ defmodule Paywizard.Client do
   @callback customer_cart_checkout(Customer.customer_id(), binary, integer) ::
               {:ok, CartDetail.t()} | {:paywizard_error, :cart_not_found | :payment_authorisation_fault}
   def customer_cart_checkout(customer_id, cart_id, payment_method_id) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().post(
              "/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}/checkout",
              %{"paymentMethodId" => payment_method_id}
@@ -243,11 +243,11 @@ defmodule Paywizard.Client do
       {:ok, response} = Jason.decode(body)
       {:ok, CartDetail.new(response)}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 404}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 404}} ->
         {:ok, %{"errorCode" => 90040}} = Jason.decode(body)
         {:paywizard_error, :cart_not_found}
 
-      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 400}} ->
         {:ok, %{"errorCode" => 90045}} = Jason.decode(body)
         {:paywizard_error, :payment_authorisation_fault}
     end
@@ -255,7 +255,7 @@ defmodule Paywizard.Client do
 
   @callback item_by_id_and_currency(binary, currency) :: {:ok, Item.t()}
   def item_by_id_and_currency(item_id, currency) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}") do
       {:ok, data} = Jason.decode(body)
       {:ok, Item.new(data)}
@@ -287,7 +287,7 @@ defmodule Paywizard.Client do
   end
 
   defp create_payment_method(customer_id, digest) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <-
            http_client().post(
              "/apis/payment-methods/v1/customer/#{customer_id}/paymentmethod",
              digest
@@ -295,7 +295,7 @@ defmodule Paywizard.Client do
       {:ok, %{"paymentMethodId" => payment_method_id}} = Jason.decode(body)
       {:ok, payment_method_id}
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 400}} ->
         Jason.decode(body)
         |> case do
           {:ok, %{"errorCode" => 90054}} -> {:paywizard_error, :receipt_not_found}
@@ -323,7 +323,7 @@ defmodule Paywizard.Client do
   end
 
   defp items_pager(path_prefix, path, payload, acc \\ []) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <- http_client().post(path_prefix <> path, payload),
+    with {:ok, %Paywizard.Response{body: body, status_code: 200}} <- http_client().post(path_prefix <> path, payload),
          {:ok, data} <- Jason.decode(body) do
       items = Map.get(data, "items", [])
       acc = acc ++ items
@@ -333,7 +333,7 @@ defmodule Paywizard.Client do
         _ -> {:ok, PPV.new(acc)}
       end
     else
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+      {:ok, %Paywizard.Response{body: body, status_code: 500}} ->
         {:ok, %{"errorCode" => 500}} = Jason.decode(body)
         {:paywizard_error, :customer_not_found}
     end

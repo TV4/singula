@@ -5,7 +5,7 @@ defmodule Paywizard.HTTPClientTest do
 
   setup :verify_on_exit!
 
-  setup do
+  setup_all do
     {:ok, current_time: fn -> ~U[2020-02-02 20:20:02.02Z] end}
   end
 
@@ -25,7 +25,7 @@ defmodule Paywizard.HTTPClientTest do
     end)
 
     assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
-             {:ok, %HTTPoison.Response{body: "", status_code: 200, request: %HTTPoison.Request{url: ""}}}
+             {:ok, %Paywizard.Response{body: "", status_code: 200}}
   end
 
   test "signed patch", %{current_time: current_time} do
@@ -45,7 +45,7 @@ defmodule Paywizard.HTTPClientTest do
     end)
 
     assert HTTPClient.patch("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
-             {:ok, %HTTPoison.Response{body: "", status_code: 200, request: %HTTPoison.Request{url: ""}}}
+             {:ok, %Paywizard.Response{body: "", status_code: 200}}
   end
 
   test "signed post", %{current_time: current_time} do
@@ -65,6 +65,6 @@ defmodule Paywizard.HTTPClientTest do
     end)
 
     assert HTTPClient.post("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
-             {:ok, %HTTPoison.Response{body: "", status_code: 200, request: %HTTPoison.Request{url: ""}}}
+             {:ok, %Paywizard.Response{body: "", status_code: 200}}
   end
 end

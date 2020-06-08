@@ -34,7 +34,7 @@ defmodule Paywizard.Item do
   end
 
   def new(payload) do
-    raise(RuntimeError, "Incomming item payload was incomplete: #{inspect(payload)}")
+    raise(RuntimeError, "Incoming item payload was incomplete: #{inspect(payload)}")
   end
 
   defp currency(%{"recurring" => %{"currency" => currency}}), do: String.to_atom(currency)

@@ -2,7 +2,7 @@ defmodule SmokeTest.PaywizardClientApi do
   use ExUnit.Case
   require Logger
 
-  alias HTTPoison.Response
+  alias Paywizard.Response
   alias Paywizard.HTTPClient
 
   setup_all do
@@ -512,7 +512,7 @@ defmodule SmokeTest.PaywizardClientApi do
         Logger.info("Deleted smoke test user: #{customer_id}")
 
       {:ok,
-       %HTTPoison.Response{
+       %Paywizard.Response{
          body:
            "{\"errorCode\":4644,\"developerMessage\":\"Contact has active subscription or is in credit control cycle\",\"moreInfo\":\"Documentation on this failure can be found in SwaggerHub (https:\\/\\/swagger.io\\/tools\\/swaggerhub\\/)\"}",
          status_code: 400

@@ -1,12 +1,26 @@
+defmodule Paywizard.Response do
+  defstruct [:body, :status_code]
+
+  @type t :: %__MODULE__{body: binary, status_code: integer}
+end
+
 defmodule Paywizard.HTTPClient do
   require Logger
 
-  @callback get(binary) :: {:ok, %HTTPoison.Response{}} | {:error, %HTTPoison.Error{}}
+  # defp translate_response({:error, %HTTPoison.Error{reason: message}}) do
+  #   %Paywizard.Error{message: message}
+  # end
+
+  defp translate_response({:ok, %HTTPoison.Response{body: body, status_code: status_code}}) do
+    {:ok, %Paywizard.Response{body: body, status_code: status_code}}
+  end
+
+  @callback get(binary) :: {:ok, Paywizard.Response.t()} | {:error, %HTTPoison.Error{}}
   def get(path, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     signed_request(http_client, current_time, :get, path, "", Accept: "application/json")
   end
 
-  @callback patch(binary, map) :: {:ok, %HTTPoison.Response{}} | {:error, %HTTPoison.Error{}}
+  @callback patch(binary, map) :: {:ok, Paywizard.Response.t()} | {:error, %HTTPoison.Error{}}
   def patch(path, data, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     body = if is_map(data), do: Jason.encode!(data), else: data
 
@@ -16,7 +30,7 @@ defmodule Paywizard.HTTPClient do
     )
   end
 
-  @callback post(binary, map) :: {:ok, %HTTPoison.Response{}} | {:error, %HTTPoison.Error{}}
+  @callback post(binary, map) :: {:ok, Paywizard.Response.t()} | {:error, %HTTPoison.Error{}}
   def post(path, data, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     body = if is_map(data), do: Jason.encode!(data), else: data
 
@@ -36,7 +50,7 @@ defmodule Paywizard.HTTPClient do
     Logger.debug("Paywizard response: #{inspect(response)}")
     Logger.info("Paywizard request time: measure#paywizard.request=#{div(time, 1000)}ms")
 
-    response
+    translate_response(response)
   end
 
   defp signed_headers(method, path, current_time) do
