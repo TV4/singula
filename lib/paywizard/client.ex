@@ -105,14 +105,15 @@ defmodule Paywizard.Client do
     items_pager("/apis/purchases/v1", "/customer/#{customer_id}/purchases/1", %{type: "PPV"})
   end
 
-  def fetch_promocode_singleuse(promocode) do
+  @callback fetch_single_use_promo_code(promo_code :: binary) :: {:ok, map} | {:paywizard_error, :promo_code_not_found}
+  def fetch_single_use_promo_code(promo_code) do
     with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
-           http_client().get("/apis/purchases/v1/promocode/#{promocode}") do
+           http_client().get("/apis/purchases/v1/promocode/#{promo_code}") do
       {:ok, _response} = Jason.decode(body)
     else
       {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
         {:ok, %{"errorCode" => 90123}} = Jason.decode(body)
-        {:paywizard_error, :promocode_not_found}
+        {:paywizard_error, :promo_code_not_found}
     end
   end
 

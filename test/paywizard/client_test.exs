@@ -1011,54 +1011,83 @@ defmodule Paywizard.ClientTest do
     end
   end
 
-  describe "fetch promocode singleuse" do
-    test "success when promocode exists" do
+  describe "fetch single use promo code" do
+    test "succeeds when promo code exists" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/TESTLM8WVE" ->
         {:ok,
          %HTTPoison.Response{
            body:
-             "{\"promoCode\":\"TESTLM8WVE\",\"availableForUse\":true,\"numberOfRedemptions\":0,\"redemptionsPerCustomer\":1,\"promotionName\":\"singelPromo\",\"promotionAvailability\":{\"from\":\"2020-06-02T13:34:40+02:00\",\"to\":\"2049-12-31T01:00:00+01:00\"},\"promotionActive\":true,\"batchActive\":true,\"discounts\":[{\"id\":10218,\"name\":\"SingelDiscount desc\",\"description\":\"SingelDiscount\",\"friendReferred\":false}]}",
+             %{
+               "promoCode" => "TESTLM8WVE",
+               "availableForUse" => true,
+               "numberOfRedemptions" => 0,
+               "redemptionsPerCustomer" => 1,
+               "promotionName" => "singelPromo",
+               "promotionAvailability" => %{
+                 "from" => "2020-06-02T13:34:40+02:00",
+                 "to" => "2049-12-31T01:00:00+01:00"
+               },
+               "promotionActive" => true,
+               "batchActive" => true,
+               "discounts" => [
+                 %{
+                   "id" => 10218,
+                   "name" => "SingelDiscount desc",
+                   "description" => "SingelDiscount",
+                   "friendReferred" => false
+                 }
+               ]
+             }
+             |> Jason.encode!(),
            status_code: 200
          }}
       end)
 
-      assert {:ok,
-              %{
-                "availableForUse" => true,
-                "batchActive" => true,
-                "discounts" => [
-                  %{
-                    "description" => "SingelDiscount",
-                    "friendReferred" => false,
-                    "id" => 10218,
-                    "name" => "SingelDiscount desc"
-                  }
-                ],
-                "numberOfRedemptions" => 0,
-                "promoCode" => "TESTLM8WVE",
-                "promotionActive" => true,
-                "promotionAvailability" => %{
-                  "from" => "2020-06-02T13:34:40+02:00",
-                  "to" => "2049-12-31T01:00:00+01:00"
-                },
-                "promotionName" => "singelPromo",
-                "redemptionsPerCustomer" => 1
-              }} == Client.fetch_promocode_singleuse("TESTLM8WVE")
+      assert Client.fetch_single_use_promo_code("TESTLM8WVE") ==
+               {:ok,
+                %{
+                  "promoCode" => "TESTLM8WVE",
+                  "availableForUse" => true,
+                  "numberOfRedemptions" => 0,
+                  "redemptionsPerCustomer" => 1,
+                  "promotionName" => "singelPromo",
+                  "promotionAvailability" => %{
+                    "from" => "2020-06-02T13:34:40+02:00",
+                    "to" => "2049-12-31T01:00:00+01:00"
+                  },
+                  "promotionActive" => true,
+                  "batchActive" => true,
+                  "discounts" => [
+                    %{
+                      "id" => 10218,
+                      "name" => "SingelDiscount desc",
+                      "description" => "SingelDiscount",
+                      "friendReferred" => false
+                    }
+                  ]
+                }}
     end
 
-    test "fail when promocode not exists" do
+    test "fails when promo code does not exists" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/NON-EXISTING-CODE" ->
         {:ok,
          %HTTPoison.Response{
            body:
-             "{\"errorCode\":90123,\"userMessage\":\"Promo code not found\",\"developerMessage\":\"Error response from promocode service404\",\"moreInfo\":\"Documentation on this failure can be found in SwaggerHub (https:\\/\\/swagger.io\\/tools\\/swaggerhub\\/)\"}",
+             %{
+               "errorCode" => 90123,
+               "userMessage" => "Promo code not found",
+               "developerMessage" => "Error response from promocode service404",
+               "moreInfo" =>
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+             }
+             |> Jason.encode!(),
            status_code: 400
          }}
       end)
 
-      assert {:paywizard_error, :promocode_not_found} == Client.fetch_promocode_singleuse("NON-EXISTING-CODE")
+      assert Client.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:paywizard_error, :promo_code_not_found}
     end
   end
 end
