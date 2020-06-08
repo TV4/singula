@@ -117,62 +117,6 @@ defmodule Paywizard.Client do
     end
   end
 
-  defp items_pager(path_prefix, path, payload, acc \\ []) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <- http_client().post(path_prefix <> path, payload),
-         {:ok, data} <- Jason.decode(body) do
-      items = Map.get(data, "items", [])
-      acc = acc ++ items
-
-      case data do
-        %{"nextPageLink" => path} -> items_pager(path_prefix, path, payload, acc)
-        _ -> {:ok, PPV.new(acc)}
-      end
-    else
-      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
-        {:ok, %{"errorCode" => 500}} = Jason.decode(body)
-        {:paywizard_error, :customer_not_found}
-    end
-  end
-
-  defp item_data(meta_data) do
-    meta_data
-    |> Map.from_struct()
-    |> Enum.reduce(%{}, fn
-      {_, nil}, item_data ->
-        item_data
-
-      {:referrer, referrer}, item_data ->
-        Map.put(item_data, :referrerId, referrer)
-
-      {:asset, asset}, item_data ->
-        Map.merge(item_data, %{id: asset.id, name: asset.title})
-
-      _, item_data ->
-        item_data
-    end)
-  end
-
-  defp cart_items_with_discount(item_id, meta_data) do
-    %{items: [%{itemCode: item_id, itemData: item_data(meta_data)}]}
-    |> add_discount(meta_data.discount)
-  end
-
-  defp add_discount(cart_data, %Paywizard.Discount{} = discount) do
-    discount_code =
-      %{
-        discountId: discount.discount,
-        campaignCode: discount.campaign,
-        promoCode: discount.promotion,
-        sourceCode: discount.source
-      }
-      |> Enum.reject(fn {_key, value} -> is_nil(value) end)
-      |> Map.new()
-
-    Map.put(cart_data, :discountCode, discount_code)
-  end
-
-  defp add_discount(cart_data, nil), do: cart_data
-
   @callback create_cart_with_item(Customer.customer_id(), item_id :: binary, currency) ::
               {:ok, cart_id :: binary}
               | {:paywizard_error, :incorrect_item | :customer_not_found | :item_not_added_to_cart}
@@ -288,24 +232,6 @@ defmodule Paywizard.Client do
     create_payment_method(customer_id, digest)
   end
 
-  defp create_payment_method(customer_id, digest) do
-    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
-           http_client().post(
-             "/apis/payment-methods/v1/customer/#{customer_id}/paymentmethod",
-             digest
-           ) do
-      {:ok, %{"paymentMethodId" => payment_method_id}} = Jason.decode(body)
-      {:ok, payment_method_id}
-    else
-      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
-        Jason.decode(body)
-        |> case do
-          {:ok, %{"errorCode" => 90054}} -> {:paywizard_error, :receipt_not_found}
-          {:ok, %{"errorCode" => 90047}} -> {:paywizard_error, :transaction_not_found}
-        end
-    end
-  end
-
   @callback customer_cart_checkout(Customer.customer_id(), binary, integer) ::
               {:ok, CartDetail.t()} | {:paywizard_error, :cart_not_found | :payment_authorisation_fault}
   def customer_cart_checkout(customer_id, cart_id, payment_method_id) do
@@ -336,6 +262,80 @@ defmodule Paywizard.Client do
     else
       error ->
         raise "item_by_id_and_currency did not get an successful response. Error: #{inspect(error)}"
+    end
+  end
+
+  defp add_discount(cart_data, %Paywizard.Discount{} = discount) do
+    discount_code =
+      %{
+        discountId: discount.discount,
+        campaignCode: discount.campaign,
+        promoCode: discount.promotion,
+        sourceCode: discount.source
+      }
+      |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+      |> Map.new()
+
+    Map.put(cart_data, :discountCode, discount_code)
+  end
+
+  defp add_discount(cart_data, nil), do: cart_data
+
+  defp cart_items_with_discount(item_id, meta_data) do
+    %{items: [%{itemCode: item_id, itemData: item_data(meta_data)}]}
+    |> add_discount(meta_data.discount)
+  end
+
+  defp create_payment_method(customer_id, digest) do
+    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+           http_client().post(
+             "/apis/payment-methods/v1/customer/#{customer_id}/paymentmethod",
+             digest
+           ) do
+      {:ok, %{"paymentMethodId" => payment_method_id}} = Jason.decode(body)
+      {:ok, payment_method_id}
+    else
+      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+        Jason.decode(body)
+        |> case do
+          {:ok, %{"errorCode" => 90054}} -> {:paywizard_error, :receipt_not_found}
+          {:ok, %{"errorCode" => 90047}} -> {:paywizard_error, :transaction_not_found}
+        end
+    end
+  end
+
+  defp item_data(meta_data) do
+    meta_data
+    |> Map.from_struct()
+    |> Enum.reduce(%{}, fn
+      {_, nil}, item_data ->
+        item_data
+
+      {:referrer, referrer}, item_data ->
+        Map.put(item_data, :referrerId, referrer)
+
+      {:asset, asset}, item_data ->
+        Map.merge(item_data, %{id: asset.id, name: asset.title})
+
+      _, item_data ->
+        item_data
+    end)
+  end
+
+  defp items_pager(path_prefix, path, payload, acc \\ []) do
+    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <- http_client().post(path_prefix <> path, payload),
+         {:ok, data} <- Jason.decode(body) do
+      items = Map.get(data, "items", [])
+      acc = acc ++ items
+
+      case data do
+        %{"nextPageLink" => path} -> items_pager(path_prefix, path, payload, acc)
+        _ -> {:ok, PPV.new(acc)}
+      end
+    else
+      {:ok, %HTTPoison.Response{body: body, status_code: 500}} ->
+        {:ok, %{"errorCode" => 500}} = Jason.decode(body)
+        {:paywizard_error, :customer_not_found}
     end
   end
 
