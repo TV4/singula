@@ -149,7 +149,7 @@ defmodule SmokeTest.PaywizardClientApi do
                       quantity: 1,
                       trial: %Paywizard.CartDetail.Item.Trial{
                         first_payment_amount: "139.00",
-                        first_payment_date: ~D[2020-06-18],
+                        first_payment_date: Date.utc_today() |> Date.add(14),
                         free_trial: true
                       }
                     }
@@ -353,7 +353,7 @@ defmodule SmokeTest.PaywizardClientApi do
                    quantity: 1,
                    trial: %Paywizard.CartDetail.Item.Trial{
                      first_payment_amount: "139.00",
-                     first_payment_date: ~D[2020-06-18],
+                     first_payment_date: Date.utc_today() |> Date.add(14),
                      free_trial: true
                    }
                  }
