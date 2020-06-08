@@ -72,13 +72,17 @@ defmodule Paywizard.Client do
 
   @callback cancel_contract(Customer.customer_id(), Contract.contract_id()) :: {:ok, cancellation_date :: Date.t()}
   def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
-    {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
-      http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
-        "cancelDate" => cancel_date
-      })
-
-    {:ok, %{"cancellationDate" => cancellation_date}} = Jason.decode(body)
-    Date.from_iso8601(cancellation_date)
+    with {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
+           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
+             "cancelDate" => cancel_date
+           }) do
+      {:ok, %{"cancellationDate" => cancellation_date}} = Jason.decode(body)
+      Date.from_iso8601(cancellation_date)
+    else
+      {:ok, %HTTPoison.Response{body: body, status_code: 400}} ->
+        {:ok, %{"errorCode" => 90006}} = Jason.decode(body)
+        {:paywizard_error, :contract_cancellation_fault}
+    end
   end
 
   @callback withdraw_cancel_contract(Customer.customer_id(), Contract.contract_id()) ::

@@ -158,24 +158,53 @@ defmodule Paywizard.ClientTest do
               }}
   end
 
-  test "cancel contract" do
-    MockPaywizardHTTPClient
-    |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
-                        %{"cancelDate" => ""} ->
-      {:ok,
-       %HTTPoison.Response{
-         body:
-           %{"status" => "CUSTOMER_CANCELLED", "cancellationDate" => "2020-05-12"}
-           |> Jason.encode!(),
-         request: %HTTPoison.Request{
-           url:
-             "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel"
-         },
-         status_code: 200
-       }}
-    end)
+  describe "cancel contract" do
+    test "successfully" do
+      MockPaywizardHTTPClient
+      |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
+                          %{"cancelDate" => ""} ->
+        {:ok,
+         %HTTPoison.Response{
+           body:
+             %{"status" => "CUSTOMER_CANCELLED", "cancellationDate" => "2020-05-12"}
+             |> Jason.encode!(),
+           request: %HTTPoison.Request{
+             url:
+               "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel"
+           },
+           status_code: 200
+         }}
+      end)
 
-    assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
+      assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
+    end
+
+    test "when minimum term blocks cancellation" do
+      MockPaywizardHTTPClient
+      |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
+                          %{"cancelDate" => "2020-02-02"} ->
+        {:ok,
+         %HTTPoison.Response{
+           body:
+             %{
+               "developerMessage" => "Unable to cancel contract : 9622756",
+               "errorCode" => 90006,
+               "moreInfo" =>
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+               "userMessage" => "Failed to cancel contract"
+             }
+             |> Jason.encode!(),
+           request: %HTTPoison.Request{
+             url:
+               "https://bbr-paywizard-proxy.b17g-stage.net/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel"
+           },
+           status_code: 400
+         }}
+      end)
+
+      assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "2020-02-02") ==
+               {:paywizard_error, :contract_cancellation_fault}
+    end
   end
 
   describe "withdraw cancel contract" do
