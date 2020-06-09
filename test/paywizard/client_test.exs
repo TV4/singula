@@ -457,13 +457,13 @@ defmodule Paywizard.ClientTest do
                  discountCode: %{individualPromoCode: "SINGLE-HELLO"}
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{"rel" => "Get cart details", "href" => "/customer/customer_id/cart/10000", "type" => "application/json"}
-             |> Jason.encode!(),
-           status_code: 201
-         }}
+        data = %{
+          "rel" => "Get cart details",
+          "href" => "/customer/customer_id/cart/10000",
+          "type" => "application/json"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
