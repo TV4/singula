@@ -1,18 +1,33 @@
 defmodule Paywizard.Response do
-  defstruct [:body, :status_code]
+  defstruct [:body, :json, :status_code]
 
-  @type t :: %__MODULE__{body: binary, status_code: integer}
+  @type t :: %__MODULE__{body: binary, json: nil | map | list, status_code: integer}
+end
+
+defmodule Paywizard.Error do
+  defstruct [:message]
+
+  @type t :: %__MODULE__{message: any}
 end
 
 defmodule Paywizard.HTTPClient do
   require Logger
 
-  # defp translate_response({:error, %HTTPoison.Error{reason: message}}) do
-  #   %Paywizard.Error{message: message}
-  # end
+  defp translate_response({:error, %HTTPoison.Error{reason: message}}) do
+    {:error, %Paywizard.Error{message: message}}
+  end
 
-  defp translate_response({:ok, %HTTPoison.Response{body: body, status_code: status_code}}) do
-    {:ok, %Paywizard.Response{body: body, status_code: status_code}}
+  defp translate_response({:ok, %HTTPoison.Response{body: body, headers: headers, status_code: status_code}}) do
+    response = %Paywizard.Response{body: body, status_code: status_code}
+
+    response =
+      Enum.find(headers, fn {key, _value} -> String.downcase(key) == "content-type" end)
+      |> case do
+        nil -> response
+        {_, "application/json"} -> %Paywizard.Response{response | json: Jason.decode!(body)}
+      end
+
+    {:ok, response}
   end
 
   @callback get(binary) :: {:ok, Paywizard.Response.t()} | {:error, %HTTPoison.Error{}}
@@ -69,5 +84,5 @@ defmodule Paywizard.HTTPClient do
   end
 
   defp paywizard_url(path), do: Application.get_env(:paywizard, :base_url) <> path
-  defp timeout, do: Application.get_env(:paywizard, :timeout_ms)
+  defp timeout, do: Application.get_env(:paywizard, :timeout_ms, 10000)
 end
