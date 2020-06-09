@@ -422,12 +422,12 @@ defmodule Paywizard.ClientTest do
              }) == {:ok, "10000"}
     end
 
-    test "with voucher discount" do
+    test "with multi-use voucher discount" do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
-                 discountCode: %{promoCode: "HELLO", campaignCode: "NETONNET", sourceCode: "PARTNER"}
+                 discountCode: %{promoCode: "MULTI_HELLO", campaignCode: "NETONNET", sourceCode: "PARTNER"}
                }
 
         data = %{
@@ -440,7 +440,37 @@ defmodule Paywizard.ClientTest do
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
-               discount: %Paywizard.Discount{promotion: "HELLO", campaign: "NETONNET", source: "PARTNER"}
+               discount: %Paywizard.Discount{
+                 is_single_use: false,
+                 promotion: "MULTI_HELLO",
+                 campaign: "NETONNET",
+                 source: "PARTNER"
+               }
+             }) == {:ok, "10000"}
+    end
+
+    test "with signle-use voucher discount" do
+      MockPaywizardHTTPClient
+      |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
+        assert data == %{
+                 items: [%{itemCode: "item_id", itemData: %{}}],
+                 discountCode: %{individualPromoCode: "SINGLE-HELLO"}
+               }
+
+        {:ok,
+         %Paywizard.Response{
+           body:
+             %{"rel" => "Get cart details", "href" => "/customer/customer_id/cart/10000", "type" => "application/json"}
+             |> Jason.encode!(),
+           status_code: 201
+         }}
+      end)
+
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
+               discount: %Paywizard.Discount{
+                 is_single_use: true,
+                 promotion: "SINGLE-HELLO"
+               }
              }) == {:ok, "10000"}
     end
 

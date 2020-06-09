@@ -238,25 +238,32 @@ defmodule Paywizard.Client do
     end
   end
 
-  defp add_discount(cart_data, %Paywizard.Discount{} = discount) do
-    discount_code =
-      %{
-        discountId: discount.discount,
-        campaignCode: discount.campaign,
-        promoCode: discount.promotion,
-        sourceCode: discount.source
-      }
-      |> Enum.reject(fn {_key, value} -> is_nil(value) end)
-      |> Map.new()
+  defp cart_items_with_discount(item_id, meta_data) do
+    %{items: [%{itemCode: item_id, itemData: item_data(meta_data)}]}
+    |> add_discount(meta_data.discount)
+  end
 
-    Map.put(cart_data, :discountCode, discount_code)
+  defp add_discount(cart_data, %Paywizard.Discount{} = discount) do
+    Map.put(cart_data, :discountCode, discount_code(discount))
   end
 
   defp add_discount(cart_data, nil), do: cart_data
 
-  defp cart_items_with_discount(item_id, meta_data) do
-    %{items: [%{itemCode: item_id, itemData: item_data(meta_data)}]}
-    |> add_discount(meta_data.discount)
+  defp discount_code(%Paywizard.Discount{is_single_use: true} = discount) do
+    %{
+      individualPromoCode: discount.promotion
+    }
+  end
+
+  defp discount_code(%Paywizard.Discount{} = discount) do
+    %{
+      discountId: discount.discount,
+      campaignCode: discount.campaign,
+      promoCode: discount.promotion,
+      sourceCode: discount.source
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Map.new()
   end
 
   defp create_payment_method(customer_id, digest) do
