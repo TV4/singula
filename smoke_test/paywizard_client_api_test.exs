@@ -186,15 +186,15 @@ defmodule SmokeTest.PaywizardClientApi do
     end
 
     test "unhandled error for invalid cart id ", %{customer_id: customer_id} do
-      {:ok, %Response{body: body, status_code: 500}} =
+      {:ok, %Response{json: data, status_code: 500}} =
         HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/non-numeric-cart")
 
-      assert Jason.decode!(body) == %{
-               "developerMessage" => "java.lang.NumberFormatException: For input string: \"non-numeric-cart\"",
+      assert data == %{
                "errorCode" => 500,
+               "userMessage" => "System Failure - please retry later.",
+               "developerMessage" => "java.lang.NumberFormatException: For input string: \"non-numeric-cart\"",
                "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "System Failure - please retry later."
+                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
              }
 
       assert Paywizard.Client.fetch_cart(customer_id, "non-numeric-cart") == {:paywizard_error, :customer_not_found}
@@ -511,13 +511,8 @@ defmodule SmokeTest.PaywizardClientApi do
       {:ok, %Response{status_code: 200}} ->
         Logger.info("Deleted smoke test user: #{customer_id}")
 
-      {:ok,
-       %Paywizard.Response{
-         body:
-           "{\"errorCode\":4644,\"developerMessage\":\"Contact has active subscription or is in credit control cycle\",\"moreInfo\":\"Documentation on this failure can be found in SwaggerHub (https:\\/\\/swagger.io\\/tools\\/swaggerhub\\/)\"}",
-         status_code: 400
-       }} ->
-        Logger.warn("Failed deleting smoke test user, retrying…")
+      {:ok, %Paywizard.Response{json: %{"developerMessage" => reason, "errorCode" => 4644}, status_code: 400}} ->
+        Logger.warn("Failed deleting smoke test user, retrying: #{reason}")
         :timer.sleep(1000)
         cancel_contracts(customer_id)
     end
@@ -579,9 +574,8 @@ defmodule SmokeTest.PaywizardClientApi do
   end
 
   defp get_post_body(path, data) do
-    {:ok, %Response{body: body}} = HTTPClient.post(path, data)
-    {:ok, data} = Jason.decode(body)
-    data
+    {:ok, %Response{json: payload}} = HTTPClient.post(path, data)
+    payload
   end
 
   defp save_in_test_context(key, value) do

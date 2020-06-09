@@ -10,39 +10,35 @@ defmodule Paywizard.ClientTest do
     test "succeeds" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/customers/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "active" => true,
-               "addresses" => [
-                 %{
-                   "addressType" => "HOME",
-                   "countryCode" => "SWE",
-                   "line1" => "Address Line 1",
-                   "postCode" => "Postcode"
-                 }
-               ],
-               "auditInfo" => %{
-                 "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
-                 "creationDate" => "2020-03-22T07:19:21+01:00",
-                 "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
-                 "modifiedDate" => "2020-03-22T07:19:21+01:00"
-               },
-               "customAttributes" => [%{"name" => "accepted_cmore_terms", "value" => "2018-09-25"}],
-               "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
-               "email" => "paywizard_purchase_test2@cmore.se",
-               "externalUniqueIdentifier" => 100_471_887,
-               "firstName" => "Paywizard_purchase_test2@cmore.se",
-               "lastName" => "Paywizard_purchase_test2@cmore.se",
-               "phone" => 0,
-               "referAFriend" => %{"active" => false, "code" => "PIh70mZL"},
-               "title" => "-",
-               "username" => "paywizard_purchase_test2@cmore.se"
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "active" => true,
+          "addresses" => [
+            %{
+              "addressType" => "HOME",
+              "countryCode" => "SWE",
+              "line1" => "Address Line 1",
+              "postCode" => "Postcode"
+            }
+          ],
+          "auditInfo" => %{
+            "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "creationDate" => "2020-03-22T07:19:21+01:00",
+            "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "modifiedDate" => "2020-03-22T07:19:21+01:00"
+          },
+          "customAttributes" => [%{"name" => "accepted_cmore_terms", "value" => "2018-09-25"}],
+          "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
+          "email" => "paywizard_purchase_test2@cmore.se",
+          "externalUniqueIdentifier" => 100_471_887,
+          "firstName" => "Paywizard_purchase_test2@cmore.se",
+          "lastName" => "Paywizard_purchase_test2@cmore.se",
+          "phone" => 0,
+          "referAFriend" => %{"active" => false, "code" => "PIh70mZL"},
+          "title" => "-",
+          "username" => "paywizard_purchase_test2@cmore.se"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
@@ -64,19 +60,15 @@ defmodule Paywizard.ClientTest do
     test "when customer not found" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/customers/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "developerMessage" => "Customer 27dc778b-582e-4551-88c6-43806128a1a0 not located",
-               "errorCode" => 90068,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "Customer cannot be located"
-             }
-             |> Jason.encode!(),
-           status_code: 404
-         }}
+        data = %{
+          "developerMessage" => "Customer 27dc778b-582e-4551-88c6-43806128a1a0 not located",
+          "errorCode" => 90068,
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+          "userMessage" => "Customer cannot be located"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
       assert Client.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") == {:paywizard_error, :customer_not_found}
@@ -87,39 +79,35 @@ defmodule Paywizard.ClientTest do
     test "with an existing external customer id" do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => "100471887"} ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "active" => true,
-               "addresses" => [
-                 %{
-                   "addressType" => "HOME",
-                   "countryCode" => "SWE",
-                   "line1" => "Address Line 1",
-                   "postCode" => "Postcode"
-                 }
-               ],
-               "auditInfo" => %{
-                 "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
-                 "creationDate" => "2020-03-22T07:19:21+01:00",
-                 "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
-                 "modifiedDate" => "2020-03-22T07:19:21+01:00"
-               },
-               "customAttributes" => [%{"name" => "accepted_cmore_terms", "value" => "2018-09-25"}],
-               "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
-               "email" => "paywizard_purchase_test2@cmore.se",
-               "externalUniqueIdentifier" => 100_471_887,
-               "firstName" => "Paywizard_purchase_test2@cmore.se",
-               "lastName" => "Paywizard_purchase_test2@cmore.se",
-               "phone" => 0,
-               "referAFriend" => %{"active" => false, "code" => "PIh70mZL"},
-               "title" => "-",
-               "username" => "paywizard_purchase_test2@cmore.se"
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "active" => true,
+          "addresses" => [
+            %{
+              "addressType" => "HOME",
+              "countryCode" => "SWE",
+              "line1" => "Address Line 1",
+              "postCode" => "Postcode"
+            }
+          ],
+          "auditInfo" => %{
+            "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "creationDate" => "2020-03-22T07:19:21+01:00",
+            "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "modifiedDate" => "2020-03-22T07:19:21+01:00"
+          },
+          "customAttributes" => [%{"name" => "accepted_cmore_terms", "value" => "2018-09-25"}],
+          "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
+          "email" => "paywizard_purchase_test2@cmore.se",
+          "externalUniqueIdentifier" => 100_471_887,
+          "firstName" => "Paywizard_purchase_test2@cmore.se",
+          "lastName" => "Paywizard_purchase_test2@cmore.se",
+          "phone" => 0,
+          "referAFriend" => %{"active" => false, "code" => "PIh70mZL"},
+          "title" => "-",
+          "username" => "paywizard_purchase_test2@cmore.se"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_search("100471887") ==
@@ -141,19 +129,15 @@ defmodule Paywizard.ClientTest do
     test "with an incorrect external customer id" do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => "666"} ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90068,
-               "userMessage" => "Customer cannot be located",
-               "developerMessage" => "Customer with external ID 666 not located",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 404
-         }}
+        data = %{
+          "errorCode" => 90068,
+          "userMessage" => "Customer cannot be located",
+          "developerMessage" => "Customer with external ID 666 not located",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
       assert Client.customer_search("666") == {:paywizard_error, :customer_not_found}
@@ -164,31 +148,27 @@ defmodule Paywizard.ClientTest do
     test "succeeds" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "contractCount" => 1,
-               "contracts" => [
-                 %{
-                   "active" => true,
-                   "contractId" => 9_719_738,
-                   "orderId" => 112_233,
-                   "itemCode" => "6D3A56FF5065478ABD61",
-                   "link" => %{
-                     "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
-                     "rel" => "Get contract details",
-                     "type" => "application/json"
-                   },
-                   "name" => "C More TV4",
-                   "startDate" => "2020-04-20",
-                   "status" => "ACTIVE"
-                 }
-               ]
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "contractCount" => 1,
+          "contracts" => [
+            %{
+              "active" => true,
+              "contractId" => 9_719_738,
+              "orderId" => 112_233,
+              "itemCode" => "6D3A56FF5065478ABD61",
+              "link" => %{
+                "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
+                "rel" => "Get contract details",
+                "type" => "application/json"
+              },
+              "name" => "C More TV4",
+              "startDate" => "2020-04-20",
+              "status" => "ACTIVE"
+            }
+          ]
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
@@ -207,20 +187,15 @@ defmodule Paywizard.ClientTest do
     test "fails" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
@@ -232,38 +207,34 @@ defmodule Paywizard.ClientTest do
     test "succeeds" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "active" => true,
-               "auditInfo" => %{
-                 "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
-                 "creationDate" => "2020-04-22T21:12:29+02:00",
-                 "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
-                 "modifiedDate" => "2020-04-22T21:12:29+02:00"
-               },
-               "balance" => %{"amount" => "-399.00", "currency" => "SEK"},
-               "billing" => %{
-                 "frequency" => %{"frequency" => "MONTH", "length" => 24},
-                 "initial" => %{"amount" => "0.00", "currency" => "SEK"},
-                 "recurring" => %{"amount" => "399.00", "currency" => "SEK"}
-               },
-               "contractId" => 9_622_082,
-               "entitlements" => [%{"id" => 5963, "name" => "C More All Sport"}],
-               "itemCode" => "4FC7D926073348038362",
-               "lastPaymentDate" => "2020-04-22",
-               "minimumTerm" => %{"frequency" => "MONTH", "length" => 24},
-               "name" => "Field Sales - All Sport 12 plus 12",
-               "nextPaymentDate" => "2020-04-22",
-               "paidUpToDate" => "2020-04-22",
-               "paymentMethodId" => 3_070_939,
-               "startDate" => "2020-04-22",
-               "status" => "ACTIVE"
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "active" => true,
+          "auditInfo" => %{
+            "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "creationDate" => "2020-04-22T21:12:29+02:00",
+            "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "modifiedDate" => "2020-04-22T21:12:29+02:00"
+          },
+          "balance" => %{"amount" => "-399.00", "currency" => "SEK"},
+          "billing" => %{
+            "frequency" => %{"frequency" => "MONTH", "length" => 24},
+            "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+            "recurring" => %{"amount" => "399.00", "currency" => "SEK"}
+          },
+          "contractId" => 9_622_082,
+          "entitlements" => [%{"id" => 5963, "name" => "C More All Sport"}],
+          "itemCode" => "4FC7D926073348038362",
+          "lastPaymentDate" => "2020-04-22",
+          "minimumTerm" => %{"frequency" => "MONTH", "length" => 24},
+          "name" => "Field Sales - All Sport 12 plus 12",
+          "nextPaymentDate" => "2020-04-22",
+          "paidUpToDate" => "2020-04-22",
+          "paymentMethodId" => 3_070_939,
+          "startDate" => "2020-04-22",
+          "status" => "ACTIVE"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
@@ -284,20 +255,15 @@ defmodule Paywizard.ClientTest do
     test "causes system failure" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
@@ -310,13 +276,9 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
                           %{"cancelDate" => ""} ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{"status" => "CUSTOMER_CANCELLED", "cancellationDate" => "2020-05-12"}
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{"status" => "CUSTOMER_CANCELLED", "cancellationDate" => "2020-05-12"}
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
@@ -326,19 +288,15 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
                           %{"cancelDate" => "2020-02-02"} ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "developerMessage" => "Unable to cancel contract : 9622756",
-               "errorCode" => 90006,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "Failed to cancel contract"
-             }
-             |> Jason.encode!(),
-           status_code: 400
-         }}
+        data = %{
+          "developerMessage" => "Unable to cancel contract : 9622756",
+          "errorCode" => 90006,
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+          "userMessage" => "Failed to cancel contract"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "2020-02-02") ==
@@ -352,17 +310,13 @@ defmodule Paywizard.ClientTest do
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
-          {:ok,
-           %Paywizard.Response{
-             body:
-               %{
-                 "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
-                 "rel" => "Get contract details",
-                 "type" => "application/json"
-               }
-               |> Jason.encode!(),
-             status_code: 200
-           }}
+          data = %{
+            "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
+            "rel" => "Get contract details",
+            "type" => "application/json"
+          }
+
+          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
         end
       )
 
@@ -374,19 +328,15 @@ defmodule Paywizard.ClientTest do
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
-          {:ok,
-           %Paywizard.Response{
-             body:
-               %{
-                 "errorCode" => 90017,
-                 "userMessage" => "Contract cannot be changed at this time",
-                 "developerMessage" => "Contract cannot be cancelled at this time",
-                 "moreInfo" =>
-                   "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-               }
-               |> Jason.encode!(),
-             status_code: 400
-           }}
+          data = %{
+            "errorCode" => 90017,
+            "userMessage" => "Contract cannot be changed at this time",
+            "developerMessage" => "Contract cannot be cancelled at this time",
+            "moreInfo" =>
+              "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+          }
+
+          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
         end
       )
 
@@ -401,13 +351,13 @@ defmodule Paywizard.ClientTest do
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{}}]}
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{"rel" => "Get cart details", "href" => "/customer/customer_id/cart/10000", "type" => "application/json"}
-             |> Jason.encode!(),
-           status_code: 201
-         }}
+        data = %{
+          "rel" => "Get cart details",
+          "href" => "/customer/customer_id/cart/10000",
+          "type" => "application/json"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency") == {:ok, "10000"}
@@ -418,13 +368,13 @@ defmodule Paywizard.ClientTest do
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{id: "654321", name: "Sportsboll"}}]}
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{"rel" => "Get cart details", "href" => "/customer/customer_id/cart/10000", "type" => "application/json"}
-             |> Jason.encode!(),
-           status_code: 201
-         }}
+        data = %{
+          "rel" => "Get cart details",
+          "href" => "/customer/customer_id/cart/10000",
+          "type" => "application/json"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
@@ -437,13 +387,13 @@ defmodule Paywizard.ClientTest do
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{referrerId: "A003_FS"}}]}
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{"rel" => "Get cart details", "href" => "/customer/customer_id/cart/10000", "type" => "application/json"}
-             |> Jason.encode!(),
-           status_code: 201
-         }}
+        data = %{
+          "rel" => "Get cart details",
+          "href" => "/customer/customer_id/cart/10000",
+          "type" => "application/json"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{referrer: "A003_FS"}) ==
@@ -458,13 +408,13 @@ defmodule Paywizard.ClientTest do
                  discountCode: %{discountId: "10097", promoCode: "NONE", campaignCode: "NONE", sourceCode: "NONE"}
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{"rel" => "Get cart details", "href" => "/customer/customer_id/cart/10000", "type" => "application/json"}
-             |> Jason.encode!(),
-           status_code: 201
-         }}
+        data = %{
+          "rel" => "Get cart details",
+          "href" => "/customer/customer_id/cart/10000",
+          "type" => "application/json"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
@@ -480,13 +430,13 @@ defmodule Paywizard.ClientTest do
                  discountCode: %{promoCode: "HELLO", campaignCode: "NETONNET", sourceCode: "PARTNER"}
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{"rel" => "Get cart details", "href" => "/customer/customer_id/cart/10000", "type" => "application/json"}
-             |> Jason.encode!(),
-           status_code: 201
-         }}
+        data = %{
+          "rel" => "Get cart details",
+          "href" => "/customer/customer_id/cart/10000",
+          "type" => "application/json"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
@@ -501,20 +451,15 @@ defmodule Paywizard.ClientTest do
                  items: [%{itemCode: "item_id", itemData: %{}}]
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency") ==
@@ -529,19 +474,15 @@ defmodule Paywizard.ClientTest do
                  discountCode: %{discountId: "10097", promoCode: "NONE", campaignCode: "NONE", sourceCode: "NONE"}
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90115,
-               "developerMessage" => "Discount criteria not matched",
-               "userMessage" => "Discount criteria not matched",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 400
-         }}
+        data = %{
+          "errorCode" => 90115,
+          "developerMessage" => "Discount criteria not matched",
+          "userMessage" => "Discount criteria not matched",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
@@ -561,19 +502,15 @@ defmodule Paywizard.ClientTest do
                  }
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90022,
-               "userMessage" => "Discount does not exist",
-               "developerMessage" => "Invalid discount code for cart",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 404
-         }}
+        data = %{
+          "errorCode" => 90022,
+          "userMessage" => "Discount does not exist",
+          "developerMessage" => "Invalid discount code for cart",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
@@ -592,19 +529,15 @@ defmodule Paywizard.ClientTest do
                  items: [%{itemCode: "item_id", itemData: %{}}]
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "developerMessage" => "Unable to add sales item with code: null",
-               "errorCode" => 90062,
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-               "userMessage" => "Items could not be added"
-             }
-             |> Jason.encode!(),
-           status_code: 400
-         }}
+        data = %{
+          "developerMessage" => "Unable to add sales item with code: null",
+          "errorCode" => 90062,
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+          "userMessage" => "Items could not be added"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency") ==
@@ -618,19 +551,15 @@ defmodule Paywizard.ClientTest do
                  items: [%{itemCode: "item_id", itemData: %{}}]
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90069,
-               "userMessage" => "No item could be found with the given code",
-               "developerMessage" => "Unable to find sales item with code: item_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 404
-         }}
+        data = %{
+          "errorCode" => 90069,
+          "userMessage" => "No item could be found with the given code",
+          "developerMessage" => "Unable to find sales item with code: item_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency") == {:paywizard_error, :incorrect_item}
@@ -641,12 +570,22 @@ defmodule Paywizard.ClientTest do
     test "succeeds" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             "{\"id\":121765,\"totalCost\":{\"amount\":\"449.00\",\"currency\":\"SEK\"},\"items\":[{\"itemCode\":\"4151C241C3DD41529A87\",\"itemData\":\"\",\"itemName\":\"C More All Sport\",\"quantity\":1,\"cost\":{\"amount\":\"449.00\",\"currency\":\"SEK\"}}],\"discountCode\":{\"campaignCode\":\"NONE\",\"sourceCode\":\"NONE\",\"promoCode\":\"NONE\"}}",
-           status_code: 200
-         }}
+        data = %{
+          "id" => 121_765,
+          "totalCost" => %{"amount" => "449.00", "currency" => "SEK"},
+          "discountCode" => %{"campaignCode" => "NONE", "promoCode" => "NONE", "sourceCode" => "NONE"},
+          "items" => [
+            %{
+              "itemCode" => "4151C241C3DD41529A87",
+              "itemData" => "",
+              "itemName" => "C More All Sport",
+              "quantity" => 1,
+              "cost" => %{"amount" => "449.00", "currency" => "SEK"}
+            }
+          ]
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_cart("customer_id", "121765") ==
@@ -669,19 +608,15 @@ defmodule Paywizard.ClientTest do
     test "when cart not found" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90040,
-               "userMessage" => "Cart ID provided is incorrect or does not exist",
-               "developerMessage" => "Unable to get cart 121765 for customer customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 404
-         }}
+        data = %{
+          "errorCode" => 90040,
+          "userMessage" => "Cart ID provided is incorrect or does not exist",
+          "developerMessage" => "Unable to get cart 121765 for customer customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
       assert Client.fetch_cart("customer_id", "121765") == {:paywizard_error, :cart_not_found}
@@ -690,20 +625,15 @@ defmodule Paywizard.ClientTest do
     test "causing system failure" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.fetch_cart("customer_id", "121765") == {:paywizard_error, :customer_not_found}
@@ -714,41 +644,37 @@ defmodule Paywizard.ClientTest do
     test "succeeds" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/item_id/discounts?currency=currency" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "discounts" => [
-                 %{
-                   "description" => "3 occurrences 100% off",
-                   "discountType" => "PERCENTAGE",
-                   "id" => 10116,
-                   "indefinite" => false,
-                   "name" => "3 occurrences 100% off",
-                   "occurrences" => 3,
-                   "referAFriendCodeRequired" => false,
-                   "value" => %{"percentage" => 100}
-                 },
-                 %{
-                   "description" => "Test gated",
-                   "discountType" => "PERCENTAGE",
-                   "id" => 10125,
-                   "indefinite" => true,
-                   "linkedCombos" => [
-                     %{"campaign" => "NONE", "promotion" => "PROMO4", "source" => "NONE"},
-                     %{"campaign" => "TESTWITHCAMPAIGN", "promotion" => "PROMO1", "source" => "TESTWITHSOURCE"},
-                     %{"campaign" => "TESTWITHCAMPAIGNONLY", "promotion" => "PROMO3", "source" => "NONE"},
-                     %{"campaign" => "NONE", "promotion" => "PROMO2", "source" => "TESTWITHSOURCEONLY"}
-                   ],
-                   "name" => "TestGatedDiscount50%Off",
-                   "referAFriendCodeRequired" => false,
-                   "value" => %{"percentage" => 50}
-                 }
-               ]
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "discounts" => [
+            %{
+              "description" => "3 occurrences 100% off",
+              "discountType" => "PERCENTAGE",
+              "id" => 10116,
+              "indefinite" => false,
+              "name" => "3 occurrences 100% off",
+              "occurrences" => 3,
+              "referAFriendCodeRequired" => false,
+              "value" => %{"percentage" => 100}
+            },
+            %{
+              "description" => "Test gated",
+              "discountType" => "PERCENTAGE",
+              "id" => 10125,
+              "indefinite" => true,
+              "linkedCombos" => [
+                %{"campaign" => "NONE", "promotion" => "PROMO4", "source" => "NONE"},
+                %{"campaign" => "TESTWITHCAMPAIGN", "promotion" => "PROMO1", "source" => "TESTWITHSOURCE"},
+                %{"campaign" => "TESTWITHCAMPAIGNONLY", "promotion" => "PROMO3", "source" => "NONE"},
+                %{"campaign" => "NONE", "promotion" => "PROMO2", "source" => "TESTWITHSOURCEONLY"}
+              ],
+              "name" => "TestGatedDiscount50%Off",
+              "referAFriendCodeRequired" => false,
+              "value" => %{"percentage" => 50}
+            }
+          ]
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_item_discounts("item_id", "currency") ==
@@ -785,7 +711,8 @@ defmodule Paywizard.ClientTest do
     test "for item without discounts" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/item_id/discounts?currency=currency" ->
-        {:ok, %Paywizard.Response{body: "{\"discounts\":[]}", status_code: 200}}
+        data = %{"discounts" => []}
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_item_discounts("item_id", "currency") == {:ok, []}
@@ -810,19 +737,15 @@ defmodule Paywizard.ClientTest do
                  "uuid" => "30f86e79-ed75-4022-a16e-d55d9f09af8d"
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "type" => "redirect",
-               "transactionId" => "mrngn-fiX9MEbB4S0",
-               "redirectURL" =>
-                 "<form action=\"https:\/\/securedt.dibspayment.com\/verify\/bin\/cmoretest\/index\" method = \"POST\"><input type=\"hidden\" name=\"referenceNo\" value=\"mrngn-fiX9MEbB4S0-27674\"\/><input type=\"text\" name=\"billingAddress\" value=\"Address Line 1\"\/><input type=\"text\" name=\"billingCity\" value=\"Stockholm\"\/><input type=\"text\" name=\"billingCountry\" value=\"SE\"\/><input type=\"text\" name=\"billingFirstName\" value=\"Forename\"\/><input type=\"text\" name=\"billingLastName\" value=\"TV4 Media SmokeTest\"\/><input type=\"text\" name=\"currency\" value=\"SEK\"\/><input type=\"text\" name=\"data\" value=\"1:REGISTER_CARD:1:100:\"\/><input type=\"text\" name=\"eMail\" value=\"user@host.com\"\/><input type=\"text\" name=\"MAC\" value=\"D18242FF449D6A674622392AE34256F291B43ED6\"\/><input type=\"text\" name=\"pageSet\" value=\"cmore-payment-window-2-0\"\/><input type=\"text\" name=\"customReturnUrl\" value=\"https:\/\/www.google.se\"\/><input type=\"text\" name=\"method\" value=\"cc.test\"\/><input type=\"text\" name=\"authOnly\" value=\"true\"\/><button type=\"submit\">Submit<\/button><\/form>",
-               "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b"
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "type" => "redirect",
+          "transactionId" => "mrngn-fiX9MEbB4S0",
+          "redirectURL" =>
+            "<form action=\"https:\/\/securedt.dibspayment.com\/verify\/bin\/cmoretest\/index\" method = \"POST\"><input type=\"hidden\" name=\"referenceNo\" value=\"mrngn-fiX9MEbB4S0-27674\"\/><input type=\"text\" name=\"billingAddress\" value=\"Address Line 1\"\/><input type=\"text\" name=\"billingCity\" value=\"Stockholm\"\/><input type=\"text\" name=\"billingCountry\" value=\"SE\"\/><input type=\"text\" name=\"billingFirstName\" value=\"Forename\"\/><input type=\"text\" name=\"billingLastName\" value=\"TV4 Media SmokeTest\"\/><input type=\"text\" name=\"currency\" value=\"SEK\"\/><input type=\"text\" name=\"data\" value=\"1:REGISTER_CARD:1:100:\"\/><input type=\"text\" name=\"eMail\" value=\"user@host.com\"\/><input type=\"text\" name=\"MAC\" value=\"D18242FF449D6A674622392AE34256F291B43ED6\"\/><input type=\"text\" name=\"pageSet\" value=\"cmore-payment-window-2-0\"\/><input type=\"text\" name=\"customReturnUrl\" value=\"https:\/\/www.google.se\"\/><input type=\"text\" name=\"method\" value=\"cc.test\"\/><input type=\"text\" name=\"authOnly\" value=\"true\"\/><button type=\"submit\">Submit<\/button><\/form>",
+          "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       redirect_data = %{
@@ -846,20 +769,15 @@ defmodule Paywizard.ClientTest do
     test "causes system failure" do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect", _data ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_redirect_dibs("non_existing_customer_id", :SEK, %{}) ==
@@ -892,19 +810,15 @@ defmodule Paywizard.ClientTest do
                  "uuid" => "30f86e79-ed75-4022-a16e-d55d9f09af8d"
                }
 
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "type" => "klarnaSession",
-               "transactionId" => "2m56mfCGyV7VWh96k",
-               "sessionId" => "22aa3f2a-ca55-19a6-8790-540a527fc877",
-               "clientToken" => "eyJhbGciOiJSUzI1NiIs",
-               "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b"
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "type" => "klarnaSession",
+          "transactionId" => "2m56mfCGyV7VWh96k",
+          "sessionId" => "22aa3f2a-ca55-19a6-8790-540a527fc877",
+          "clientToken" => "eyJhbGciOiJSUzI1NiIs",
+          "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       redirect_data = %{
@@ -935,20 +849,15 @@ defmodule Paywizard.ClientTest do
     test "causes system failure" do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/redirect", _data ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, %{}) ==
@@ -993,7 +902,8 @@ defmodule Paywizard.ClientTest do
                  "uuid" => "30f86e79-ed75-4022-a16e-d55d9f09af8d"
                }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(%{paymentMethodId: 26574}), status_code: 200}}
+        data = %{"paymentMethodId" => 26574}
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
@@ -1004,19 +914,15 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90047,
-               "developerMessage" => "Token not generated",
-               "userMessage" => "Payment method creation failure",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 400
-         }}
+        data = %{
+          "errorCode" => 90047,
+          "developerMessage" => "Token not generated",
+          "userMessage" => "Payment method creation failure",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
@@ -1027,19 +933,15 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90054,
-               "userMessage" => "Payment provider cannot complete transaction",
-               "developerMessage" => "Authorisation failed",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 400
-         }}
+        data = %{
+          "errorCode" => 90054,
+          "userMessage" => "Payment provider cannot complete transaction",
+          "developerMessage" => "Authorisation failed",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
@@ -1071,7 +973,8 @@ defmodule Paywizard.ClientTest do
                  "uuid" => "30f86e79-ed75-4022-a16e-d55d9f09af8d"
                }
 
-        {:ok, %Paywizard.Response{status_code: 200, body: %{"paymentMethodId" => 654_321} |> Jason.encode!()}}
+        data = %{"paymentMethodId" => 654_321}
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       payment_method = %Paywizard.KlarnaPaymentMethod{
@@ -1100,37 +1003,33 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
-        {:ok,
-         %Paywizard.Response{
-           status_code: 200,
-           body:
-             %{
-               "orderId" => "order_id_123",
-               "contractDetails" => %{
-                 "contractId" => 18978,
-                 "itemCode" => "6D3A56FF5065478ABD61",
-                 "itemName" => "C More TV4",
-                 "status" => "ACTIVE"
-               },
-               "items" => [
-                 %{
-                   "cost" => %{"amount" => "0.00", "currency" => "SEK"},
-                   "freeTrial" => %{
-                     "applied" => true,
-                     "firstPaymentAmount" => %{"amount" => "139.00", "currency" => "SEK"},
-                     "firstPaymentDate" => "2020-04-05T00:00:00+02:00",
-                     "numberOfDays" => 14
-                   },
-                   "itemCode" => "6D3A56FF5065478ABD61",
-                   "itemData" => "",
-                   "itemName" => "C More TV4",
-                   "quantity" => 1
-                 }
-               ],
-               "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
-             }
-             |> Jason.encode!()
-         }}
+        data = %{
+          "orderId" => "order_id_123",
+          "contractDetails" => %{
+            "contractId" => 18978,
+            "itemCode" => "6D3A56FF5065478ABD61",
+            "itemName" => "C More TV4",
+            "status" => "ACTIVE"
+          },
+          "items" => [
+            %{
+              "cost" => %{"amount" => "0.00", "currency" => "SEK"},
+              "freeTrial" => %{
+                "applied" => true,
+                "firstPaymentAmount" => %{"amount" => "139.00", "currency" => "SEK"},
+                "firstPaymentDate" => "2020-04-05T00:00:00+02:00",
+                "numberOfDays" => 14
+              },
+              "itemCode" => "6D3A56FF5065478ABD61",
+              "itemData" => "",
+              "itemName" => "C More TV4",
+              "quantity" => 1
+            }
+          ],
+          "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1160,26 +1059,22 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
-        {:ok,
-         %Paywizard.Response{
-           status_code: 200,
-           body:
-             %{
-               "discountCode" => %{"campaignCode" => "NONE", "promoCode" => "NONE", "sourceCode" => "NONE"},
-               "id" => 119_469,
-               "items" => [
-                 %{
-                   "cost" => %{"amount" => "449.00", "currency" => "SEK"},
-                   "itemCode" => "4151C241C3DD41529A87",
-                   "itemData" => "",
-                   "itemName" => "C More All Sport",
-                   "quantity" => 1
-                 }
-               ],
-               "totalCost" => %{"amount" => "449.00", "currency" => "SEK"}
-             }
-             |> Jason.encode!()
-         }}
+        data = %{
+          "discountCode" => %{"campaignCode" => "NONE", "promoCode" => "NONE", "sourceCode" => "NONE"},
+          "id" => 119_469,
+          "items" => [
+            %{
+              "cost" => %{"amount" => "449.00", "currency" => "SEK"},
+              "itemCode" => "4151C241C3DD41529A87",
+              "itemData" => "",
+              "itemName" => "C More All Sport",
+              "quantity" => 1
+            }
+          ],
+          "totalCost" => %{"amount" => "449.00", "currency" => "SEK"}
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1204,24 +1099,20 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
-        {:ok,
-         %Paywizard.Response{
-           status_code: 200,
-           body:
-             %{
-               "items" => [
-                 %{
-                   "cost" => %{"amount" => "149.00", "currency" => "SEK"},
-                   "itemCode" => "A2D895F14D6B4F2DA03C",
-                   "itemData" => %{"id" => 10_255_800, "name" => "Rögle BK - Växjö Lakers HC"},
-                   "itemName" => "PPV - 249",
-                   "quantity" => 1
-                 }
-               ],
-               "totalCost" => %{"amount" => "149.00", "currency" => "SEK"}
-             }
-             |> Jason.encode!()
-         }}
+        data = %{
+          "items" => [
+            %{
+              "cost" => %{"amount" => "149.00", "currency" => "SEK"},
+              "itemCode" => "A2D895F14D6B4F2DA03C",
+              "itemData" => %{"id" => 10_255_800, "name" => "Rögle BK - Växjö Lakers HC"},
+              "itemName" => "PPV - 249",
+              "quantity" => 1
+            }
+          ],
+          "totalCost" => %{"amount" => "149.00", "currency" => "SEK"}
+        }
+
+        {:ok, %Paywizard.Response{status_code: 200, body: Jason.encode!(data), json: data}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1246,19 +1137,15 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
-        {:ok,
-         %Paywizard.Response{
-           status_code: 404,
-           body:
-             %{
-               errorCode: 90040,
-               userMessage: "Cart ID provided is incorrect or does not exist",
-               developerMessage: "No cart found with given ID",
-               moreInfo:
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!()
-         }}
+        data = %{
+          "errorCode" => 90040,
+          "userMessage" => "Cart ID provided is incorrect or does not exist",
+          "developerMessage" => "No cart found with given ID",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1269,20 +1156,16 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
-        {:ok,
-         %Paywizard.Response{
-           status_code: 400,
-           body:
-             %{
-               errorCode: 90045,
-               userMessage: "Payment attempt failed",
-               developerMessage:
-                 "Unable to authorise payment: PaymentAttemptFailedException server_error PSP error: 402",
-               moreInfo:
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!()
-         }}
+        data = %{
+          "errorCode" => 90045,
+          "userMessage" => "Payment attempt failed",
+          "developerMessage" =>
+            "Unable to authorise payment: PaymentAttemptFailedException server_error PSP error: 402",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{status_code: 400, body: Jason.encode!(data), json: data}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1295,55 +1178,47 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
                           %{type: "PPV"} ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "currentPage" => 1,
-               "items" => [
-                 %{
-                   "entitlements" => 5961,
-                   "itemData" => %{"id" => 1, "name" => "1"},
-                   "orderId" => 112_233,
-                   "purchaseDate" => "2020-04-01T13:04:29+02:00",
-                   "salesItemCode" => "A2D895F14D6B4F2DA03C",
-                   "salesItemName" => "PPV - 249",
-                   "type" => "PPV"
-                 }
-               ],
-               "nextPageLink" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/2",
-               "numberOfPages" => 2,
-               "totalResults" => 2
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "currentPage" => 1,
+          "items" => [
+            %{
+              "entitlements" => 5961,
+              "itemData" => %{"id" => 1, "name" => "1"},
+              "orderId" => 112_233,
+              "purchaseDate" => "2020-04-01T13:04:29+02:00",
+              "salesItemCode" => "A2D895F14D6B4F2DA03C",
+              "salesItemName" => "PPV - 249",
+              "type" => "PPV"
+            }
+          ],
+          "nextPageLink" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/2",
+          "numberOfPages" => 2,
+          "totalResults" => 2
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/2",
                           %{type: "PPV"} ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "currentPage" => 2,
-               "items" => [
-                 %{
-                   "entitlements" => 5961,
-                   "itemData" => %{"id" => 2, "name" => "2"},
-                   "orderId" => 445_566,
-                   "purchaseDate" => "2020-04-01T13:10:10+02:00",
-                   "salesItemCode" => "A2D895F14D6B4F2DA03C",
-                   "salesItemName" => "PPV - 249",
-                   "type" => "PPV"
-                 }
-               ],
-               "numberOfPages" => 2,
-               "previousPageLink" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
-               "totalResults" => 2
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "currentPage" => 2,
+          "items" => [
+            %{
+              "entitlements" => 5961,
+              "itemData" => %{"id" => 2, "name" => "2"},
+              "orderId" => 445_566,
+              "purchaseDate" => "2020-04-01T13:10:10+02:00",
+              "salesItemCode" => "A2D895F14D6B4F2DA03C",
+              "salesItemName" => "PPV - 249",
+              "type" => "PPV"
+            }
+          ],
+          "numberOfPages" => 2,
+          "previousPageLink" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
+          "totalResults" => 2
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
@@ -1366,20 +1241,15 @@ defmodule Paywizard.ClientTest do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
                           %{type: "PPV"} ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" =>
-                 "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
@@ -1391,27 +1261,23 @@ defmodule Paywizard.ClientTest do
     test "successfully" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "active" => true,
-               "categoryId" => 101,
-               "description" => "C More TV4",
-               "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
-               "freeTrial" => %{"active" => true, "numberOfDays" => 14},
-               "itemId" => "6D3A56FF5065478ABD61",
-               "itemType" => "SERVICE",
-               "name" => "C More TV4",
-               "pricing" => %{
-                 "frequency" => %{"frequency" => "MONTH", "length" => 1},
-                 "initial" => %{"amount" => "0.00", "currency" => "SEK"},
-                 "recurring" => %{"amount" => "139.00", "currency" => "SEK"}
-               }
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "active" => true,
+          "categoryId" => 101,
+          "description" => "C More TV4",
+          "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+          "freeTrial" => %{"active" => true, "numberOfDays" => 14},
+          "itemId" => "6D3A56FF5065478ABD61",
+          "itemType" => "SERVICE",
+          "name" => "C More TV4",
+          "pricing" => %{
+            "frequency" => %{"frequency" => "MONTH", "length" => 1},
+            "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+            "recurring" => %{"amount" => "139.00", "currency" => "SEK"}
+          }
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
@@ -1429,22 +1295,18 @@ defmodule Paywizard.ClientTest do
     test "without required payload" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "active" => true,
-               "categoryId" => 101,
-               "description" => "C More TV4",
-               "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
-               "freeTrial" => %{"active" => true, "numberOfDays" => 14},
-               "itemId" => "6D3A56FF5065478ABD61",
-               "itemType" => "SERVICE",
-               "name" => "C More TV4"
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "active" => true,
+          "categoryId" => 101,
+          "description" => "C More TV4",
+          "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+          "freeTrial" => %{"active" => true, "numberOfDays" => 14},
+          "itemId" => "6D3A56FF5065478ABD61",
+          "itemType" => "SERVICE",
+          "name" => "C More TV4"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert_raise RuntimeError, ~r/Incoming item payload was incomplete:/, fn ->
@@ -1455,18 +1317,14 @@ defmodule Paywizard.ClientTest do
     test "causing system failure" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 500
-         }}
+        data = %{
+          "errorCode" => 500,
+          "userMessage" => "System Failure - please retry later.",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert_raise RuntimeError, ~r/item_by_id_and_currency did not get an successful response. Error:/, fn ->
@@ -1479,33 +1337,29 @@ defmodule Paywizard.ClientTest do
     test "succeeds when promo code exists" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/TESTLM8WVE" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "promoCode" => "TESTLM8WVE",
-               "availableForUse" => true,
-               "numberOfRedemptions" => 0,
-               "redemptionsPerCustomer" => 1,
-               "promotionName" => "singelPromo",
-               "promotionAvailability" => %{
-                 "from" => "2020-06-02T13:34:40+02:00",
-                 "to" => "2049-12-31T01:00:00+01:00"
-               },
-               "promotionActive" => true,
-               "batchActive" => true,
-               "discounts" => [
-                 %{
-                   "id" => 10218,
-                   "name" => "SingelDiscount desc",
-                   "description" => "SingelDiscount",
-                   "friendReferred" => false
-                 }
-               ]
-             }
-             |> Jason.encode!(),
-           status_code: 200
-         }}
+        data = %{
+          "promoCode" => "TESTLM8WVE",
+          "availableForUse" => true,
+          "numberOfRedemptions" => 0,
+          "redemptionsPerCustomer" => 1,
+          "promotionName" => "singelPromo",
+          "promotionAvailability" => %{
+            "from" => "2020-06-02T13:34:40+02:00",
+            "to" => "2049-12-31T01:00:00+01:00"
+          },
+          "promotionActive" => true,
+          "batchActive" => true,
+          "discounts" => [
+            %{
+              "id" => 10218,
+              "name" => "SingelDiscount desc",
+              "description" => "SingelDiscount",
+              "friendReferred" => false
+            }
+          ]
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_single_use_promo_code("TESTLM8WVE") ==
@@ -1536,19 +1390,15 @@ defmodule Paywizard.ClientTest do
     test "fails when promo code does not exists" do
       MockPaywizardHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/NON-EXISTING-CODE" ->
-        {:ok,
-         %Paywizard.Response{
-           body:
-             %{
-               "errorCode" => 90123,
-               "userMessage" => "Promo code not found",
-               "developerMessage" => "Error response from promocode service404",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-             |> Jason.encode!(),
-           status_code: 400
-         }}
+        data = %{
+          "errorCode" => 90123,
+          "userMessage" => "Promo code not found",
+          "developerMessage" => "Error response from promocode service404",
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:paywizard_error, :promo_code_not_found}
