@@ -62,7 +62,8 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback cancel_contract(Customer.customer_id(), Contract.contract_id()) :: {:ok, cancellation_date :: Date.t()}
+  @callback cancel_contract(Customer.customer_id(), Contract.contract_id()) ::
+              {:ok, cancellation_date :: Date.t()} | {:paywizard_error, :contract_cancellation_fault}
   def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
     with {:ok, %Paywizard.Response{json: %{"cancellationDate" => cancellation_date}, status_code: 200}} <-
            http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{

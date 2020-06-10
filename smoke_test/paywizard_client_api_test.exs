@@ -49,7 +49,7 @@ defmodule SmokeTest.PaywizardClientApi do
     end
   end
 
-  describe("Fetching customer contract") do
+  describe "Fetching customer contract" do
     test "returns 0 when no contracts", %{customer_id: customer_id} do
       assert Paywizard.Client.customer_contracts(customer_id) == {:ok, []}
     end
@@ -59,7 +59,7 @@ defmodule SmokeTest.PaywizardClientApi do
     end
   end
 
-  describe("Fetching customer PPV") do
+  describe "Fetching customer PPV" do
     test "returns 0 when no PPV's", %{customer_id: customer_id} do
       assert Paywizard.Client.customer_purchases_ppv(customer_id) == {:ok, []}
     end
