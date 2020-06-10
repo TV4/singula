@@ -69,11 +69,17 @@ defmodule Paywizard.HTTPClientTest do
         Accept: "application/json"
       ],
       [recv_timeout: 10000] ->
-        {:ok, %HTTPoison.Response{body: "", status_code: 200, request: %HTTPoison.Request{url: ""}}}
+        {:ok,
+         %HTTPoison.Response{
+           body: "{\"key\":\"value\"}",
+           status_code: 200,
+           headers: [{"Content-Type", "application/json;charset=UTF-8"}],
+           request: %HTTPoison.Request{url: ""}
+         }}
     end)
 
     assert HTTPClient.patch("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
-             {:ok, %Paywizard.Response{body: "", status_code: 200}}
+             {:ok, %Paywizard.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
   end
 
   @tag :capture_log

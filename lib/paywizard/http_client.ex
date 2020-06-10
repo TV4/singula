@@ -24,7 +24,7 @@ defmodule Paywizard.HTTPClient do
       Enum.find(headers, fn {key, _value} -> String.downcase(key) == "content-type" end)
       |> case do
         nil -> response
-        {_, "application/json"} -> %Paywizard.Response{response | json: Jason.decode!(body)}
+        {_, "application/json" <> _charset} -> %Paywizard.Response{response | json: Jason.decode!(body)}
       end
 
     {:ok, response}

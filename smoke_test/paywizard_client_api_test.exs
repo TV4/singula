@@ -537,6 +537,97 @@ defmodule SmokeTest.PaywizardClientApi do
     assert Paywizard.Client.withdraw_cancel_contract(customer_id, contract_id) == :ok
   end
 
+  test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
+    subscription_item_ids = [
+      "6D3A56FF5065478ABD61",
+      "9781F421A5894FC0AA96",
+      "4151C241C3DD41529A87",
+      "180B2AD9332349E6A7A4",
+      "C943A5FED47E444B96E1"
+    ]
+
+    {:ok, %Paywizard.Response{json: %{"crossgradePaths" => crossgrade_paths}, status_code: 200}} =
+      Paywizard.HTTPClient.get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change")
+
+    assert Enum.filter(crossgrade_paths, fn %{"itemCode" => item_id} -> item_id in subscription_item_ids end) == [
+             %{
+               "changeCost" => %{"amount" => "109.00", "currency" => "SEK"},
+               "changeType" => "DOWNGRADE",
+               "itemCode" => "180B2AD9332349E6A7A4",
+               "name" => "C More"
+             },
+             %{
+               "changeCost" => %{"amount" => "449.00", "currency" => "SEK"},
+               "changeType" => "CROSSGRADE",
+               "itemCode" => "C943A5FED47E444B96E1",
+               "name" => "C More All Sport - 12 months"
+             },
+             %{
+               "changeCost" => %{"amount" => "199.00", "currency" => "SEK"},
+               "changeType" => "UPGRADE",
+               "itemCode" => "9781F421A5894FC0AA96",
+               "name" => "C More Mycket Sport"
+             },
+             %{
+               "changeCost" => %{"amount" => "449.00", "currency" => "SEK"},
+               "changeType" => "UPGRADE",
+               "itemCode" => "4151C241C3DD41529A87",
+               "name" => "C More All Sport"
+             }
+           ]
+  end
+
+  test "Get the cost of changing a contract", %{customer_id: customer_id, contract_id: contract_id} do
+    assert {:ok, %Paywizard.Response{json: payload, status_code: 200}} =
+             Paywizard.HTTPClient.post(
+               "/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change/cost",
+               %{itemCode: "180B2AD9332349E6A7A4"}
+             )
+
+    assert payload ==
+             %{
+               "changeCost" => %{"amount" => "109.00", "currency" => "SEK"},
+               "changeDate" => Date.utc_today() |> Date.add(14) |> to_string(),
+               "currentContract" => %{
+                 "balance" => %{"amount" => "0.00", "currency" => "SEK"},
+                 "id" => contract_id,
+                 "lastPayment" => %{"amount" => "0.00", "currency" => "SEK"},
+                 "name" => "C More TV4"
+               },
+               "newContract" => %{
+                 "itemCode" => "180B2AD9332349E6A7A4",
+                 "name" => "C More",
+                 "recurringCost" => %{"amount" => "109.00", "currency" => "SEK"}
+               }
+             }
+  end
+
+  test "Change a contract", %{customer_id: customer_id, contract_id: contract_id, subscription_item_id: item_id} do
+    assert {:ok, %Paywizard.Response{json: payload, status_code: 200}} =
+             Paywizard.HTTPClient.post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change", %{
+               itemCode: "180B2AD9332349E6A7A4"
+             })
+
+    assert payload == %{
+             "href" => "/customer/#{customer_id}/contract/#{contract_id}",
+             "rel" => "Get contract details",
+             "type" => "application/json"
+           }
+
+    assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
+             {:ok,
+              %Paywizard.ContractDetails{
+                balance: %{amount: "0.00", currency: :SEK},
+                id: contract_id,
+                item_id: item_id,
+                item_name: "C More TV4",
+                paid_up_to_date: Date.utc_today() |> Date.add(14),
+                recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+                start_date: Date.utc_today(),
+                status: :DOWNGRADE_SCHEDULED
+              }}
+  end
+
   defp setup_test_customer(_context) do
     unix_time_now = DateTime.to_unix(DateTime.utc_now())
     user_id = "smoke_test_#{unix_time_now}"
