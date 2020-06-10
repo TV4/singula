@@ -449,7 +449,7 @@ defmodule Paywizard.ClientTest do
              }) == {:ok, "10000"}
     end
 
-    test "with signle-use voucher discount" do
+    test "with single-use voucher discount" do
       MockPaywizardHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
