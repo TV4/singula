@@ -62,32 +62,6 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback cancel_contract(Customer.customer_id(), Contract.contract_id()) ::
-              {:ok, cancellation_date :: Date.t()} | {:paywizard_error, :contract_cancellation_fault}
-  def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
-    with {:ok, %Paywizard.Response{json: %{"cancellationDate" => cancellation_date}, status_code: 200}} <-
-           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
-             "cancelDate" => cancel_date
-           }) do
-      Date.from_iso8601(cancellation_date)
-    else
-      {:ok, %Paywizard.Response{json: %{"errorCode" => 90006}, status_code: 400}} ->
-        {:paywizard_error, :contract_cancellation_fault}
-    end
-  end
-
-  @callback withdraw_cancel_contract(Customer.customer_id(), Contract.contract_id()) ::
-              :ok | {:paywizard_error, :cancellation_withdrawal_fault}
-  def withdraw_cancel_contract(customer_id, contract_id) do
-    with {:ok, %Paywizard.Response{status_code: 200}} <-
-           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel/withdraw", %{}) do
-      :ok
-    else
-      {:ok, %Paywizard.Response{json: %{"errorCode" => 90017}}} ->
-        {:paywizard_error, :cancellation_withdrawal_fault}
-    end
-  end
-
   @callback customer_purchases_ppv(Customer.customer_id()) ::
               {:ok, list(PPV.t())} | {:paywizard_error, :customer_not_found}
   def customer_purchases_ppv(customer_id) do
@@ -225,6 +199,32 @@ defmodule Paywizard.Client do
 
       {:ok, %Paywizard.Response{json: %{"errorCode" => 90045}, status_code: 400}} ->
         {:paywizard_error, :payment_authorisation_fault}
+    end
+  end
+
+  @callback cancel_contract(Customer.customer_id(), Contract.contract_id()) ::
+              {:ok, cancellation_date :: Date.t()} | {:paywizard_error, :contract_cancellation_fault}
+  def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
+    with {:ok, %Paywizard.Response{json: %{"cancellationDate" => cancellation_date}, status_code: 200}} <-
+           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
+             "cancelDate" => cancel_date
+           }) do
+      Date.from_iso8601(cancellation_date)
+    else
+      {:ok, %Paywizard.Response{json: %{"errorCode" => 90006}, status_code: 400}} ->
+        {:paywizard_error, :contract_cancellation_fault}
+    end
+  end
+
+  @callback withdraw_cancel_contract(Customer.customer_id(), Contract.contract_id()) ::
+              :ok | {:paywizard_error, :cancellation_withdrawal_fault}
+  def withdraw_cancel_contract(customer_id, contract_id) do
+    with {:ok, %Paywizard.Response{status_code: 200}} <-
+           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel/withdraw", %{}) do
+      :ok
+    else
+      {:ok, %Paywizard.Response{json: %{"errorCode" => 90017}}} ->
+        {:paywizard_error, :cancellation_withdrawal_fault}
     end
   end
 

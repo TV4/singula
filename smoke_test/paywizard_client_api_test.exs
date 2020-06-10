@@ -23,6 +23,48 @@ defmodule SmokeTest.PaywizardClientApi do
   setup_all [:setup_test_customer, :setup_defaults]
   setup :merge_saved_test_context
 
+  test "Get item by id and currency", %{subscription_item_id: item_id, currency: currency} do
+    assert Paywizard.Client.item_by_id_and_currency(item_id, currency) ==
+             {:ok,
+              %Paywizard.Item{
+                category_id: 101,
+                currency: :SEK,
+                entitlements: [5960],
+                id: "6D3A56FF5065478ABD61",
+                minimum_term_month_count: nil,
+                name: "C More TV4",
+                one_off_price: nil,
+                recurring_billing: %{amount: "139.00", month_count: 1}
+              }}
+  end
+
+  describe "Get customer by id" do
+    test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
+      assert Paywizard.Client.customer_fetch(customer_id) ==
+               {:ok,
+                %Paywizard.Customer{
+                  active: true,
+                  address_post_code: 12220,
+                  custom_attributes: [
+                    %{name: "Accepted Play Terms Date", value: "2020-02-25"},
+                    %{name: "Accepted Play Terms", value: "Telia"}
+                  ],
+                  customer_id: customer_id,
+                  date_of_birth: nil,
+                  email: email,
+                  external_unique_id: to_string(vimond_id),
+                  first_name: "Forename",
+                  last_name: "TV4 Media SmokeTest",
+                  username: username
+                }}
+    end
+
+    test "when customer not found" do
+      assert Paywizard.Client.customer_fetch("12345678-90ab-cdef-1234-567890abcdef") ==
+               {:paywizard_error, :customer_not_found}
+    end
+  end
+
   describe "Searching external id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
       assert Paywizard.Client.customer_search(vimond_id) ==
@@ -49,7 +91,7 @@ defmodule SmokeTest.PaywizardClientApi do
     end
   end
 
-  describe "Fetching customer contract" do
+  describe "Fetching customer contracts" do
     test "returns 0 when no contracts", %{customer_id: customer_id} do
       assert Paywizard.Client.customer_contracts(customer_id) == {:ok, []}
     end
@@ -59,8 +101,8 @@ defmodule SmokeTest.PaywizardClientApi do
     end
   end
 
-  describe "Fetching customer PPV" do
-    test "returns 0 when no PPV's", %{customer_id: customer_id} do
+  describe "Fetching customer PPV purchases" do
+    test "returns 0 when no purchases", %{customer_id: customer_id} do
       assert Paywizard.Client.customer_purchases_ppv(customer_id) == {:ok, []}
     end
 
@@ -417,6 +459,19 @@ defmodule SmokeTest.PaywizardClientApi do
                     order_id: order_id
                   }
                 ]}
+
+      assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
+               {:ok,
+                %Paywizard.ContractDetails{
+                  balance: %{amount: "0.00", currency: :SEK},
+                  id: contract_id,
+                  item_id: item_id,
+                  item_name: "C More TV4",
+                  paid_up_to_date: Date.utc_today() |> Date.add(14),
+                  recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+                  start_date: Date.utc_today(),
+                  status: :ACTIVE
+                }}
     end
 
     test "returns purchased pay per view", %{
@@ -472,6 +527,14 @@ defmodule SmokeTest.PaywizardClientApi do
                 "type" => "klarnaSession"
               }} = Paywizard.Client.customer_redirect_klarna(customer_id, currency, klarna_redirect_data)
     end
+  end
+
+  test "Cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
+    assert Paywizard.Client.cancel_contract(customer_id, contract_id) == {:ok, Date.utc_today() |> Date.add(14)}
+  end
+
+  test "Withdraw cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
+    assert Paywizard.Client.withdraw_cancel_contract(customer_id, contract_id) == :ok
   end
 
   defp setup_test_customer(_context) do
