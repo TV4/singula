@@ -8,7 +8,9 @@ defmodule Paywizard.ContractDetails do
     :minimum_term,
     :status,
     :start_date,
-    :paid_up_to_date
+    :paid_up_to_date,
+    :change_date,
+    :change_to_item_id
   ]
 
   @type t :: %__MODULE__{}
@@ -22,8 +24,10 @@ defmodule Paywizard.ContractDetails do
       recurring_billing: recurring_billing(response["billing"]),
       minimum_term: frequency(response["minimumTerm"]),
       status: String.to_atom(response["status"]),
-      start_date: Date.from_iso8601!(response["startDate"]),
-      paid_up_to_date: Date.from_iso8601!(response["paidUpToDate"])
+      start_date: date(response["startDate"]),
+      paid_up_to_date: date(response["paidUpToDate"]),
+      change_date: date(response["changeDate"]),
+      change_to_item_id: response["changeToItem"]
     }
   end
 
@@ -45,4 +49,7 @@ defmodule Paywizard.ContractDetails do
   defp frequency_term("YEAR"), do: :YEAR
 
   defp currency_term(currency), do: String.to_atom(currency)
+
+  defp date(nil), do: nil
+  defp date(date_string), do: Date.from_iso8601!(date_string)
 end

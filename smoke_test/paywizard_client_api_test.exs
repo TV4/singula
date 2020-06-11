@@ -578,21 +578,14 @@ defmodule SmokeTest.PaywizardClientApi do
   end
 
   test "Change a contract", %{customer_id: customer_id, contract_id: contract_id, subscription_item_id: item_id} do
-    assert {:ok, %Paywizard.Response{json: payload, status_code: 200}} =
-             Paywizard.HTTPClient.post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change", %{
-               itemCode: "180B2AD9332349E6A7A4"
-             })
-
-    assert payload == %{
-             "href" => "/customer/#{customer_id}/contract/#{contract_id}",
-             "rel" => "Get contract details",
-             "type" => "application/json"
-           }
+    assert Paywizard.Client.change_contract(customer_id, contract_id, "180B2AD9332349E6A7A4") == :ok
 
     assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
              {:ok,
               %Paywizard.ContractDetails{
                 balance: %{amount: "0.00", currency: :SEK},
+                change_date: Date.utc_today() |> Date.add(14),
+                change_to_item_id: "180B2AD9332349E6A7A4",
                 id: contract_id,
                 item_id: item_id,
                 item_name: "C More TV4",

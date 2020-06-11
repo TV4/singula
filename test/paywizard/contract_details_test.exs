@@ -240,4 +240,46 @@ defmodule Paywizard.ContractDetailsTest do
              status: :ACTIVE
            }
   end
+
+  test "parse scheduled contract change" do
+    payload = %{
+      "active" => true,
+      "auditInfo" => %{
+        "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "creationDate" => "2020-04-20T10:01:48+02:00",
+        "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "modifiedDate" => "2020-04-20T10:01:48+02:00"
+      },
+      "balance" => %{"amount" => "0.00", "currency" => "SEK"},
+      "billing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "139.00", "currency" => "SEK"}
+      },
+      "changeDate" => "2020-05-04",
+      "changeToItem" => "180B2AD9332349E6A7A4",
+      "contractId" => 9_719_738,
+      "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+      "itemCode" => "6D3A56FF5065478ABD61",
+      "name" => "C More TV4",
+      "nextPaymentDate" => "2020-05-04",
+      "paidUpToDate" => "2020-05-04",
+      "paymentMethodId" => 10_246_312,
+      "startDate" => "2020-04-20",
+      "status" => "DOWNGRADE_SCHEDULED"
+    }
+
+    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+             id: 9_719_738,
+             item_id: "6D3A56FF5065478ABD61",
+             item_name: "C More TV4",
+             balance: %{amount: "0.00", currency: :SEK},
+             change_date: ~D[2020-05-04],
+             change_to_item_id: "180B2AD9332349E6A7A4",
+             recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+             status: :DOWNGRADE_SCHEDULED,
+             start_date: ~D[2020-04-20],
+             paid_up_to_date: ~D[2020-05-04]
+           }
+  end
 end

@@ -1400,35 +1400,30 @@ defmodule Paywizard.ClientTest do
     assert Client.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
              {:ok,
               [
-                %Paywizard.Crossgrade{
-                  recurring_price: "109.00",
-                  currency: :SEK,
-                  # "changeType" => "DOWNGRADE",
-                  item_id: "180B2AD9332349E6A7A4"
-                  # "name" => "C More"
-                },
-                %Paywizard.Crossgrade{
-                  recurring_price: "449.00",
-                  currency: :SEK,
-                  # "changeType" => "CROSSGRADE",
-                  item_id: "C943A5FED47E444B96E1"
-                  # "name" => "C More All Sport - 12 months"
-                },
-                %Paywizard.Crossgrade{
-                  recurring_price: "199.00",
-                  currency: :SEK,
-                  # "changeType" => "UPGRADE",
-                  item_id: "9781F421A5894FC0AA96"
-                  # "name" => "C More Mycket Sport"
-                },
-                %Paywizard.Crossgrade{
-                  recurring_price: "449.00",
-                  currency: :SEK,
-                  # "changeType" => "UPGRADE",
-                  item_id: "4151C241C3DD41529A87"
-                  # "name" => "C More All Sport"
-                }
+                %Paywizard.Crossgrade{recurring_price: "109.00", currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
+                %Paywizard.Crossgrade{recurring_price: "449.00", currency: :SEK, item_id: "C943A5FED47E444B96E1"},
+                %Paywizard.Crossgrade{recurring_price: "199.00", currency: :SEK, item_id: "9781F421A5894FC0AA96"},
+                %Paywizard.Crossgrade{recurring_price: "449.00", currency: :SEK, item_id: "4151C241C3DD41529A87"}
               ]}
+  end
+
+  test "change a contract" do
+    MockPaywizardHTTPClient
+    |> expect(
+      :post,
+      fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change",
+         %{itemCode: "180B2AD9332349E6A7A4"} ->
+        data = %{
+          "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
+          "rel" => "Get contract details",
+          "type" => "application/json"
+        }
+
+        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+      end
+    )
+
+    assert Client.change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "180B2AD9332349E6A7A4") == :ok
   end
 
   describe "get item" do

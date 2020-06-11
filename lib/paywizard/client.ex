@@ -236,7 +236,8 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback crossgrades_for_contract(Customer.customer_id(), Contract.contract_id()) :: {:ok, list(item_id :: binary)}
+  @callback crossgrades_for_contract(Customer.customer_id(), Contract.contract_id()) ::
+              {:ok, list(Paywizard.Crossgrade.t())}
   def crossgrades_for_contract(customer_id, contract_id) do
     with {:ok, %Paywizard.Response{json: %{"crossgradePaths" => crossgrade_paths}, status_code: 200}} <-
            http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change") do
@@ -245,7 +246,17 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback item_by_id_and_currency(binary, currency) :: {:ok, Item.t()}
+  @callback change_contract(Customer.customer_id(), Contract.contract_id(), item_id :: binary) :: :ok
+  def change_contract(customer_id, contract_id, item_id) do
+    with {:ok, %Paywizard.Response{status_code: 200}} <-
+           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change", %{
+             itemCode: item_id
+           }) do
+      :ok
+    end
+  end
+
+  @callback item_by_id_and_currency(item_id :: binary, currency) :: {:ok, Item.t()}
   def item_by_id_and_currency(item_id, currency) do
     with {:ok, %Paywizard.Response{json: data, status_code: 200}} <-
            http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}") do
