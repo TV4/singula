@@ -537,63 +537,57 @@ defmodule SmokeTest.PaywizardClientApi do
     assert Paywizard.Client.withdraw_cancel_contract(customer_id, contract_id) == :ok
   end
 
-  test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
-    published_swedish_subscription_item_ids = [
-      "6D3A56FF5065478ABD61",
-      "9781F421A5894FC0AA96",
-      "4151C241C3DD41529A87",
-      "180B2AD9332349E6A7A4",
-      "C943A5FED47E444B96E1"
-    ]
-
-    assert {:ok, crossgrades} = Paywizard.Client.crossgrades_for_contract(customer_id, contract_id)
-
-    selected_crossgrades =
-      Enum.filter(crossgrades, fn %Paywizard.Crossgrade{item_id: item_id} ->
-        item_id in published_swedish_subscription_item_ids
-      end)
-
-    assert selected_crossgrades == [
-             %Paywizard.Crossgrade{
-               recurring_price: "109.00",
-               currency: :SEK,
-               item_id: "180B2AD9332349E6A7A4"
-             },
-             %Paywizard.Crossgrade{
-               recurring_price: "449.00",
-               currency: :SEK,
-               item_id: "C943A5FED47E444B96E1"
-             },
-             %Paywizard.Crossgrade{
-               recurring_price: "199.00",
-               currency: :SEK,
-               item_id: "9781F421A5894FC0AA96"
-             },
-             %Paywizard.Crossgrade{
-               recurring_price: "449.00",
-               currency: :SEK,
-               item_id: "4151C241C3DD41529A87"
-             }
-           ]
-  end
-
-  test "Change a contract", %{customer_id: customer_id, contract_id: contract_id, subscription_item_id: item_id} do
-    assert Paywizard.Client.change_contract(customer_id, contract_id, "180B2AD9332349E6A7A4") == :ok
+  test "Change a contract changes immediately for upgrades", %{customer_id: customer_id, contract_id: contract_id} do
+    assert Paywizard.Client.change_contract(customer_id, contract_id, "4151C241C3DD41529A87") == :ok
 
     assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
              {:ok,
               %Paywizard.ContractDetails{
                 balance: %{amount: "0.00", currency: :SEK},
-                change_date: Date.utc_today() |> Date.add(14),
-                change_to_item_id: "180B2AD9332349E6A7A4",
                 id: contract_id,
-                item_id: item_id,
-                item_name: "C More TV4",
-                paid_up_to_date: Date.utc_today() |> Date.add(14),
-                recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+                item_id: "4151C241C3DD41529A87",
+                item_name: "C More All Sport",
+                minimum_term: %{frequency: :MONTH, length: 1},
+                paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
+                recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
+                start_date: Date.utc_today(),
+                status: :ACTIVE
+              }}
+  end
+
+  test "Change a contract is scheduled for downgrades", %{
+    customer_id: customer_id,
+    contract_id: contract_id,
+    subscription_item_id: item_id
+  } do
+    assert Paywizard.Client.change_contract(customer_id, contract_id, item_id) == :ok
+
+    assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
+             {:ok,
+              %Paywizard.ContractDetails{
+                balance: %{amount: "0.00", currency: :SEK},
+                change_date: Date.utc_today() |> Timex.shift(months: 1),
+                change_to_item_id: item_id,
+                id: contract_id,
+                item_id: "4151C241C3DD41529A87",
+                item_name: "C More All Sport",
+                minimum_term: %{frequency: :MONTH, length: 1},
+                paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
+                recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
                 start_date: Date.utc_today(),
                 status: :DOWNGRADE_SCHEDULED
               }}
+  end
+
+  test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
+    assert {:ok, crossgrades} = Paywizard.Client.crossgrades_for_contract(customer_id, contract_id)
+
+    assert crossgrades == [
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4", recurring_price: "-340.00"},
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61", recurring_price: "-310.00"},
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1", recurring_price: "0.00"},
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96", recurring_price: "-250.00"}
+           ]
   end
 
   defp setup_test_customer(_context) do
