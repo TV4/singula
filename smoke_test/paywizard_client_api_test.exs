@@ -538,7 +538,7 @@ defmodule SmokeTest.PaywizardClientApi do
   end
 
   test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
-    subscription_item_ids = [
+    published_swedish_subscription_item_ids = [
       "6D3A56FF5065478ABD61",
       "9781F421A5894FC0AA96",
       "4151C241C3DD41529A87",
@@ -546,60 +546,35 @@ defmodule SmokeTest.PaywizardClientApi do
       "C943A5FED47E444B96E1"
     ]
 
-    {:ok, %Paywizard.Response{json: %{"crossgradePaths" => crossgrade_paths}, status_code: 200}} =
-      Paywizard.HTTPClient.get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change")
+    assert {:ok, crossgrades} = Paywizard.Client.crossgrades_for_contract(customer_id, contract_id)
 
-    assert Enum.filter(crossgrade_paths, fn %{"itemCode" => item_id} -> item_id in subscription_item_ids end) == [
-             %{
-               "changeCost" => %{"amount" => "109.00", "currency" => "SEK"},
-               "changeType" => "DOWNGRADE",
-               "itemCode" => "180B2AD9332349E6A7A4",
-               "name" => "C More"
+    selected_crossgrades =
+      Enum.filter(crossgrades, fn %Paywizard.Crossgrade{item_id: item_id} ->
+        item_id in published_swedish_subscription_item_ids
+      end)
+
+    assert selected_crossgrades == [
+             %Paywizard.Crossgrade{
+               recurring_price: "109.00",
+               currency: :SEK,
+               item_id: "180B2AD9332349E6A7A4"
              },
-             %{
-               "changeCost" => %{"amount" => "449.00", "currency" => "SEK"},
-               "changeType" => "CROSSGRADE",
-               "itemCode" => "C943A5FED47E444B96E1",
-               "name" => "C More All Sport - 12 months"
+             %Paywizard.Crossgrade{
+               recurring_price: "449.00",
+               currency: :SEK,
+               item_id: "C943A5FED47E444B96E1"
              },
-             %{
-               "changeCost" => %{"amount" => "199.00", "currency" => "SEK"},
-               "changeType" => "UPGRADE",
-               "itemCode" => "9781F421A5894FC0AA96",
-               "name" => "C More Mycket Sport"
+             %Paywizard.Crossgrade{
+               recurring_price: "199.00",
+               currency: :SEK,
+               item_id: "9781F421A5894FC0AA96"
              },
-             %{
-               "changeCost" => %{"amount" => "449.00", "currency" => "SEK"},
-               "changeType" => "UPGRADE",
-               "itemCode" => "4151C241C3DD41529A87",
-               "name" => "C More All Sport"
+             %Paywizard.Crossgrade{
+               recurring_price: "449.00",
+               currency: :SEK,
+               item_id: "4151C241C3DD41529A87"
              }
            ]
-  end
-
-  test "Get the cost of changing a contract", %{customer_id: customer_id, contract_id: contract_id} do
-    assert {:ok, %Paywizard.Response{json: payload, status_code: 200}} =
-             Paywizard.HTTPClient.post(
-               "/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change/cost",
-               %{itemCode: "180B2AD9332349E6A7A4"}
-             )
-
-    assert payload ==
-             %{
-               "changeCost" => %{"amount" => "109.00", "currency" => "SEK"},
-               "changeDate" => Date.utc_today() |> Date.add(14) |> to_string(),
-               "currentContract" => %{
-                 "balance" => %{"amount" => "0.00", "currency" => "SEK"},
-                 "id" => contract_id,
-                 "lastPayment" => %{"amount" => "0.00", "currency" => "SEK"},
-                 "name" => "C More TV4"
-               },
-               "newContract" => %{
-                 "itemCode" => "180B2AD9332349E6A7A4",
-                 "name" => "C More",
-                 "recurringCost" => %{"amount" => "109.00", "currency" => "SEK"}
-               }
-             }
   end
 
   test "Change a contract", %{customer_id: customer_id, contract_id: contract_id, subscription_item_id: item_id} do

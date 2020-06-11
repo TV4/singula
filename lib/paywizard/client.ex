@@ -1,3 +1,11 @@
+defmodule Paywizard.Crossgrade do
+  defstruct [:item_id, :recurring_price, :currency]
+
+  def new(%{"itemCode" => item_id, "changeCost" => %{"amount" => recurring_price, "currency" => currency}}) do
+    %__MODULE__{item_id: item_id, recurring_price: recurring_price, currency: String.to_atom(currency)}
+  end
+end
+
 defmodule Paywizard.Client do
   alias Paywizard.{
     CartDetail,
@@ -225,6 +233,15 @@ defmodule Paywizard.Client do
     else
       {:ok, %Paywizard.Response{json: %{"errorCode" => 90017}}} ->
         {:paywizard_error, :cancellation_withdrawal_fault}
+    end
+  end
+
+  @callback crossgrades_for_contract(Customer.customer_id(), Contract.contract_id()) :: {:ok, list(item_id :: binary)}
+  def crossgrades_for_contract(customer_id, contract_id) do
+    with {:ok, %Paywizard.Response{json: %{"crossgradePaths" => crossgrade_paths}, status_code: 200}} <-
+           http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change") do
+      crossgrades = Enum.map(crossgrade_paths, fn crossgrade_path -> Paywizard.Crossgrade.new(crossgrade_path) end)
+      {:ok, crossgrades}
     end
   end
 
