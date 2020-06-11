@@ -1,8 +1,8 @@
 defmodule Paywizard.Crossgrade do
-  defstruct [:item_id, :recurring_price, :currency]
+  defstruct [:item_id, :currency]
 
-  def new(%{"itemCode" => item_id, "changeCost" => %{"amount" => recurring_price, "currency" => currency}}) do
-    %__MODULE__{item_id: item_id, recurring_price: recurring_price, currency: String.to_atom(currency)}
+  def new(%{"itemCode" => item_id, "changeCost" => %{"currency" => currency}}) do
+    %__MODULE__{item_id: item_id, currency: String.to_atom(currency)}
   end
 end
 

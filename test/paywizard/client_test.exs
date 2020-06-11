@@ -1400,10 +1400,10 @@ defmodule Paywizard.ClientTest do
     assert Client.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
              {:ok,
               [
-                %Paywizard.Crossgrade{recurring_price: "109.00", currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
-                %Paywizard.Crossgrade{recurring_price: "449.00", currency: :SEK, item_id: "C943A5FED47E444B96E1"},
-                %Paywizard.Crossgrade{recurring_price: "199.00", currency: :SEK, item_id: "9781F421A5894FC0AA96"},
-                %Paywizard.Crossgrade{recurring_price: "449.00", currency: :SEK, item_id: "4151C241C3DD41529A87"}
+                %Paywizard.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
+                %Paywizard.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1"},
+                %Paywizard.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96"},
+                %Paywizard.Crossgrade{currency: :SEK, item_id: "4151C241C3DD41529A87"}
               ]}
   end
 

@@ -583,10 +583,10 @@ defmodule SmokeTest.PaywizardClientApi do
     assert {:ok, crossgrades} = Paywizard.Client.crossgrades_for_contract(customer_id, contract_id)
 
     assert crossgrades == [
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4", recurring_price: "-340.00"},
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61", recurring_price: "-310.00"},
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1", recurring_price: "0.00"},
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96", recurring_price: "-250.00"}
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61"},
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1"},
+             %Paywizard.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96"}
            ]
   end
 
