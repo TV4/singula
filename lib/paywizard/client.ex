@@ -1,5 +1,6 @@
 defmodule Paywizard.Crossgrade do
   defstruct [:item_id, :currency]
+  @type t :: %__MODULE__{item_id: binary, currency: :DKK | :NOK | :SEK}
 
   def new(%{"itemCode" => item_id, "changeCost" => %{"currency" => currency}}) do
     %__MODULE__{item_id: item_id, currency: String.to_atom(currency)}
@@ -21,8 +22,6 @@ defmodule Paywizard.Client do
   }
 
   require Logger
-
-  @type currency :: :DKK | :NOK | :SEK
 
   @callback customer_fetch(Customer.customer_id()) :: {:ok, Customer.t()} | {:paywizard_error, :customer_not_found}
   def customer_fetch(customer_id) do
@@ -87,10 +86,10 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback create_cart_with_item(Customer.customer_id(), item_id :: binary, currency) ::
+  @callback create_cart_with_item(Customer.customer_id(), item_id :: binary, Item.currency()) ::
               {:ok, cart_id :: binary}
               | {:paywizard_error, :incorrect_item | :customer_not_found | :item_not_added_to_cart}
-  @callback create_cart_with_item(Customer.customer_id(), item_id :: binary, currency, MetaData.t()) ::
+  @callback create_cart_with_item(Customer.customer_id(), item_id :: binary, Item.currency(), MetaData.t()) ::
               {:ok, cart_id :: binary}
               | {:paywizard_error,
                  :incorrect_item | :customer_not_found | :item_not_added_to_cart | :discount_not_found}
@@ -136,7 +135,7 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback fetch_item_discounts(item_id :: binary, currency) :: {:ok, list}
+  @callback fetch_item_discounts(item_id :: binary, Item.currency()) :: {:ok, list}
   def fetch_item_discounts(item_id, currency) do
     {:ok, %Paywizard.Response{json: %{"discounts" => discounts}, status_code: 200}} =
       http_client().get("/apis/catalogue/v1/item/#{item_id}/discounts?currency=#{currency}")
@@ -144,7 +143,7 @@ defmodule Paywizard.Client do
     {:ok, discounts}
   end
 
-  @callback customer_redirect_dibs(Customer.customer_id(), currency, map) ::
+  @callback customer_redirect_dibs(Customer.customer_id(), Item.currency(), map) ::
               {:ok, map}
               | {:paywizard_error, :customer_not_found}
   def customer_redirect_dibs(customer_id, currency, redirect_data) do
@@ -160,7 +159,7 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback customer_redirect_klarna(Customer.customer_id(), currency, map) ::
+  @callback customer_redirect_klarna(Customer.customer_id(), Item.currency(), map) ::
               {:ok, map}
               | {:paywizard_error, :customer_not_found}
   def customer_redirect_klarna(customer_id, currency, redirect_data) do
@@ -176,7 +175,7 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback customer_payment_method(Customer.customer_id(), currency, DibsPaymentMethod.t()) ::
+  @callback customer_payment_method(Customer.customer_id(), Item.currency(), DibsPaymentMethod.t()) ::
               {:ok, payment_method_id :: integer}
               | {:paywizard_error, :receipt_not_found | :transaction_not_found}
   def customer_payment_method(customer_id, currency, %DibsPaymentMethod{} = dibs_payment_method) do
@@ -184,7 +183,7 @@ defmodule Paywizard.Client do
     create_payment_method(customer_id, digest)
   end
 
-  @callback customer_payment_method(Customer.customer_id(), currency, KlarnaPaymentMethod.t()) ::
+  @callback customer_payment_method(Customer.customer_id(), Item.currency(), KlarnaPaymentMethod.t()) ::
               {:ok, payment_method_id :: integer}
               | {:paywizard_error, :receipt_not_found | :transaction_not_found}
   def customer_payment_method(customer_id, currency, %KlarnaPaymentMethod{} = klarna_payment_method) do
@@ -256,7 +255,7 @@ defmodule Paywizard.Client do
     end
   end
 
-  @callback item_by_id_and_currency(item_id :: binary, currency) :: {:ok, Item.t()}
+  @callback item_by_id_and_currency(item_id :: binary, Item.currency()) :: {:ok, Item.t()}
   def item_by_id_and_currency(item_id, currency) do
     with {:ok, %Paywizard.Response{json: data, status_code: 200}} <-
            http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}") do

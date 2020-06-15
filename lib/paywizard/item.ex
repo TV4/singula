@@ -12,7 +12,8 @@ defmodule Paywizard.Item do
     entitlements: []
   ]
 
-  @type t :: %__MODULE__{}
+  @type currency :: :DKK | :NOK | :SEK
+  @type t :: %__MODULE__{id: binary, currency: currency}
 
   def new(
         %{
