@@ -74,7 +74,7 @@ defmodule Paywizard.CartDetail do
 
   defstruct [:id, :order_id, :contract_id, :total_cost, :currency, :discount, items: []]
 
-  @type t :: %__MODULE__{currency: Paywizard.Client.currency()}
+  @type t :: %__MODULE__{currency: Paywizard.Item.currency()}
 
   def new(cart_payload) do
     %{"amount" => amount, "currency" => currency} = cart_payload["totalCost"]
