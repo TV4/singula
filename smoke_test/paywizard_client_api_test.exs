@@ -579,6 +579,10 @@ defmodule SmokeTest.PaywizardClientApi do
               }}
   end
 
+  test "Withdraw a contract that is scheduled for downgrades", %{customer_id: customer_id, contract_id: contract_id} do
+    assert Paywizard.Client.withdraw_change_contract(customer_id, contract_id) == :ok
+  end
+
   test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
     assert {:ok, crossgrades} = Paywizard.Client.crossgrades_for_contract(customer_id, contract_id)
 
