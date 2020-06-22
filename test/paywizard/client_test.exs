@@ -1359,6 +1359,48 @@ defmodule Paywizard.ClientTest do
     end
   end
 
+  describe "withdraw change contract" do
+    test "succeeds" do
+      MockPaywizardHTTPClient
+      |> expect(
+        :post,
+        fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change/withdraw", %{} ->
+          data = %{
+            "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
+            "rel" => "Get contract details",
+            "type" => "application/json"
+          }
+
+          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        end
+      )
+
+      assert Client.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == :ok
+    end
+
+    test "fails" do
+      MockPaywizardHTTPClient
+      |> expect(
+        :post,
+        fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change/withdraw", %{} ->
+          data = %{
+            "developerMessage" =>
+              "Unable to withdraw change of contract 9719738 for customer ff160270-5197-4c90-835c-cd1fff8b19d0/6296944; invalid state ACTIVE",
+            "errorCode" => 90108,
+            "moreInfo" =>
+              "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+            "userMessage" => "Unable to withdraw scheduled contract change"
+          }
+
+          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        end
+      )
+
+      assert Client.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
+               {:paywizard_error, :change_withdrawal_fault}
+    end
+  end
+
   test "crossgrades for contract" do
     MockPaywizardHTTPClient
     |> expect(

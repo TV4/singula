@@ -255,6 +255,18 @@ defmodule Paywizard.Client do
     end
   end
 
+  @callback withdraw_change_contract(Customer.customer_id(), Contract.contract_id()) ::
+              :ok | {:paywizard_error, :change_withdrawal_fault}
+  def withdraw_change_contract(customer_id, contract_id) do
+    with {:ok, %Paywizard.Response{status_code: 200}} <-
+           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change/withdraw", %{}) do
+      :ok
+    else
+      {:ok, %Paywizard.Response{json: %{"errorCode" => 90108}}} ->
+        {:paywizard_error, :change_withdrawal_fault}
+    end
+  end
+
   @callback item_by_id_and_currency(item_id :: binary, Item.currency()) :: {:ok, Item.t()}
   def item_by_id_and_currency(item_id, currency) do
     with {:ok, %Paywizard.Response{json: data, status_code: 200}} <-
