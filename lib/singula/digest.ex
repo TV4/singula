@@ -1,4 +1,4 @@
-defmodule Paywizard.Digest do
+defmodule Singula.Digest do
   def generate(provider, currency, data) do
     uuid = uuid_generator().()
 
@@ -17,13 +17,13 @@ defmodule Paywizard.Digest do
   end
 
   defp digest(uuid) do
-    merchant_password = Application.get_env(:paywizard, :merchant_password)
+    merchant_password = Application.get_env(:singula, :merchant_password)
 
     :crypto.hash(:sha256, "#{client_name()}#{uuid}#{merchant_password}")
     |> Base.encode16()
     |> String.downcase()
   end
 
-  defp uuid_generator, do: Application.get_env(:paywizard, :uuid_generator, &UUID.uuid4/0)
-  defp client_name, do: Application.get_env(:paywizard, :client_name)
+  defp uuid_generator, do: Application.get_env(:singula, :uuid_generator, &UUID.uuid4/0)
+  defp client_name, do: Application.get_env(:singula, :client_name)
 end

@@ -1,4 +1,4 @@
-defmodule Paywizard.Customer do
+defmodule Singula.Customer do
   @enforce_keys [:customer_id, :active]
   defstruct [
     :customer_id,
@@ -17,7 +17,7 @@ defmodule Paywizard.Customer do
   @type t :: %__MODULE__{customer_id: customer_id, active: boolean}
 
   def new(response) do
-    %Paywizard.Customer{
+    %Singula.Customer{
       customer_id: Map.get(response, "customerId"),
       external_unique_id: Map.get(response, "externalUniqueIdentifier") |> to_string(),
       username: Map.get(response, "username"),

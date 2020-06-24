@@ -1,5 +1,5 @@
-defmodule Paywizard.PPV do
-  alias Paywizard.Asset
+defmodule Singula.PPV do
+  alias Singula.Asset
 
   defstruct [:order_id, :item_id, :asset]
 

@@ -1,4 +1,4 @@
-defmodule Paywizard.ContractDetails do
+defmodule Singula.ContractDetails do
   defstruct [
     :id,
     :item_id,

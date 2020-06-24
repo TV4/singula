@@ -1,12 +1,12 @@
-defmodule Paywizard.CartDetail.Discount do
+defmodule Singula.CartDetail.Discount do
   defstruct [:discount_end_date, :discount_amount]
 end
 
-defmodule Paywizard.CartDetail.Item.Trial do
+defmodule Singula.CartDetail.Item.Trial do
   defstruct [:free_trial, :first_payment_date, :first_payment_amount]
 end
 
-defmodule Paywizard.CartDetail.Item do
+defmodule Singula.CartDetail.Item do
   defstruct [:cost, :quantity, :trial, :item_id, :item_name, :asset]
 
   # creates a PPV Item (free trial not applicable for PPV)
@@ -22,7 +22,7 @@ defmodule Paywizard.CartDetail.Item do
       quantity: quantity,
       item_id: item_id,
       item_name: name,
-      asset: %Paywizard.Asset{id: asset_id, title: asset_name}
+      asset: %Singula.Asset{id: asset_id, title: asset_name}
     }
   end
 
@@ -58,23 +58,23 @@ defmodule Paywizard.CartDetail.Item do
     {:ok, payment_date, utc_offset} = DateTime.from_iso8601(paymentDate)
     first_payment_date = payment_date |> DateTime.add(utc_offset) |> DateTime.to_date()
 
-    %Paywizard.CartDetail.Item.Trial{
+    %Singula.CartDetail.Item.Trial{
       free_trial: applied,
       first_payment_date: first_payment_date,
       first_payment_amount: first_payment_amount
     }
   end
 
-  defp free_trial?(%{"applied" => applied}), do: %Paywizard.CartDetail.Item.Trial{free_trial: applied}
+  defp free_trial?(%{"applied" => applied}), do: %Singula.CartDetail.Item.Trial{free_trial: applied}
   defp free_trial?(_), do: nil
 end
 
-defmodule Paywizard.CartDetail do
-  alias Paywizard.CartDetail.Item
+defmodule Singula.CartDetail do
+  alias Singula.CartDetail.Item
 
   defstruct [:id, :order_id, :contract_id, :total_cost, :currency, :discount, items: []]
 
-  @type t :: %__MODULE__{currency: Paywizard.Item.currency()}
+  @type t :: %__MODULE__{currency: Singula.Item.currency()}
 
   def new(cart_payload) do
     %{"amount" => amount, "currency" => currency} = cart_payload["totalCost"]
@@ -86,7 +86,7 @@ defmodule Paywizard.CartDetail do
         item = items |> Enum.find(fn item -> item.item_id == discount["itemCode"] end)
         first_payment_date = (Map.get(item, :trial) || %{}) |> Map.get(:first_payment_date) || today()
 
-        %Paywizard.CartDetail.Discount{
+        %Singula.CartDetail.Discount{
           discount_end_date:
             unless(discount["indefinite"], do: Timex.shift(first_payment_date, months: discount["numberOfOccurrences"])),
           discount_amount: get_in(discount, ["discountAmount", "amount"])
@@ -104,5 +104,5 @@ defmodule Paywizard.CartDetail do
     }
   end
 
-  defp today, do: Application.get_env(:paywizard, :today, &Date.utc_today/0).()
+  defp today, do: Application.get_env(:singula, :today, &Date.utc_today/0).()
 end

@@ -1,4 +1,4 @@
-defmodule Paywizard.Contract do
+defmodule Singula.Contract do
   defstruct [:contract_id, :order_id, :item_id, :item_name, :active]
 
   @type contract_id :: integer | binary

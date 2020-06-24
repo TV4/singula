@@ -1,4 +1,4 @@
-defmodule Paywizard.DibsPaymentMethod do
+defmodule Singula.DibsPaymentMethod do
   defstruct [
     :dibs_ccPart,
     :dibs_ccPrefix,

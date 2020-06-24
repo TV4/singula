@@ -1,7 +1,7 @@
-defmodule Paywizard.HTTPClientTest do
+defmodule Singula.HTTPClientTest do
   use ExUnit.Case, async: true
   import Hammox
-  alias Paywizard.HTTPClient
+  alias Singula.HTTPClient
 
   setup :verify_on_exit!
 
@@ -14,7 +14,7 @@ defmodule Paywizard.HTTPClientTest do
     MockHTTPClient
     |> expect(:request, fn
       :get,
-      "https://paywizard.example.b17g.net/api/get/päth",
+      "https://singula.example.b17g.net/api/get/päth",
       "",
       [
         Authorization: "hmac admin:1A9820392174E71E9A66758F29EEC28596FA9DC75A3EC5A29F7EDB6C86A74409",
@@ -26,7 +26,7 @@ defmodule Paywizard.HTTPClientTest do
     end)
 
     assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
-             {:error, %Paywizard.Error{message: :nxdomain}}
+             {:error, %Singula.Error{message: :nxdomain}}
   end
 
   @tag :capture_log
@@ -34,7 +34,7 @@ defmodule Paywizard.HTTPClientTest do
     MockHTTPClient
     |> expect(:request, fn
       :get,
-      "https://paywizard.example.b17g.net/api/get/päth",
+      "https://singula.example.b17g.net/api/get/päth",
       "",
       [
         Authorization: "hmac admin:1A9820392174E71E9A66758F29EEC28596FA9DC75A3EC5A29F7EDB6C86A74409",
@@ -52,7 +52,7 @@ defmodule Paywizard.HTTPClientTest do
     end)
 
     assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
-             {:ok, %Paywizard.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
+             {:ok, %Singula.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
   end
 
   @tag :capture_log
@@ -60,7 +60,7 @@ defmodule Paywizard.HTTPClientTest do
     MockHTTPClient
     |> expect(:request, fn
       :patch,
-      "https://paywizard.example.b17g.net/api/get/päth",
+      "https://singula.example.b17g.net/api/get/päth",
       "{\"key\":\"value\"}",
       [
         Authorization: "hmac admin:B65D6E5E74DEA8CC585D779DE815AF965F774A4CC3870CB5839D5784B5733134",
@@ -79,7 +79,7 @@ defmodule Paywizard.HTTPClientTest do
     end)
 
     assert HTTPClient.patch("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
-             {:ok, %Paywizard.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
+             {:ok, %Singula.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
   end
 
   @tag :capture_log
@@ -87,7 +87,7 @@ defmodule Paywizard.HTTPClientTest do
     MockHTTPClient
     |> expect(:request, fn
       :post,
-      "https://paywizard.example.b17g.net/api/get/päth",
+      "https://singula.example.b17g.net/api/get/päth",
       "{\"key\":\"value\"}",
       [
         Authorization: "hmac admin:67A59DAFC94D26EAA8B12178D6FDED3257E19F69485FDBEEBD129266F41A519A",
@@ -100,6 +100,6 @@ defmodule Paywizard.HTTPClientTest do
     end)
 
     assert HTTPClient.post("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
-             {:ok, %Paywizard.Response{body: "", status_code: 200}}
+             {:ok, %Singula.Response{body: "", status_code: 200}}
   end
 end

@@ -1,6 +1,6 @@
-defmodule Paywizard.ContractDetailsTest do
+defmodule Singula.ContractDetailsTest do
   use ExUnit.Case, async: true
-  alias Paywizard.ContractDetails
+  alias Singula.ContractDetails
 
   test "parse minimum term" do
     payload = %{
@@ -30,7 +30,7 @@ defmodule Paywizard.ContractDetailsTest do
       "status" => "ACTIVE"
     }
 
-    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
              id: 9_622_082,
              item_id: "4FC7D926073348038362",
              item_name: "Field Sales - All Sport 12 plus 12",
@@ -69,7 +69,7 @@ defmodule Paywizard.ContractDetailsTest do
       "status" => "ACTIVE"
     }
 
-    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
              id: 9_719_738,
              item_id: "6D3A56FF5065478ABD61",
              item_name: "C More TV4",
@@ -119,7 +119,7 @@ defmodule Paywizard.ContractDetailsTest do
       "status" => "ACTIVE"
     }
 
-    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
              id: 19844,
              item_id: "6D3A56FF5065478ABD61",
              item_name: "C More TV4",
@@ -171,7 +171,7 @@ defmodule Paywizard.ContractDetailsTest do
       "status" => "ACTIVE"
     }
 
-    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
              balance: %{amount: "0.00", currency: :SEK},
              item_id: "6D3A56FF5065478ABD61",
              id: 19846,
@@ -223,7 +223,7 @@ defmodule Paywizard.ContractDetailsTest do
       "status" => "ACTIVE"
     }
 
-    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
              balance: %{amount: "-2189.00", currency: :SEK},
              id: 19848,
              item_id: "8FB4E247D57B40E09FA7",
@@ -269,7 +269,7 @@ defmodule Paywizard.ContractDetailsTest do
       "status" => "DOWNGRADE_SCHEDULED"
     }
 
-    assert ContractDetails.new(payload) == %Paywizard.ContractDetails{
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
              id: 9_719_738,
              item_id: "6D3A56FF5065478ABD61",
              item_name: "C More TV4",

@@ -1,7 +1,7 @@
-defmodule Paywizard.KlarnaPaymentMethod do
+defmodule Singula.KlarnaPaymentMethod do
   defstruct [:receipt, :transactionId, :redirectUrl, order_lines: [], locale: "sv-SE"]
 
-  alias Paywizard.CartDetail
+  alias Singula.CartDetail
 
   @type t :: %__MODULE__{}
 

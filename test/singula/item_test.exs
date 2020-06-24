@@ -1,6 +1,6 @@
-defmodule Paywizard.ItemTest do
+defmodule Singula.ItemTest do
   use ExUnit.Case, async: true
-  alias Paywizard.Item
+  alias Singula.Item
 
   test "ppv" do
     payload = %{
@@ -14,7 +14,7 @@ defmodule Paywizard.ItemTest do
       "pricing" => %{"oneOff" => %{"amount" => "149.00", "currency" => "SEK"}}
     }
 
-    assert Item.new(payload) == %Paywizard.Item{
+    assert Item.new(payload) == %Singula.Item{
              id: "A2D895F14D6B4F2DA03C",
              currency: :SEK,
              category_id: 213,
@@ -41,7 +41,7 @@ defmodule Paywizard.ItemTest do
       }
     }
 
-    assert Item.new(payload) == %Paywizard.Item{
+    assert Item.new(payload) == %Singula.Item{
              id: "6D3A56FF5065478ABD61",
              currency: :SEK,
              category_id: 101,
@@ -69,7 +69,7 @@ defmodule Paywizard.ItemTest do
       }
     }
 
-    assert Item.new(payload) == %Paywizard.Item{
+    assert Item.new(payload) == %Singula.Item{
              id: "4FC7D926073348038362",
              currency: :SEK,
              category_id: 226,
@@ -98,7 +98,7 @@ defmodule Paywizard.ItemTest do
       }
     }
 
-    assert Item.new(payload) == %Paywizard.Item{
+    assert Item.new(payload) == %Singula.Item{
              id: "8FB4E247D57B40E09FA7",
              currency: :SEK,
              category_id: 226,

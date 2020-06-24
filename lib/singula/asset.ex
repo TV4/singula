@@ -1,4 +1,4 @@
-defmodule Paywizard.Asset do
+defmodule Singula.Asset do
   @enforce_keys [:id, :title]
   defstruct [:id, :title]
 

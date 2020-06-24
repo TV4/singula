@@ -1,14 +1,14 @@
-defmodule SmokeTest.PaywizardClientApi do
+defmodule SmokeTest.SingulaClientApi do
   use ExUnit.Case
   require Logger
 
-  alias Paywizard.Response
-  alias Paywizard.HTTPClient
+  alias Singula.Response
+  alias Singula.HTTPClient
 
   setup_all do
     Application.put_all_env(
-      paywizard: [
-        http_client: Paywizard.HTTPClient,
+      singula: [
+        http_client: Singula.HTTPClient,
         uuid_generator: &UUID.uuid4/0,
         base_url: System.get_env("PAYWIZARD_BASE_URL"),
         api_key: System.get_env("PAYWIZARD_API_KEY"),
@@ -24,9 +24,9 @@ defmodule SmokeTest.PaywizardClientApi do
   setup :merge_saved_test_context
 
   test "Get item by id and currency", %{subscription_item_id: item_id, currency: currency} do
-    assert Paywizard.Client.item_by_id_and_currency(item_id, currency) ==
+    assert Singula.Client.item_by_id_and_currency(item_id, currency) ==
              {:ok,
-              %Paywizard.Item{
+              %Singula.Item{
                 category_id: 101,
                 currency: :SEK,
                 entitlements: [5960],
@@ -40,9 +40,9 @@ defmodule SmokeTest.PaywizardClientApi do
 
   describe "Get customer by id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
-      assert Paywizard.Client.customer_fetch(customer_id) ==
+      assert Singula.Client.customer_fetch(customer_id) ==
                {:ok,
-                %Paywizard.Customer{
+                %Singula.Customer{
                   active: true,
                   address_post_code: 12220,
                   custom_attributes: [
@@ -60,16 +60,16 @@ defmodule SmokeTest.PaywizardClientApi do
     end
 
     test "when customer not found" do
-      assert Paywizard.Client.customer_fetch("12345678-90ab-cdef-1234-567890abcdef") ==
-               {:paywizard_error, :customer_not_found}
+      assert Singula.Client.customer_fetch("12345678-90ab-cdef-1234-567890abcdef") ==
+               {:singula_error, :customer_not_found}
     end
   end
 
   describe "Searching external id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
-      assert Paywizard.Client.customer_search(vimond_id) ==
+      assert Singula.Client.customer_search(vimond_id) ==
                {:ok,
-                %Paywizard.Customer{
+                %Singula.Customer{
                   active: true,
                   address_post_code: 12220,
                   custom_attributes: [
@@ -87,28 +87,28 @@ defmodule SmokeTest.PaywizardClientApi do
     end
 
     test "returns error 90068 when not finding customer" do
-      assert Paywizard.Client.customer_search(666) == {:paywizard_error, :customer_not_found}
+      assert Singula.Client.customer_search(666) == {:singula_error, :customer_not_found}
     end
   end
 
   describe "Fetching customer contracts" do
     test "returns 0 when no contracts", %{customer_id: customer_id} do
-      assert Paywizard.Client.customer_contracts(customer_id) == {:ok, []}
+      assert Singula.Client.customer_contracts(customer_id) == {:ok, []}
     end
 
     test "returns customer not found passing invalid UUID" do
-      assert Paywizard.Client.customer_contracts("non_existing_customer_id") == {:paywizard_error, :customer_not_found}
+      assert Singula.Client.customer_contracts("non_existing_customer_id") == {:singula_error, :customer_not_found}
     end
   end
 
   describe "Fetching customer PPV purchases" do
     test "returns 0 when no purchases", %{customer_id: customer_id} do
-      assert Paywizard.Client.customer_purchases_ppv(customer_id) == {:ok, []}
+      assert Singula.Client.customer_purchases_ppv(customer_id) == {:ok, []}
     end
 
     test "returns customer not found passing invalid UUID" do
-      assert Paywizard.Client.customer_purchases_ppv("non_existing_customer_id") ==
-               {:paywizard_error, :customer_not_found}
+      assert Singula.Client.customer_purchases_ppv("non_existing_customer_id") ==
+               {:singula_error, :customer_not_found}
     end
   end
 
@@ -118,7 +118,7 @@ defmodule SmokeTest.PaywizardClientApi do
       subscription_item_id: subscription_item_id,
       currency: currency
     } do
-      assert {:ok, cart_id} = Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
+      assert {:ok, cart_id} = Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
 
       save_in_test_context(:cart_id, cart_id)
     end
@@ -130,7 +130,7 @@ defmodule SmokeTest.PaywizardClientApi do
       asset: asset
     } do
       assert {:ok, cart_id} =
-               Paywizard.Client.create_cart_with_item(customer_id, ppv_item_id, currency, %Paywizard.MetaData{
+               Singula.Client.create_cart_with_item(customer_id, ppv_item_id, currency, %Singula.MetaData{
                  asset: asset
                })
 
@@ -138,13 +138,13 @@ defmodule SmokeTest.PaywizardClientApi do
     end
 
     test "returns customer not found passing invalid UUID", %{subscription_item_id: item_id, currency: currency} do
-      assert Paywizard.Client.create_cart_with_item("non_existing_customer_id", item_id, currency) ==
-               {:paywizard_error, :customer_not_found}
+      assert Singula.Client.create_cart_with_item("non_existing_customer_id", item_id, currency) ==
+               {:singula_error, :customer_not_found}
     end
 
     test "returns error 90069 for non-existing item code", %{customer_id: customer_id, currency: currency} do
-      assert Paywizard.Client.create_cart_with_item(customer_id, "incorrect_item_id", currency) ==
-               {:paywizard_error, :incorrect_item}
+      assert Singula.Client.create_cart_with_item(customer_id, "incorrect_item_id", currency) ==
+               {:singula_error, :incorrect_item}
     end
   end
 
@@ -154,15 +154,15 @@ defmodule SmokeTest.PaywizardClientApi do
       currency: currency,
       no_free_trial_item_id: subscription_item_id
     } do
-      assert {:ok, cart_id} = Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
+      assert {:ok, cart_id} = Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
 
-      assert Paywizard.Client.fetch_cart(customer_id, cart_id) ==
+      assert Singula.Client.fetch_cart(customer_id, cart_id) ==
                {:ok,
-                %Paywizard.CartDetail{
+                %Singula.CartDetail{
                   currency: :SEK,
                   id: String.to_integer(cart_id),
                   items: [
-                    %Paywizard.CartDetail.Item{
+                    %Singula.CartDetail.Item{
                       cost: "449.00",
                       item_id: subscription_item_id,
                       item_name: "C More All Sport",
@@ -178,18 +178,18 @@ defmodule SmokeTest.PaywizardClientApi do
       cart_id: cart_id,
       subscription_item_id: subscription_item_id
     } do
-      assert Paywizard.Client.fetch_cart(customer_id, cart_id) ==
+      assert Singula.Client.fetch_cart(customer_id, cart_id) ==
                {:ok,
-                %Paywizard.CartDetail{
+                %Singula.CartDetail{
                   currency: :SEK,
                   id: String.to_integer(cart_id),
                   items: [
-                    %Paywizard.CartDetail.Item{
+                    %Singula.CartDetail.Item{
                       cost: "0.00",
                       item_id: subscription_item_id,
                       item_name: "C More TV4",
                       quantity: 1,
-                      trial: %Paywizard.CartDetail.Item.Trial{
+                      trial: %Singula.CartDetail.Item.Trial{
                         first_payment_amount: "139.00",
                         first_payment_date: Date.utc_today() |> Date.add(14),
                         free_trial: true
@@ -201,13 +201,13 @@ defmodule SmokeTest.PaywizardClientApi do
     end
 
     test "returns added ppv", %{customer_id: customer_id, ppv_cart_id: cart_id, ppv_item_id: ppv_item_id, asset: asset} do
-      assert Paywizard.Client.fetch_cart(customer_id, cart_id) ==
+      assert Singula.Client.fetch_cart(customer_id, cart_id) ==
                {:ok,
-                %Paywizard.CartDetail{
+                %Singula.CartDetail{
                   currency: :SEK,
                   id: String.to_integer(cart_id),
                   items: [
-                    %Paywizard.CartDetail.Item{
+                    %Singula.CartDetail.Item{
                       asset: asset,
                       cost: "149.00",
                       item_id: ppv_item_id,
@@ -220,11 +220,11 @@ defmodule SmokeTest.PaywizardClientApi do
     end
 
     test "returns customer not found passing invalid UUID", %{cart_id: cart_id} do
-      assert Paywizard.Client.fetch_cart("non_existing_customer_id", cart_id) == {:paywizard_error, :customer_not_found}
+      assert Singula.Client.fetch_cart("non_existing_customer_id", cart_id) == {:singula_error, :customer_not_found}
     end
 
     test "returns error 90040 for non-existing cart", %{customer_id: customer_id} do
-      assert Paywizard.Client.fetch_cart(customer_id, 666) == {:paywizard_error, :cart_not_found}
+      assert Singula.Client.fetch_cart(customer_id, 666) == {:singula_error, :cart_not_found}
     end
 
     test "unhandled error for invalid cart id ", %{customer_id: customer_id} do
@@ -239,17 +239,17 @@ defmodule SmokeTest.PaywizardClientApi do
                  "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
              }
 
-      assert Paywizard.Client.fetch_cart(customer_id, "non-numeric-cart") == {:paywizard_error, :customer_not_found}
+      assert Singula.Client.fetch_cart(customer_id, "non-numeric-cart") == {:singula_error, :customer_not_found}
     end
   end
 
   describe "Fetching item on sale" do
     test "returns empty list for item without discount", %{no_discount_item_id: item_id, currency: currency} do
-      assert Paywizard.Client.fetch_item_discounts(item_id, currency) == {:ok, []}
+      assert Singula.Client.fetch_item_discounts(item_id, currency) == {:ok, []}
     end
 
     test "returns discount codes for item", %{subscription_item_id: item_id, currency: currency} do
-      assert {:ok, discounts} = Paywizard.Client.fetch_item_discounts(item_id, currency)
+      assert {:ok, discounts} = Singula.Client.fetch_item_discounts(item_id, currency)
 
       discount = Enum.find(discounts, fn discount -> discount["id"] == 10125 end)
       campaign = Enum.find(discount["linkedCombos"], fn campaign -> campaign["campaign"] == "TESTWITHCAMPAIGN" end)
@@ -260,7 +260,7 @@ defmodule SmokeTest.PaywizardClientApi do
                "source" => "TESTWITHSOURCE"
              }
 
-      save_in_test_context(:discount, %Paywizard.Discount{
+      save_in_test_context(:discount, %Singula.Discount{
         campaign: "TESTWITHCAMPAIGN",
         promotion: "PROMO1",
         source: "TESTWITHSOURCE"
@@ -274,21 +274,21 @@ defmodule SmokeTest.PaywizardClientApi do
       discount: discount
     } do
       assert {:ok, cart_id} =
-               Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Paywizard.MetaData{
+               Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Singula.MetaData{
                  discount: discount
                })
 
-      assert Paywizard.Client.fetch_cart(customer_id, cart_id) == {
+      assert Singula.Client.fetch_cart(customer_id, cart_id) == {
                :ok,
-               %Paywizard.CartDetail{
+               %Singula.CartDetail{
                  currency: :SEK,
-                 discount: %Paywizard.CartDetail.Discount{
+                 discount: %Singula.CartDetail.Discount{
                    discount_amount: "224.50",
                    discount_end_date: nil
                  },
                  id: String.to_integer(cart_id),
                  items: [
-                   %Paywizard.CartDetail.Item{
+                   %Singula.CartDetail.Item{
                      cost: "449.00",
                      item_id: "4151C241C3DD41529A87",
                      item_name: "C More All Sport",
@@ -305,13 +305,13 @@ defmodule SmokeTest.PaywizardClientApi do
       currency: currency,
       no_free_trial_item_id: subscription_item_id
     } do
-      assert Paywizard.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Paywizard.MetaData{
-               discount: %Paywizard.Discount{
+      assert Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Singula.MetaData{
+               discount: %Singula.Discount{
                  campaign: "wrong_campaign",
                  source: "broken_source",
                  promotion: "invalid_promotion"
                }
-             }) == {:paywizard_error, :discount_not_found}
+             }) == {:singula_error, :discount_not_found}
     end
   end
 
@@ -332,7 +332,7 @@ defmodule SmokeTest.PaywizardClientApi do
                 "redirectURL" => _redirect_form,
                 "transactionId" => transaction_id,
                 "type" => "redirect"
-              }} = Paywizard.Client.customer_redirect_dibs(customer_id, currency, dibs_redirect_data)
+              }} = Singula.Client.customer_redirect_dibs(customer_id, currency, dibs_redirect_data)
 
       save_in_test_context(:transaction_id, transaction_id)
     end
@@ -345,8 +345,8 @@ defmodule SmokeTest.PaywizardClientApi do
         billing_city: "Stockholm"
       }
 
-      assert Paywizard.Client.customer_redirect_dibs("non_existing_customer_id", currency, dibs_redirect_data) ==
-               {:paywizard_error, :customer_not_found}
+      assert Singula.Client.customer_redirect_dibs("non_existing_customer_id", currency, dibs_redirect_data) ==
+               {:singula_error, :customer_not_found}
     end
 
     test "setting up a dibs payment method returns a payment_method_id",
@@ -359,7 +359,7 @@ defmodule SmokeTest.PaywizardClientApi do
       # TODO: The receipt is returned once the pre-populated form-data gets submitted.
       #       A hard coded receipt is used for testing until its properly received.
 
-      dibs_payment_method = %Paywizard.DibsPaymentMethod{
+      dibs_payment_method = %Singula.DibsPaymentMethod{
         dibs_ccPart: "**** **** **** 0000",
         dibs_ccPrefix: "457110",
         dibs_ccType: "Visa",
@@ -370,7 +370,7 @@ defmodule SmokeTest.PaywizardClientApi do
       }
 
       assert {:ok, payment_method_id} =
-               Paywizard.Client.customer_payment_method(customer_id, currency, dibs_payment_method)
+               Singula.Client.customer_payment_method(customer_id, currency, dibs_payment_method)
 
       save_in_test_context(:payment_method_id, payment_method_id)
     end
@@ -381,19 +381,19 @@ defmodule SmokeTest.PaywizardClientApi do
       payment_method_id: payment_method_id,
       subscription_item_id: item_id
     } do
-      assert {:ok, %Paywizard.CartDetail{contract_id: contract_id, order_id: order_id} = cart} =
-               Paywizard.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
+      assert {:ok, %Singula.CartDetail{contract_id: contract_id, order_id: order_id} = cart} =
+               Singula.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
 
-      assert cart == %Paywizard.CartDetail{
+      assert cart == %Singula.CartDetail{
                contract_id: contract_id,
                currency: :SEK,
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "0.00",
                    item_id: item_id,
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{
+                   trial: %Singula.CartDetail.Item.Trial{
                      first_payment_amount: "139.00",
                      first_payment_date: Date.utc_today() |> Date.add(14),
                      free_trial: true
@@ -418,13 +418,13 @@ defmodule SmokeTest.PaywizardClientApi do
       ppv_item_id: item_id,
       asset: asset
     } do
-      assert {:ok, %Paywizard.CartDetail{order_id: order_id} = cart} =
-               Paywizard.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
+      assert {:ok, %Singula.CartDetail{order_id: order_id} = cart} =
+               Singula.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
 
-      assert cart == %Paywizard.CartDetail{
+      assert cart == %Singula.CartDetail{
                currency: :SEK,
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "149.00",
                    item_id: item_id,
                    item_name: "PPV - 149",
@@ -448,10 +448,10 @@ defmodule SmokeTest.PaywizardClientApi do
       contract_id: contract_id,
       order_id: order_id
     } do
-      assert Paywizard.Client.customer_contracts(customer_id) ==
+      assert Singula.Client.customer_contracts(customer_id) ==
                {:ok,
                 [
-                  %Paywizard.Contract{
+                  %Singula.Contract{
                     active: true,
                     contract_id: contract_id,
                     item_id: item_id,
@@ -460,9 +460,9 @@ defmodule SmokeTest.PaywizardClientApi do
                   }
                 ]}
 
-      assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
+      assert Singula.Client.customer_contract(customer_id, contract_id) ==
                {:ok,
-                %Paywizard.ContractDetails{
+                %Singula.ContractDetails{
                   balance: %{amount: "0.00", currency: :SEK},
                   id: contract_id,
                   item_id: item_id,
@@ -480,10 +480,10 @@ defmodule SmokeTest.PaywizardClientApi do
       asset: asset,
       ppv_order_id: order_id
     } do
-      assert Paywizard.Client.customer_purchases_ppv(customer_id) ==
+      assert Singula.Client.customer_purchases_ppv(customer_id) ==
                {:ok,
                 [
-                  %Paywizard.PPV{asset: asset, item_id: item_id, order_id: order_id}
+                  %Singula.PPV{asset: asset, item_id: item_id, order_id: order_id}
                 ]}
     end
   end
@@ -497,8 +497,8 @@ defmodule SmokeTest.PaywizardClientApi do
       customer_id = create_test_customer(external_id, user_id, email)
       delete_test_customer(customer_id)
 
-      assert Paywizard.Client.create_cart_with_item(customer_id, item_id, currency) ==
-               {:paywizard_error, :item_not_added_to_cart}
+      assert Singula.Client.create_cart_with_item(customer_id, item_id, currency) ==
+               {:singula_error, :item_not_added_to_cart}
     end
   end
 
@@ -525,24 +525,24 @@ defmodule SmokeTest.PaywizardClientApi do
                 "sessionId" => _session_id,
                 "transactionId" => _transaction_id,
                 "type" => "klarnaSession"
-              }} = Paywizard.Client.customer_redirect_klarna(customer_id, currency, klarna_redirect_data)
+              }} = Singula.Client.customer_redirect_klarna(customer_id, currency, klarna_redirect_data)
     end
   end
 
   test "Cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Paywizard.Client.cancel_contract(customer_id, contract_id) == {:ok, Date.utc_today() |> Date.add(14)}
+    assert Singula.Client.cancel_contract(customer_id, contract_id) == {:ok, Date.utc_today() |> Date.add(14)}
   end
 
   test "Withdraw cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Paywizard.Client.withdraw_cancel_contract(customer_id, contract_id) == :ok
+    assert Singula.Client.withdraw_cancel_contract(customer_id, contract_id) == :ok
   end
 
   test "Change a contract changes immediately for upgrades", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Paywizard.Client.change_contract(customer_id, contract_id, "4151C241C3DD41529A87") == :ok
+    assert Singula.Client.change_contract(customer_id, contract_id, "4151C241C3DD41529A87") == :ok
 
-    assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
+    assert Singula.Client.customer_contract(customer_id, contract_id) ==
              {:ok,
-              %Paywizard.ContractDetails{
+              %Singula.ContractDetails{
                 balance: %{amount: "0.00", currency: :SEK},
                 id: contract_id,
                 item_id: "4151C241C3DD41529A87",
@@ -560,11 +560,11 @@ defmodule SmokeTest.PaywizardClientApi do
     contract_id: contract_id,
     subscription_item_id: item_id
   } do
-    assert Paywizard.Client.change_contract(customer_id, contract_id, item_id) == :ok
+    assert Singula.Client.change_contract(customer_id, contract_id, item_id) == :ok
 
-    assert Paywizard.Client.customer_contract(customer_id, contract_id) ==
+    assert Singula.Client.customer_contract(customer_id, contract_id) ==
              {:ok,
-              %Paywizard.ContractDetails{
+              %Singula.ContractDetails{
                 balance: %{amount: "0.00", currency: :SEK},
                 change_date: Date.utc_today() |> Timex.shift(months: 1),
                 change_to_item_id: item_id,
@@ -580,17 +580,17 @@ defmodule SmokeTest.PaywizardClientApi do
   end
 
   test "Withdraw a contract that is scheduled for downgrades", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Paywizard.Client.withdraw_change_contract(customer_id, contract_id) == :ok
+    assert Singula.Client.withdraw_change_contract(customer_id, contract_id) == :ok
   end
 
   test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
-    assert {:ok, crossgrades} = Paywizard.Client.crossgrades_for_contract(customer_id, contract_id)
+    assert {:ok, crossgrades} = Singula.Client.crossgrades_for_contract(customer_id, contract_id)
 
     assert Enum.sort_by(crossgrades, & &1.item_id) == [
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61"},
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96"},
-             %Paywizard.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1"}
+             %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
+             %Singula.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61"},
+             %Singula.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96"},
+             %Singula.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1"}
            ]
   end
 
@@ -614,14 +614,14 @@ defmodule SmokeTest.PaywizardClientApi do
   end
 
   defp cancel_contracts(customer_id) do
-    {:ok, contracts} = Paywizard.Client.customer_contracts(customer_id)
+    {:ok, contracts} = Singula.Client.customer_contracts(customer_id)
 
     Enum.each(contracts, fn %{contract_id: contract_id} ->
       # BUG: Inconsistent behavior calling cancel-endpoint. Will succeed most of the times,
       # but sometimes returns error code 90006 ("Failed to cancel contract").
       # A re-run will succeed...
       cancel_date = Date.utc_today()
-      {:ok, ^cancel_date} = Paywizard.Client.cancel_contract(customer_id, contract_id, to_string(cancel_date))
+      {:ok, ^cancel_date} = Singula.Client.cancel_contract(customer_id, contract_id, to_string(cancel_date))
 
       Logger.info("Deleted contract #{contract_id} for test user: #{customer_id}")
     end)
@@ -631,7 +631,7 @@ defmodule SmokeTest.PaywizardClientApi do
       {:ok, %Response{status_code: 200}} ->
         Logger.info("Deleted smoke test user: #{customer_id}")
 
-      {:ok, %Paywizard.Response{json: %{"developerMessage" => reason, "errorCode" => 4644}, status_code: 400}} ->
+      {:ok, %Singula.Response{json: %{"developerMessage" => reason, "errorCode" => 4644}, status_code: 400}} ->
         Logger.warn("Failed deleting smoke test user, retrying: #{reason}")
         :timer.sleep(1000)
         cancel_contracts(customer_id)
@@ -689,7 +689,7 @@ defmodule SmokeTest.PaywizardClientApi do
       no_discount_item_id: "180B2AD9332349E6A7A4",
       ppv_item_id: "8F9AA56706904775AD7F",
       payment_method_receipt: 602_229_546,
-      asset: %Paywizard.Asset{id: 12_345_678, title: "Sportsboll"}
+      asset: %Singula.Asset{id: 12_345_678, title: "Sportsboll"}
     ]
   end
 

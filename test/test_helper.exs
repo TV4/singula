@@ -1,11 +1,11 @@
 ExUnit.configure(exclude: :pending, timeout: 10000)
 # ExUnit.configure(include: :wip, exclude: :test)
 Application.put_all_env(
-  paywizard: [
-    http_client: MockPaywizardHTTPClient,
+  singula: [
+    http_client: MockSingulaHTTPClient,
     uuid_generator: fn -> "30f86e79-ed75-4022-a16e-d55d9f09af8d" end,
     today: fn -> ~D[2020-02-02] end,
-    base_url: "https://paywizard.example.b17g.net",
+    base_url: "https://singula.example.b17g.net",
     api_key: "admin",
     api_secret: "***REMOVED***",
     client_name: "BBR",

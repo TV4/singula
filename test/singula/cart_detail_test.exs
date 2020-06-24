@@ -1,6 +1,6 @@
-defmodule Paywizard.CartDetailTest do
+defmodule Singula.CartDetailTest do
   use ExUnit.Case, async: true
-  alias Paywizard.CartDetail
+  alias Singula.CartDetail
 
   describe "parse cart containing" do
     test "ppv" do
@@ -22,12 +22,12 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "249.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_385,
                currency: :SEK,
                items: [
-                 %Paywizard.CartDetail.Item{
-                   asset: %Paywizard.Asset{id: 10_255_800, title: "Rögle BK - Växjö Lakers HC"},
+                 %Singula.CartDetail.Item{
+                   asset: %Singula.Asset{id: 10_255_800, title: "Rögle BK - Växjö Lakers HC"},
                    cost: "249.00",
                    item_id: "A2D895F14D6B4F2DA03C",
                    item_name: "PPV - 249",
@@ -54,11 +54,11 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "449.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_357,
                currency: :SEK,
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "449.00",
                    item_id: "4151C241C3DD41529A87",
                    item_name: "C More All Sport",
@@ -94,16 +94,16 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_357,
                currency: :SEK,
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "0.00",
                    item_id: "6D3A56FF5065478ABD61",
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{
+                   trial: %Singula.CartDetail.Item.Trial{
                      first_payment_date: ~D[2020-02-02],
                      free_trial: true,
                      first_payment_amount: "139.00"
@@ -134,16 +134,16 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "139.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_418,
                currency: :SEK,
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "139.00",
                    item_id: "6D3A56FF5065478ABD61",
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{free_trial: false}
+                   trial: %Singula.CartDetail.Item.Trial{free_trial: false}
                  }
                ],
                total_cost: "139.00"
@@ -173,14 +173,14 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "399.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_435,
-               discount: %Paywizard.CartDetail.Discount{
+               discount: %Singula.CartDetail.Discount{
                  discount_end_date: ~D[2022-02-02],
                  discount_amount: "50.00"
                },
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "449.00",
                    item_id: "95AC5A5C31A64F76B323",
                    item_name: "Field Sales - All Sport 24",
@@ -229,19 +229,19 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_448,
-               discount: %Paywizard.CartDetail.Discount{
+               discount: %Singula.CartDetail.Discount{
                  discount_end_date: nil,
                  discount_amount: "69.50"
                },
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "0.00",
                    item_id: "6D3A56FF5065478ABD61",
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{
+                   trial: %Singula.CartDetail.Item.Trial{
                      first_payment_amount: "69.50",
                      first_payment_date: ~D[2020-05-27],
                      free_trial: true
@@ -286,19 +286,19 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_312,
-               discount: %Paywizard.CartDetail.Discount{
+               discount: %Singula.CartDetail.Discount{
                  discount_end_date: ~D[2020-09-02],
                  discount_amount: "139.00"
                },
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "0.00",
                    item_id: "6D3A56FF5065478ABD61",
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{
+                   trial: %Singula.CartDetail.Item.Trial{
                      first_payment_amount: "0.00",
                      first_payment_date: ~D[2020-06-02],
                      free_trial: true
@@ -349,21 +349,21 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: nil,
                order_id: 112_863,
                contract_id: 19844,
-               discount: %Paywizard.CartDetail.Discount{
+               discount: %Singula.CartDetail.Discount{
                  discount_end_date: ~D[2020-09-02],
                  discount_amount: "139.00"
                },
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "0.00",
                    item_id: "6D3A56FF5065478ABD61",
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{
+                   trial: %Singula.CartDetail.Item.Trial{
                      first_payment_amount: "0.00",
                      first_payment_date: ~D[2020-06-02],
                      free_trial: true
@@ -406,20 +406,20 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                currency: :SEK,
-               discount: %Paywizard.CartDetail.Discount{
+               discount: %Singula.CartDetail.Discount{
                  discount_amount: "139.00",
                  discount_end_date: ~D[2020-05-02]
                },
                id: 121_314,
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "139.00",
                    item_id: "6D3A56FF5065478ABD61",
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{
+                   trial: %Singula.CartDetail.Item.Trial{
                      free_trial: false
                    }
                  }
@@ -465,19 +465,19 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: nil,
                order_id: 112_865,
                contract_id: 19846,
                currency: :SEK,
-               discount: %Paywizard.CartDetail.Discount{discount_amount: "139.00", discount_end_date: ~D[2020-05-02]},
+               discount: %Singula.CartDetail.Discount{discount_amount: "139.00", discount_end_date: ~D[2020-05-02]},
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "139.00",
                    item_id: "6D3A56FF5065478ABD61",
                    item_name: "C More TV4",
                    quantity: 1,
-                   trial: %Paywizard.CartDetail.Item.Trial{
+                   trial: %Singula.CartDetail.Item.Trial{
                      free_trial: false
                    }
                  }
@@ -513,12 +513,12 @@ defmodule Paywizard.CartDetailTest do
         "totalCost" => %{"amount" => "2189.00", "currency" => "SEK"}
       }
 
-      assert CartDetail.new(payload) == %Paywizard.CartDetail{
+      assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_320,
                currency: :SEK,
-               discount: %Paywizard.CartDetail.Discount{discount_amount: "200.00", discount_end_date: ~D[2021-02-02]},
+               discount: %Singula.CartDetail.Discount{discount_amount: "200.00", discount_end_date: ~D[2021-02-02]},
                items: [
-                 %Paywizard.CartDetail.Item{
+                 %Singula.CartDetail.Item{
                    cost: "2389.00",
                    item_id: "8FB4E247D57B40E09FA7",
                    item_name: "Field Sales - All Sport 12 plus 12 Apple TV full price",

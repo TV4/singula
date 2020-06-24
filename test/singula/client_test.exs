@@ -1,14 +1,14 @@
-defmodule Paywizard.ClientTest do
+defmodule Singula.ClientTest do
   use ExUnit.Case
   import Hammox
 
-  alias Paywizard.{Asset, CartDetail, Client, Customer, DibsPaymentMethod}
+  alias Singula.{Asset, CartDetail, Client, Customer, DibsPaymentMethod}
 
   setup :verify_on_exit!
 
   describe "get customer" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/customers/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0" ->
         data = %{
           "active" => true,
@@ -28,17 +28,17 @@ defmodule Paywizard.ClientTest do
           },
           "customAttributes" => [%{"name" => "accepted_cmore_terms", "value" => "2018-09-25"}],
           "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
-          "email" => "paywizard_purchase_test2@cmore.se",
+          "email" => "singula_purchase_test2@cmore.se",
           "externalUniqueIdentifier" => 100_471_887,
-          "firstName" => "Paywizard_purchase_test2@cmore.se",
-          "lastName" => "Paywizard_purchase_test2@cmore.se",
+          "firstName" => "Singula_purchase_test2@cmore.se",
+          "lastName" => "Singula_purchase_test2@cmore.se",
           "phone" => 0,
           "referAFriend" => %{"active" => false, "code" => "PIh70mZL"},
           "title" => "-",
-          "username" => "paywizard_purchase_test2@cmore.se"
+          "username" => "singula_purchase_test2@cmore.se"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
@@ -49,16 +49,16 @@ defmodule Paywizard.ClientTest do
                   date_of_birth: nil,
                   address_post_code: "Postcode",
                   custom_attributes: [%{name: "accepted_cmore_terms", value: "2018-09-25"}],
-                  email: "paywizard_purchase_test2@cmore.se",
+                  email: "singula_purchase_test2@cmore.se",
                   external_unique_id: "100471887",
-                  first_name: "Paywizard_purchase_test2@cmore.se",
-                  last_name: "Paywizard_purchase_test2@cmore.se",
-                  username: "paywizard_purchase_test2@cmore.se"
+                  first_name: "Singula_purchase_test2@cmore.se",
+                  last_name: "Singula_purchase_test2@cmore.se",
+                  username: "singula_purchase_test2@cmore.se"
                 }}
     end
 
     test "when customer not found" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/customers/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0" ->
         data = %{
           "developerMessage" => "Customer 27dc778b-582e-4551-88c6-43806128a1a0 not located",
@@ -68,16 +68,16 @@ defmodule Paywizard.ClientTest do
           "userMessage" => "Customer cannot be located"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") == {:paywizard_error, :customer_not_found}
+      assert Client.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") == {:singula_error, :customer_not_found}
     end
   end
 
   describe "search customer" do
     test "with an existing external customer id" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => "100471887"} ->
         data = %{
           "active" => true,
@@ -97,17 +97,17 @@ defmodule Paywizard.ClientTest do
           },
           "customAttributes" => [%{"name" => "accepted_cmore_terms", "value" => "2018-09-25"}],
           "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
-          "email" => "paywizard_purchase_test2@cmore.se",
+          "email" => "singula_purchase_test2@cmore.se",
           "externalUniqueIdentifier" => 100_471_887,
-          "firstName" => "Paywizard_purchase_test2@cmore.se",
-          "lastName" => "Paywizard_purchase_test2@cmore.se",
+          "firstName" => "Singula_purchase_test2@cmore.se",
+          "lastName" => "Singula_purchase_test2@cmore.se",
           "phone" => 0,
           "referAFriend" => %{"active" => false, "code" => "PIh70mZL"},
           "title" => "-",
-          "username" => "paywizard_purchase_test2@cmore.se"
+          "username" => "singula_purchase_test2@cmore.se"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_search("100471887") ==
@@ -118,16 +118,16 @@ defmodule Paywizard.ClientTest do
                   date_of_birth: nil,
                   address_post_code: "Postcode",
                   custom_attributes: [%{name: "accepted_cmore_terms", value: "2018-09-25"}],
-                  email: "paywizard_purchase_test2@cmore.se",
+                  email: "singula_purchase_test2@cmore.se",
                   external_unique_id: "100471887",
-                  first_name: "Paywizard_purchase_test2@cmore.se",
-                  last_name: "Paywizard_purchase_test2@cmore.se",
-                  username: "paywizard_purchase_test2@cmore.se"
+                  first_name: "Singula_purchase_test2@cmore.se",
+                  last_name: "Singula_purchase_test2@cmore.se",
+                  username: "singula_purchase_test2@cmore.se"
                 }}
     end
 
     test "with an incorrect external customer id" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => "666"} ->
         data = %{
           "errorCode" => 90068,
@@ -137,16 +137,16 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.customer_search("666") == {:paywizard_error, :customer_not_found}
+      assert Client.customer_search("666") == {:singula_error, :customer_not_found}
     end
   end
 
   describe "get contracts" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true" ->
         data = %{
           "contractCount" => 1,
@@ -168,13 +168,13 @@ defmodule Paywizard.ClientTest do
           ]
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
                {:ok,
                 [
-                  %Paywizard.Contract{
+                  %Singula.Contract{
                     active: true,
                     contract_id: 9_719_738,
                     item_id: "6D3A56FF5065478ABD61",
@@ -185,7 +185,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "fails" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true" ->
         data = %{
           "errorCode" => 500,
@@ -195,17 +195,17 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
-               {:paywizard_error, :customer_not_found}
+               {:singula_error, :customer_not_found}
     end
   end
 
   describe "get contract" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738" ->
         data = %{
           "active" => true,
@@ -234,12 +234,12 @@ defmodule Paywizard.ClientTest do
           "status" => "ACTIVE"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
                {:ok,
-                %Paywizard.ContractDetails{
+                %Singula.ContractDetails{
                   id: 9_622_082,
                   item_id: "4FC7D926073348038362",
                   item_name: "Field Sales - All Sport 12 plus 12",
@@ -253,7 +253,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "causes system failure" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738" ->
         data = %{
           "errorCode" => 500,
@@ -263,17 +263,17 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:paywizard_error, :customer_not_found}
+               {:singula_error, :customer_not_found}
     end
   end
 
   describe "get ppv purchases" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
                           %{type: "PPV"} ->
         data = %{
@@ -294,7 +294,7 @@ defmodule Paywizard.ClientTest do
           "totalResults" => 2
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/2",
                           %{type: "PPV"} ->
@@ -316,27 +316,27 @@ defmodule Paywizard.ClientTest do
           "totalResults" => 2
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
                {:ok,
                 [
-                  %Paywizard.PPV{
+                  %Singula.PPV{
                     order_id: 112_233,
-                    asset: %Paywizard.Asset{id: 1, title: "1"},
+                    asset: %Singula.Asset{id: 1, title: "1"},
                     item_id: "A2D895F14D6B4F2DA03C"
                   },
-                  %Paywizard.PPV{
+                  %Singula.PPV{
                     order_id: 445_566,
-                    asset: %Paywizard.Asset{id: 2, title: "2"},
+                    asset: %Singula.Asset{id: 2, title: "2"},
                     item_id: "A2D895F14D6B4F2DA03C"
                   }
                 ]}
     end
 
     test "causing system failure" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
                           %{type: "PPV"} ->
         data = %{
@@ -347,17 +347,17 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
-               {:paywizard_error, :customer_not_found}
+               {:singula_error, :customer_not_found}
     end
   end
 
   describe "fetch single use promo code" do
     test "succeeds when promo code exists" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/TESTLM8WVE" ->
         data = %{
           "promoCode" => "TESTLM8WVE",
@@ -381,7 +381,7 @@ defmodule Paywizard.ClientTest do
           ]
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_single_use_promo_code("TESTLM8WVE") ==
@@ -410,7 +410,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "fails when promo code does not exists" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/NON-EXISTING-CODE" ->
         data = %{
           "errorCode" => 90123,
@@ -420,16 +420,16 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:paywizard_error, :promo_code_not_found}
+      assert Client.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:singula_error, :promo_code_not_found}
     end
   end
 
   describe "create cart" do
     test "without meta data" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{}}]}
 
@@ -439,14 +439,14 @@ defmodule Paywizard.ClientTest do
           "type" => "application/json"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency") == {:ok, "10000"}
     end
 
     test "with asset" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{id: "654321", name: "Sportsboll"}}]}
 
@@ -456,16 +456,16 @@ defmodule Paywizard.ClientTest do
           "type" => "application/json"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
-               asset: %Paywizard.Asset{id: "654321", title: "Sportsboll"}
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+               asset: %Singula.Asset{id: "654321", title: "Sportsboll"}
              }) == {:ok, "10000"}
     end
 
     test "with referrer" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{referrerId: "A003_FS"}}]}
 
@@ -475,15 +475,15 @@ defmodule Paywizard.ClientTest do
           "type" => "application/json"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{referrer: "A003_FS"}) ==
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{referrer: "A003_FS"}) ==
                {:ok, "10000"}
     end
 
     test "with discount" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -496,16 +496,16 @@ defmodule Paywizard.ClientTest do
           "type" => "application/json"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
-               discount: %Paywizard.Discount{discount: "10097"}
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+               discount: %Singula.Discount{discount: "10097"}
              }) == {:ok, "10000"}
     end
 
     test "with multi-use voucher discount" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -518,11 +518,11 @@ defmodule Paywizard.ClientTest do
           "type" => "application/json"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
-               discount: %Paywizard.Discount{
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+               discount: %Singula.Discount{
                  is_single_use: false,
                  promotion: "MULTI_HELLO",
                  campaign: "NETONNET",
@@ -532,7 +532,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "with single-use voucher discount" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -545,11 +545,11 @@ defmodule Paywizard.ClientTest do
           "type" => "application/json"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
-               discount: %Paywizard.Discount{
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+               discount: %Singula.Discount{
                  is_single_use: true,
                  promotion: "SINGLE-HELLO"
                }
@@ -557,7 +557,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "causing system failure" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}]
@@ -571,15 +571,15 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency") ==
-               {:paywizard_error, :customer_not_found}
+               {:singula_error, :customer_not_found}
     end
 
     test "discount not found" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -594,16 +594,16 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
-               discount: %Paywizard.Discount{discount: "10097"}
-             }) == {:paywizard_error, :discount_not_found}
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+               discount: %Singula.Discount{discount: "10097"}
+             }) == {:singula_error, :discount_not_found}
     end
 
     test "voucher not found" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -622,20 +622,20 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Paywizard.MetaData{
-               discount: %Paywizard.Discount{
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+               discount: %Singula.Discount{
                  campaign: "wrong_campaign",
                  source: "broken_source",
                  promotion: "invalid_promotion"
                }
-             }) == {:paywizard_error, :discount_not_found}
+             }) == {:singula_error, :discount_not_found}
     end
 
     test "item not added to cart" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}]
@@ -649,15 +649,15 @@ defmodule Paywizard.ClientTest do
           "userMessage" => "Items could not be added"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.create_cart_with_item("customer_id", "item_id", "currency") ==
-               {:paywizard_error, :item_not_added_to_cart}
+               {:singula_error, :item_not_added_to_cart}
     end
 
     test "item not found" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}]
@@ -671,16 +671,16 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency") == {:paywizard_error, :incorrect_item}
+      assert Client.create_cart_with_item("customer_id", "item_id", "currency") == {:singula_error, :incorrect_item}
     end
   end
 
   describe "get cart" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
         data = %{
           "id" => 121_765,
@@ -697,16 +697,16 @@ defmodule Paywizard.ClientTest do
           ]
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_cart("customer_id", "121765") ==
                {:ok,
-                %Paywizard.CartDetail{
+                %Singula.CartDetail{
                   currency: :SEK,
                   id: 121_765,
                   items: [
-                    %Paywizard.CartDetail.Item{
+                    %Singula.CartDetail.Item{
                       cost: "449.00",
                       item_id: "4151C241C3DD41529A87",
                       item_name: "C More All Sport",
@@ -718,7 +718,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "when cart not found" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
         data = %{
           "errorCode" => 90040,
@@ -728,14 +728,14 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.fetch_cart("customer_id", "121765") == {:paywizard_error, :cart_not_found}
+      assert Client.fetch_cart("customer_id", "121765") == {:singula_error, :cart_not_found}
     end
 
     test "causing system failure" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
         data = %{
           "errorCode" => 500,
@@ -745,16 +745,16 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.fetch_cart("customer_id", "121765") == {:paywizard_error, :customer_not_found}
+      assert Client.fetch_cart("customer_id", "121765") == {:singula_error, :customer_not_found}
     end
   end
 
   describe "get item discounts" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/item_id/discounts?currency=currency" ->
         data = %{
           "discounts" => [
@@ -786,7 +786,7 @@ defmodule Paywizard.ClientTest do
           ]
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_item_discounts("item_id", "currency") ==
@@ -821,10 +821,10 @@ defmodule Paywizard.ClientTest do
     end
 
     test "for item without discounts" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/item_id/discounts?currency=currency" ->
         data = %{"discounts" => []}
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.fetch_item_discounts("item_id", "currency") == {:ok, []}
@@ -833,7 +833,7 @@ defmodule Paywizard.ClientTest do
 
   describe "create dibs redirect" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/redirect", data ->
         assert data == %{
                  "currencyCode" => :SEK,
@@ -857,7 +857,7 @@ defmodule Paywizard.ClientTest do
           "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       redirect_data = %{
@@ -879,7 +879,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "causes system failure" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect", _data ->
         data = %{
           "errorCode" => 500,
@@ -889,17 +889,17 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_redirect_dibs("non_existing_customer_id", :SEK, %{}) ==
-               {:paywizard_error, :customer_not_found}
+               {:singula_error, :customer_not_found}
     end
   end
 
   describe "create klarna redirect" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/redirect", data ->
         assert data == %{
                  "currencyCode" => :SEK,
@@ -930,7 +930,7 @@ defmodule Paywizard.ClientTest do
           "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       redirect_data = %{
@@ -959,7 +959,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "causes system failure" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/redirect", _data ->
         data = %{
           "errorCode" => 500,
@@ -969,11 +969,11 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert Client.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, %{}) ==
-               {:paywizard_error, :customer_not_found}
+               {:singula_error, :customer_not_found}
     end
   end
 
@@ -993,7 +993,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "on success", %{dibs_payment_method: dibs_payment_method} do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           data ->
         assert data == %{
@@ -1015,7 +1015,7 @@ defmodule Paywizard.ClientTest do
                }
 
         data = %{"paymentMethodId" => 26574}
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
@@ -1023,7 +1023,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "transaction not found", %{dibs_payment_method: dibs_payment_method} do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
         data = %{
@@ -1034,15 +1034,15 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
-               {:paywizard_error, :transaction_not_found}
+               {:singula_error, :transaction_not_found}
     end
 
     test "receipt not found", %{dibs_payment_method: dibs_payment_method} do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
         data = %{
@@ -1053,17 +1053,17 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
-               {:paywizard_error, :receipt_not_found}
+               {:singula_error, :receipt_not_found}
     end
   end
 
   describe "add klarna payment method to customer" do
     test "on success" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/4ad58d9d-8976-47c0-af2c-35debf38d0eb/paymentmethod",
                           data ->
         assert data == %{
@@ -1086,10 +1086,10 @@ defmodule Paywizard.ClientTest do
                }
 
         data = %{"paymentMethodId" => 654_321}
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      payment_method = %Paywizard.KlarnaPaymentMethod{
+      payment_method = %Singula.KlarnaPaymentMethod{
         receipt: "dea12664-6e1f-1aef-bfb0-e9968842f32c",
         transactionId: "2m56mfCGyV7VWh96k",
         redirectUrl: "http://localhost:4000",
@@ -1105,14 +1105,14 @@ defmodule Paywizard.ClientTest do
         ]
       }
 
-      assert Paywizard.Client.customer_payment_method("4ad58d9d-8976-47c0-af2c-35debf38d0eb", :SEK, payment_method) ==
+      assert Singula.Client.customer_payment_method("4ad58d9d-8976-47c0-af2c-35debf38d0eb", :SEK, payment_method) ==
                {:ok, 654_321}
     end
   end
 
   describe "checkout cart" do
     test "success for subscription that supports free trial" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1141,7 +1141,7 @@ defmodule Paywizard.ClientTest do
           "totalCost" => %{"amount" => "0.00", "currency" => "SEK"}
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1168,7 +1168,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "success for subscription that don't support free trial" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1186,7 +1186,7 @@ defmodule Paywizard.ClientTest do
           "totalCost" => %{"amount" => "449.00", "currency" => "SEK"}
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1208,7 +1208,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "success for PPV" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1224,7 +1224,7 @@ defmodule Paywizard.ClientTest do
           "totalCost" => %{"amount" => "149.00", "currency" => "SEK"}
         }
 
-        {:ok, %Paywizard.Response{status_code: 200, body: Jason.encode!(data), json: data}}
+        {:ok, %Singula.Response{status_code: 200, body: Jason.encode!(data), json: data}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
@@ -1246,7 +1246,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "cart not found" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1257,15 +1257,15 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
-               {:paywizard_error, :cart_not_found}
+               {:singula_error, :cart_not_found}
     end
 
     test "payment authorization fault" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1277,29 +1277,29 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{status_code: 400, body: Jason.encode!(data), json: data}}
+        {:ok, %Singula.Response{status_code: 400, body: Jason.encode!(data), json: data}}
       end)
 
       assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
-               {:paywizard_error, :payment_authorisation_fault}
+               {:singula_error, :payment_authorisation_fault}
     end
   end
 
   describe "cancel contract" do
     test "successfully" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
                           %{"cancelDate" => ""} ->
         data = %{"status" => "CUSTOMER_CANCELLED", "cancellationDate" => "2020-05-12"}
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
     end
 
     test "when minimum term blocks cancellation" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
                           %{"cancelDate" => "2020-02-02"} ->
         data = %{
@@ -1310,17 +1310,17 @@ defmodule Paywizard.ClientTest do
           "userMessage" => "Failed to cancel contract"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
       assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "2020-02-02") ==
-               {:paywizard_error, :contract_cancellation_fault}
+               {:singula_error, :contract_cancellation_fault}
     end
   end
 
   describe "withdraw cancel contract" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
@@ -1330,7 +1330,7 @@ defmodule Paywizard.ClientTest do
             "type" => "application/json"
           }
 
-          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
         end
       )
 
@@ -1338,7 +1338,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "fails" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
@@ -1350,18 +1350,18 @@ defmodule Paywizard.ClientTest do
               "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
           }
 
-          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
         end
       )
 
       assert Client.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:paywizard_error, :cancellation_withdrawal_fault}
+               {:singula_error, :cancellation_withdrawal_fault}
     end
   end
 
   describe "withdraw change contract" do
     test "succeeds" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change/withdraw", %{} ->
@@ -1371,7 +1371,7 @@ defmodule Paywizard.ClientTest do
             "type" => "application/json"
           }
 
-          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
         end
       )
 
@@ -1379,7 +1379,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "fails" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change/withdraw", %{} ->
@@ -1392,17 +1392,17 @@ defmodule Paywizard.ClientTest do
             "userMessage" => "Unable to withdraw scheduled contract change"
           }
 
-          {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
         end
       )
 
       assert Client.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:paywizard_error, :change_withdrawal_fault}
+               {:singula_error, :change_withdrawal_fault}
     end
   end
 
   test "crossgrades for contract" do
-    MockPaywizardHTTPClient
+    MockSingulaHTTPClient
     |> expect(
       :get,
       fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change" ->
@@ -1435,22 +1435,22 @@ defmodule Paywizard.ClientTest do
           ]
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end
     )
 
     assert Client.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
              {:ok,
               [
-                %Paywizard.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
-                %Paywizard.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1"},
-                %Paywizard.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96"},
-                %Paywizard.Crossgrade{currency: :SEK, item_id: "4151C241C3DD41529A87"}
+                %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
+                %Singula.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1"},
+                %Singula.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96"},
+                %Singula.Crossgrade{currency: :SEK, item_id: "4151C241C3DD41529A87"}
               ]}
   end
 
   test "change a contract" do
-    MockPaywizardHTTPClient
+    MockSingulaHTTPClient
     |> expect(
       :post,
       fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change",
@@ -1461,7 +1461,7 @@ defmodule Paywizard.ClientTest do
           "type" => "application/json"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end
     )
 
@@ -1470,7 +1470,7 @@ defmodule Paywizard.ClientTest do
 
   describe "get item" do
     test "successfully" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
         data = %{
           "active" => true,
@@ -1488,12 +1488,12 @@ defmodule Paywizard.ClientTest do
           }
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
                {:ok,
-                %Paywizard.Item{
+                %Singula.Item{
                   id: "6D3A56FF5065478ABD61",
                   category_id: 101,
                   currency: :SEK,
@@ -1504,7 +1504,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "without required payload" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
         data = %{
           "active" => true,
@@ -1517,7 +1517,7 @@ defmodule Paywizard.ClientTest do
           "name" => "C More TV4"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
       assert_raise RuntimeError, ~r/Incoming item payload was incomplete:/, fn ->
@@ -1526,7 +1526,7 @@ defmodule Paywizard.ClientTest do
     end
 
     test "causing system failure" do
-      MockPaywizardHTTPClient
+      MockSingulaHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
         data = %{
           "errorCode" => 500,
@@ -1535,7 +1535,7 @@ defmodule Paywizard.ClientTest do
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
 
-        {:ok, %Paywizard.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
       assert_raise RuntimeError, ~r/item_by_id_and_currency did not get an successful response. Error:/, fn ->

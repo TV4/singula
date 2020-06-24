@@ -1,4 +1,4 @@
-defmodule Paywizard.Item do
+defmodule Singula.Item do
   # TODO: Change recurring_billing: %{amount: "139.00", month_count: 1} => recurring_price: "139.00" since frequency is always 1 month.
   # See change contract endpoint which do not include frequency and also must assume frequency to alwyas be 1 month
   defstruct [

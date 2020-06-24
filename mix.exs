@@ -1,9 +1,9 @@
-defmodule Paywizard.MixProject do
+defmodule Singula.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :paywizard,
+      app: :singula,
       version: "0.1.0",
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
