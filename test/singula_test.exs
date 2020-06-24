@@ -1,8 +1,8 @@
-defmodule Singula.ClientTest do
+defmodule SingulaTest do
   use ExUnit.Case
   import Hammox
 
-  alias Singula.{Asset, CartDetail, Client, Customer, DibsPaymentMethod}
+  alias Singula.{Asset, CartDetail, Customer, DibsPaymentMethod}
 
   setup :verify_on_exit!
 
@@ -41,7 +41,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
+      assert Singula.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
                {:ok,
                 %Customer{
                   active: true,
@@ -71,7 +71,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") == {:singula_error, :customer_not_found}
+      assert Singula.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") == {:singula_error, :customer_not_found}
     end
   end
 
@@ -110,7 +110,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_search("100471887") ==
+      assert Singula.customer_search("100471887") ==
                {:ok,
                 %Customer{
                   active: true,
@@ -140,7 +140,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.customer_search("666") == {:singula_error, :customer_not_found}
+      assert Singula.customer_search("666") == {:singula_error, :customer_not_found}
     end
   end
 
@@ -171,7 +171,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
+      assert Singula.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
                {:ok,
                 [
                   %Singula.Contract{
@@ -198,7 +198,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
+      assert Singula.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
                {:singula_error, :customer_not_found}
     end
   end
@@ -237,7 +237,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
+      assert Singula.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
                {:ok,
                 %Singula.ContractDetails{
                   id: 9_622_082,
@@ -266,7 +266,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
+      assert Singula.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
                {:singula_error, :customer_not_found}
     end
   end
@@ -319,7 +319,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
+      assert Singula.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
                {:ok,
                 [
                   %Singula.PPV{
@@ -350,7 +350,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
+      assert Singula.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
                {:singula_error, :customer_not_found}
     end
   end
@@ -384,7 +384,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.fetch_single_use_promo_code("TESTLM8WVE") ==
+      assert Singula.fetch_single_use_promo_code("TESTLM8WVE") ==
                {:ok,
                 %{
                   "promoCode" => "TESTLM8WVE",
@@ -423,7 +423,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:singula_error, :promo_code_not_found}
+      assert Singula.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:singula_error, :promo_code_not_found}
     end
   end
 
@@ -442,7 +442,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency") == {:ok, "10000"}
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency") == {:ok, "10000"}
     end
 
     test "with asset" do
@@ -459,7 +459,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                asset: %Singula.Asset{id: "654321", title: "Sportsboll"}
              }) == {:ok, "10000"}
     end
@@ -478,7 +478,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{referrer: "A003_FS"}) ==
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{referrer: "A003_FS"}) ==
                {:ok, "10000"}
     end
 
@@ -499,7 +499,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                discount: %Singula.Discount{discount: "10097"}
              }) == {:ok, "10000"}
     end
@@ -521,7 +521,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                discount: %Singula.Discount{
                  is_single_use: false,
                  promotion: "MULTI_HELLO",
@@ -548,7 +548,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                discount: %Singula.Discount{
                  is_single_use: true,
                  promotion: "SINGLE-HELLO"
@@ -574,7 +574,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency") ==
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
                {:singula_error, :customer_not_found}
     end
 
@@ -597,7 +597,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                discount: %Singula.Discount{discount: "10097"}
              }) == {:singula_error, :discount_not_found}
     end
@@ -625,7 +625,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                discount: %Singula.Discount{
                  campaign: "wrong_campaign",
                  source: "broken_source",
@@ -652,7 +652,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency") ==
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
                {:singula_error, :item_not_added_to_cart}
     end
 
@@ -674,7 +674,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.create_cart_with_item("customer_id", "item_id", "currency") == {:singula_error, :incorrect_item}
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency") == {:singula_error, :incorrect_item}
     end
   end
 
@@ -700,7 +700,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.fetch_cart("customer_id", "121765") ==
+      assert Singula.fetch_cart("customer_id", "121765") ==
                {:ok,
                 %Singula.CartDetail{
                   currency: :SEK,
@@ -731,7 +731,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.fetch_cart("customer_id", "121765") == {:singula_error, :cart_not_found}
+      assert Singula.fetch_cart("customer_id", "121765") == {:singula_error, :cart_not_found}
     end
 
     test "causing system failure" do
@@ -748,7 +748,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.fetch_cart("customer_id", "121765") == {:singula_error, :customer_not_found}
+      assert Singula.fetch_cart("customer_id", "121765") == {:singula_error, :customer_not_found}
     end
   end
 
@@ -789,7 +789,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.fetch_item_discounts("item_id", "currency") ==
+      assert Singula.fetch_item_discounts("item_id", "currency") ==
                {:ok,
                 [
                   %{
@@ -827,7 +827,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.fetch_item_discounts("item_id", "currency") == {:ok, []}
+      assert Singula.fetch_item_discounts("item_id", "currency") == {:ok, []}
     end
   end
 
@@ -867,7 +867,7 @@ defmodule Singula.ClientTest do
         billing_city: "Stockholm"
       }
 
-      assert Client.customer_redirect_dibs("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, redirect_data) ==
+      assert Singula.customer_redirect_dibs("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, redirect_data) ==
                {:ok,
                 %{
                   "digest" => "ec2198bbf344e08d14e931c5e06e8bc21a4ce8f947959e072b1f9ac75af1833b",
@@ -892,7 +892,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.customer_redirect_dibs("non_existing_customer_id", :SEK, %{}) ==
+      assert Singula.customer_redirect_dibs("non_existing_customer_id", :SEK, %{}) ==
                {:singula_error, :customer_not_found}
     end
   end
@@ -947,7 +947,7 @@ defmodule Singula.ClientTest do
         tax_rate: 0
       }
 
-      assert Client.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, redirect_data) ==
+      assert Singula.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, redirect_data) ==
                {:ok,
                 %{
                   "type" => "klarnaSession",
@@ -972,7 +972,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Client.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, %{}) ==
+      assert Singula.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, %{}) ==
                {:singula_error, :customer_not_found}
     end
   end
@@ -1018,7 +1018,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
+      assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
                {:ok, 26574}
     end
 
@@ -1037,7 +1037,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
+      assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
                {:singula_error, :transaction_not_found}
     end
 
@@ -1056,7 +1056,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
+      assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
                {:singula_error, :receipt_not_found}
     end
   end
@@ -1105,7 +1105,7 @@ defmodule Singula.ClientTest do
         ]
       }
 
-      assert Singula.Client.customer_payment_method("4ad58d9d-8976-47c0-af2c-35debf38d0eb", :SEK, payment_method) ==
+      assert Singula.customer_payment_method("4ad58d9d-8976-47c0-af2c-35debf38d0eb", :SEK, payment_method) ==
                {:ok, 654_321}
     end
   end
@@ -1144,7 +1144,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
+      assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:ok,
                 %CartDetail{
                   contract_id: 18978,
@@ -1189,7 +1189,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
+      assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:ok,
                 %CartDetail{
                   id: 119_469,
@@ -1227,7 +1227,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{status_code: 200, body: Jason.encode!(data), json: data}}
       end)
 
-      assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
+      assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:ok,
                 %CartDetail{
                   currency: :SEK,
@@ -1260,7 +1260,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
+      assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:singula_error, :cart_not_found}
     end
 
@@ -1280,7 +1280,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{status_code: 400, body: Jason.encode!(data), json: data}}
       end)
 
-      assert Client.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
+      assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
                {:singula_error, :payment_authorisation_fault}
     end
   end
@@ -1295,7 +1295,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
+      assert Singula.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, ~D[2020-05-12]}
     end
 
     test "when minimum term blocks cancellation" do
@@ -1313,7 +1313,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Client.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "2020-02-02") ==
+      assert Singula.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "2020-02-02") ==
                {:singula_error, :contract_cancellation_fault}
     end
   end
@@ -1334,7 +1334,7 @@ defmodule Singula.ClientTest do
         end
       )
 
-      assert Client.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == :ok
+      assert Singula.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == :ok
     end
 
     test "fails" do
@@ -1354,7 +1354,7 @@ defmodule Singula.ClientTest do
         end
       )
 
-      assert Client.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
+      assert Singula.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
                {:singula_error, :cancellation_withdrawal_fault}
     end
   end
@@ -1375,7 +1375,7 @@ defmodule Singula.ClientTest do
         end
       )
 
-      assert Client.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == :ok
+      assert Singula.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == :ok
     end
 
     test "fails" do
@@ -1396,7 +1396,7 @@ defmodule Singula.ClientTest do
         end
       )
 
-      assert Client.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
+      assert Singula.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
                {:singula_error, :change_withdrawal_fault}
     end
   end
@@ -1439,7 +1439,7 @@ defmodule Singula.ClientTest do
       end
     )
 
-    assert Client.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
+    assert Singula.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
              {:ok,
               [
                 %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
@@ -1465,7 +1465,7 @@ defmodule Singula.ClientTest do
       end
     )
 
-    assert Client.change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "180B2AD9332349E6A7A4") == :ok
+    assert Singula.change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "180B2AD9332349E6A7A4") == :ok
   end
 
   describe "get item" do
@@ -1491,7 +1491,7 @@ defmodule Singula.ClientTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
+      assert Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
                {:ok,
                 %Singula.Item{
                   id: "6D3A56FF5065478ABD61",
@@ -1521,7 +1521,7 @@ defmodule Singula.ClientTest do
       end)
 
       assert_raise RuntimeError, ~r/Incoming item payload was incomplete:/, fn ->
-        Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
+        Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
       end
     end
 
@@ -1539,7 +1539,7 @@ defmodule Singula.ClientTest do
       end)
 
       assert_raise RuntimeError, ~r/item_by_id_and_currency did not get an successful response. Error:/, fn ->
-        Client.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
+        Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
       end
     end
   end

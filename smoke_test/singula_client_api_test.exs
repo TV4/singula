@@ -10,12 +10,12 @@ defmodule SmokeTest.SingulaClientApi do
       singula: [
         http_client: Singula.HTTPClient,
         uuid_generator: &UUID.uuid4/0,
-        base_url: System.get_env("PAYWIZARD_BASE_URL"),
-        api_key: System.get_env("PAYWIZARD_API_KEY"),
-        api_secret: System.get_env("PAYWIZARD_API_SECRET"),
-        client_name: System.get_env("PAYWIZARD_CLIENT_NAME"),
-        merchant_password: System.get_env("PAYWIZARD_MERCHANT_PASSWORD"),
-        timeout_ms: System.get_env("PAYWIZARD_TIMEOUT_MS", "10000") |> String.to_integer()
+        base_url: System.get_env("SINGULA_BASE_URL"),
+        api_key: System.get_env("SINGULA_API_KEY"),
+        api_secret: System.get_env("SINGULA_API_SECRET"),
+        client_name: System.get_env("SINGULA_CLIENT_NAME"),
+        merchant_password: System.get_env("SINGULA_MERCHANT_PASSWORD"),
+        timeout_ms: System.get_env("SINGULA_TIMEOUT_MS", "10000") |> String.to_integer()
       ]
     )
   end
@@ -24,7 +24,7 @@ defmodule SmokeTest.SingulaClientApi do
   setup :merge_saved_test_context
 
   test "Get item by id and currency", %{subscription_item_id: item_id, currency: currency} do
-    assert Singula.Client.item_by_id_and_currency(item_id, currency) ==
+    assert Singula.item_by_id_and_currency(item_id, currency) ==
              {:ok,
               %Singula.Item{
                 category_id: 101,
@@ -40,7 +40,7 @@ defmodule SmokeTest.SingulaClientApi do
 
   describe "Get customer by id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
-      assert Singula.Client.customer_fetch(customer_id) ==
+      assert Singula.customer_fetch(customer_id) ==
                {:ok,
                 %Singula.Customer{
                   active: true,
@@ -60,14 +60,14 @@ defmodule SmokeTest.SingulaClientApi do
     end
 
     test "when customer not found" do
-      assert Singula.Client.customer_fetch("12345678-90ab-cdef-1234-567890abcdef") ==
+      assert Singula.customer_fetch("12345678-90ab-cdef-1234-567890abcdef") ==
                {:singula_error, :customer_not_found}
     end
   end
 
   describe "Searching external id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
-      assert Singula.Client.customer_search(vimond_id) ==
+      assert Singula.customer_search(vimond_id) ==
                {:ok,
                 %Singula.Customer{
                   active: true,
@@ -87,27 +87,27 @@ defmodule SmokeTest.SingulaClientApi do
     end
 
     test "returns error 90068 when not finding customer" do
-      assert Singula.Client.customer_search(666) == {:singula_error, :customer_not_found}
+      assert Singula.customer_search(666) == {:singula_error, :customer_not_found}
     end
   end
 
   describe "Fetching customer contracts" do
     test "returns 0 when no contracts", %{customer_id: customer_id} do
-      assert Singula.Client.customer_contracts(customer_id) == {:ok, []}
+      assert Singula.customer_contracts(customer_id) == {:ok, []}
     end
 
     test "returns customer not found passing invalid UUID" do
-      assert Singula.Client.customer_contracts("non_existing_customer_id") == {:singula_error, :customer_not_found}
+      assert Singula.customer_contracts("non_existing_customer_id") == {:singula_error, :customer_not_found}
     end
   end
 
   describe "Fetching customer PPV purchases" do
     test "returns 0 when no purchases", %{customer_id: customer_id} do
-      assert Singula.Client.customer_purchases_ppv(customer_id) == {:ok, []}
+      assert Singula.customer_purchases_ppv(customer_id) == {:ok, []}
     end
 
     test "returns customer not found passing invalid UUID" do
-      assert Singula.Client.customer_purchases_ppv("non_existing_customer_id") ==
+      assert Singula.customer_purchases_ppv("non_existing_customer_id") ==
                {:singula_error, :customer_not_found}
     end
   end
@@ -118,7 +118,7 @@ defmodule SmokeTest.SingulaClientApi do
       subscription_item_id: subscription_item_id,
       currency: currency
     } do
-      assert {:ok, cart_id} = Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
+      assert {:ok, cart_id} = Singula.create_cart_with_item(customer_id, subscription_item_id, currency)
 
       save_in_test_context(:cart_id, cart_id)
     end
@@ -130,7 +130,7 @@ defmodule SmokeTest.SingulaClientApi do
       asset: asset
     } do
       assert {:ok, cart_id} =
-               Singula.Client.create_cart_with_item(customer_id, ppv_item_id, currency, %Singula.MetaData{
+               Singula.create_cart_with_item(customer_id, ppv_item_id, currency, %Singula.MetaData{
                  asset: asset
                })
 
@@ -138,12 +138,12 @@ defmodule SmokeTest.SingulaClientApi do
     end
 
     test "returns customer not found passing invalid UUID", %{subscription_item_id: item_id, currency: currency} do
-      assert Singula.Client.create_cart_with_item("non_existing_customer_id", item_id, currency) ==
+      assert Singula.create_cart_with_item("non_existing_customer_id", item_id, currency) ==
                {:singula_error, :customer_not_found}
     end
 
     test "returns error 90069 for non-existing item code", %{customer_id: customer_id, currency: currency} do
-      assert Singula.Client.create_cart_with_item(customer_id, "incorrect_item_id", currency) ==
+      assert Singula.create_cart_with_item(customer_id, "incorrect_item_id", currency) ==
                {:singula_error, :incorrect_item}
     end
   end
@@ -154,9 +154,9 @@ defmodule SmokeTest.SingulaClientApi do
       currency: currency,
       no_free_trial_item_id: subscription_item_id
     } do
-      assert {:ok, cart_id} = Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency)
+      assert {:ok, cart_id} = Singula.create_cart_with_item(customer_id, subscription_item_id, currency)
 
-      assert Singula.Client.fetch_cart(customer_id, cart_id) ==
+      assert Singula.fetch_cart(customer_id, cart_id) ==
                {:ok,
                 %Singula.CartDetail{
                   currency: :SEK,
@@ -178,7 +178,7 @@ defmodule SmokeTest.SingulaClientApi do
       cart_id: cart_id,
       subscription_item_id: subscription_item_id
     } do
-      assert Singula.Client.fetch_cart(customer_id, cart_id) ==
+      assert Singula.fetch_cart(customer_id, cart_id) ==
                {:ok,
                 %Singula.CartDetail{
                   currency: :SEK,
@@ -201,7 +201,7 @@ defmodule SmokeTest.SingulaClientApi do
     end
 
     test "returns added ppv", %{customer_id: customer_id, ppv_cart_id: cart_id, ppv_item_id: ppv_item_id, asset: asset} do
-      assert Singula.Client.fetch_cart(customer_id, cart_id) ==
+      assert Singula.fetch_cart(customer_id, cart_id) ==
                {:ok,
                 %Singula.CartDetail{
                   currency: :SEK,
@@ -220,11 +220,11 @@ defmodule SmokeTest.SingulaClientApi do
     end
 
     test "returns customer not found passing invalid UUID", %{cart_id: cart_id} do
-      assert Singula.Client.fetch_cart("non_existing_customer_id", cart_id) == {:singula_error, :customer_not_found}
+      assert Singula.fetch_cart("non_existing_customer_id", cart_id) == {:singula_error, :customer_not_found}
     end
 
     test "returns error 90040 for non-existing cart", %{customer_id: customer_id} do
-      assert Singula.Client.fetch_cart(customer_id, 666) == {:singula_error, :cart_not_found}
+      assert Singula.fetch_cart(customer_id, 666) == {:singula_error, :cart_not_found}
     end
 
     test "unhandled error for invalid cart id ", %{customer_id: customer_id} do
@@ -239,17 +239,17 @@ defmodule SmokeTest.SingulaClientApi do
                  "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
              }
 
-      assert Singula.Client.fetch_cart(customer_id, "non-numeric-cart") == {:singula_error, :customer_not_found}
+      assert Singula.fetch_cart(customer_id, "non-numeric-cart") == {:singula_error, :customer_not_found}
     end
   end
 
   describe "Fetching item on sale" do
     test "returns empty list for item without discount", %{no_discount_item_id: item_id, currency: currency} do
-      assert Singula.Client.fetch_item_discounts(item_id, currency) == {:ok, []}
+      assert Singula.fetch_item_discounts(item_id, currency) == {:ok, []}
     end
 
     test "returns discount codes for item", %{subscription_item_id: item_id, currency: currency} do
-      assert {:ok, discounts} = Singula.Client.fetch_item_discounts(item_id, currency)
+      assert {:ok, discounts} = Singula.fetch_item_discounts(item_id, currency)
 
       discount = Enum.find(discounts, fn discount -> discount["id"] == 10125 end)
       campaign = Enum.find(discount["linkedCombos"], fn campaign -> campaign["campaign"] == "TESTWITHCAMPAIGN" end)
@@ -274,11 +274,11 @@ defmodule SmokeTest.SingulaClientApi do
       discount: discount
     } do
       assert {:ok, cart_id} =
-               Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Singula.MetaData{
+               Singula.create_cart_with_item(customer_id, subscription_item_id, currency, %Singula.MetaData{
                  discount: discount
                })
 
-      assert Singula.Client.fetch_cart(customer_id, cart_id) == {
+      assert Singula.fetch_cart(customer_id, cart_id) == {
                :ok,
                %Singula.CartDetail{
                  currency: :SEK,
@@ -305,7 +305,7 @@ defmodule SmokeTest.SingulaClientApi do
       currency: currency,
       no_free_trial_item_id: subscription_item_id
     } do
-      assert Singula.Client.create_cart_with_item(customer_id, subscription_item_id, currency, %Singula.MetaData{
+      assert Singula.create_cart_with_item(customer_id, subscription_item_id, currency, %Singula.MetaData{
                discount: %Singula.Discount{
                  campaign: "wrong_campaign",
                  source: "broken_source",
@@ -332,7 +332,7 @@ defmodule SmokeTest.SingulaClientApi do
                 "redirectURL" => _redirect_form,
                 "transactionId" => transaction_id,
                 "type" => "redirect"
-              }} = Singula.Client.customer_redirect_dibs(customer_id, currency, dibs_redirect_data)
+              }} = Singula.customer_redirect_dibs(customer_id, currency, dibs_redirect_data)
 
       save_in_test_context(:transaction_id, transaction_id)
     end
@@ -345,7 +345,7 @@ defmodule SmokeTest.SingulaClientApi do
         billing_city: "Stockholm"
       }
 
-      assert Singula.Client.customer_redirect_dibs("non_existing_customer_id", currency, dibs_redirect_data) ==
+      assert Singula.customer_redirect_dibs("non_existing_customer_id", currency, dibs_redirect_data) ==
                {:singula_error, :customer_not_found}
     end
 
@@ -369,8 +369,7 @@ defmodule SmokeTest.SingulaClientApi do
         transactionId: transaction_id
       }
 
-      assert {:ok, payment_method_id} =
-               Singula.Client.customer_payment_method(customer_id, currency, dibs_payment_method)
+      assert {:ok, payment_method_id} = Singula.customer_payment_method(customer_id, currency, dibs_payment_method)
 
       save_in_test_context(:payment_method_id, payment_method_id)
     end
@@ -382,7 +381,7 @@ defmodule SmokeTest.SingulaClientApi do
       subscription_item_id: item_id
     } do
       assert {:ok, %Singula.CartDetail{contract_id: contract_id, order_id: order_id} = cart} =
-               Singula.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
+               Singula.customer_cart_checkout(customer_id, cart_id, payment_method_id)
 
       assert cart == %Singula.CartDetail{
                contract_id: contract_id,
@@ -419,7 +418,7 @@ defmodule SmokeTest.SingulaClientApi do
       asset: asset
     } do
       assert {:ok, %Singula.CartDetail{order_id: order_id} = cart} =
-               Singula.Client.customer_cart_checkout(customer_id, cart_id, payment_method_id)
+               Singula.customer_cart_checkout(customer_id, cart_id, payment_method_id)
 
       assert cart == %Singula.CartDetail{
                currency: :SEK,
@@ -448,7 +447,7 @@ defmodule SmokeTest.SingulaClientApi do
       contract_id: contract_id,
       order_id: order_id
     } do
-      assert Singula.Client.customer_contracts(customer_id) ==
+      assert Singula.customer_contracts(customer_id) ==
                {:ok,
                 [
                   %Singula.Contract{
@@ -460,7 +459,7 @@ defmodule SmokeTest.SingulaClientApi do
                   }
                 ]}
 
-      assert Singula.Client.customer_contract(customer_id, contract_id) ==
+      assert Singula.customer_contract(customer_id, contract_id) ==
                {:ok,
                 %Singula.ContractDetails{
                   balance: %{amount: "0.00", currency: :SEK},
@@ -480,7 +479,7 @@ defmodule SmokeTest.SingulaClientApi do
       asset: asset,
       ppv_order_id: order_id
     } do
-      assert Singula.Client.customer_purchases_ppv(customer_id) ==
+      assert Singula.customer_purchases_ppv(customer_id) ==
                {:ok,
                 [
                   %Singula.PPV{asset: asset, item_id: item_id, order_id: order_id}
@@ -497,7 +496,7 @@ defmodule SmokeTest.SingulaClientApi do
       customer_id = create_test_customer(external_id, user_id, email)
       delete_test_customer(customer_id)
 
-      assert Singula.Client.create_cart_with_item(customer_id, item_id, currency) ==
+      assert Singula.create_cart_with_item(customer_id, item_id, currency) ==
                {:singula_error, :item_not_added_to_cart}
     end
   end
@@ -525,22 +524,22 @@ defmodule SmokeTest.SingulaClientApi do
                 "sessionId" => _session_id,
                 "transactionId" => _transaction_id,
                 "type" => "klarnaSession"
-              }} = Singula.Client.customer_redirect_klarna(customer_id, currency, klarna_redirect_data)
+              }} = Singula.customer_redirect_klarna(customer_id, currency, klarna_redirect_data)
     end
   end
 
   test "Cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Singula.Client.cancel_contract(customer_id, contract_id) == {:ok, Date.utc_today() |> Date.add(14)}
+    assert Singula.cancel_contract(customer_id, contract_id) == {:ok, Date.utc_today() |> Date.add(14)}
   end
 
   test "Withdraw cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Singula.Client.withdraw_cancel_contract(customer_id, contract_id) == :ok
+    assert Singula.withdraw_cancel_contract(customer_id, contract_id) == :ok
   end
 
   test "Change a contract changes immediately for upgrades", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Singula.Client.change_contract(customer_id, contract_id, "4151C241C3DD41529A87") == :ok
+    assert Singula.change_contract(customer_id, contract_id, "4151C241C3DD41529A87") == :ok
 
-    assert Singula.Client.customer_contract(customer_id, contract_id) ==
+    assert Singula.customer_contract(customer_id, contract_id) ==
              {:ok,
               %Singula.ContractDetails{
                 balance: %{amount: "0.00", currency: :SEK},
@@ -560,9 +559,9 @@ defmodule SmokeTest.SingulaClientApi do
     contract_id: contract_id,
     subscription_item_id: item_id
   } do
-    assert Singula.Client.change_contract(customer_id, contract_id, item_id) == :ok
+    assert Singula.change_contract(customer_id, contract_id, item_id) == :ok
 
-    assert Singula.Client.customer_contract(customer_id, contract_id) ==
+    assert Singula.customer_contract(customer_id, contract_id) ==
              {:ok,
               %Singula.ContractDetails{
                 balance: %{amount: "0.00", currency: :SEK},
@@ -580,11 +579,11 @@ defmodule SmokeTest.SingulaClientApi do
   end
 
   test "Withdraw a contract that is scheduled for downgrades", %{customer_id: customer_id, contract_id: contract_id} do
-    assert Singula.Client.withdraw_change_contract(customer_id, contract_id) == :ok
+    assert Singula.withdraw_change_contract(customer_id, contract_id) == :ok
   end
 
   test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
-    assert {:ok, crossgrades} = Singula.Client.crossgrades_for_contract(customer_id, contract_id)
+    assert {:ok, crossgrades} = Singula.crossgrades_for_contract(customer_id, contract_id)
 
     assert Enum.sort_by(crossgrades, & &1.item_id) == [
              %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
@@ -614,14 +613,14 @@ defmodule SmokeTest.SingulaClientApi do
   end
 
   defp cancel_contracts(customer_id) do
-    {:ok, contracts} = Singula.Client.customer_contracts(customer_id)
+    {:ok, contracts} = Singula.customer_contracts(customer_id)
 
     Enum.each(contracts, fn %{contract_id: contract_id} ->
       # BUG: Inconsistent behavior calling cancel-endpoint. Will succeed most of the times,
       # but sometimes returns error code 90006 ("Failed to cancel contract").
       # A re-run will succeed...
       cancel_date = Date.utc_today()
-      {:ok, ^cancel_date} = Singula.Client.cancel_contract(customer_id, contract_id, to_string(cancel_date))
+      {:ok, ^cancel_date} = Singula.cancel_contract(customer_id, contract_id, to_string(cancel_date))
 
       Logger.info("Deleted contract #{contract_id} for test user: #{customer_id}")
     end)
