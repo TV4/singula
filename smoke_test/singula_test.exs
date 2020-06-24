@@ -1,4 +1,4 @@
-defmodule SmokeTest.SingulaClientApi do
+defmodule SmokeTest.Singula do
   use ExUnit.Case
   require Logger
 
