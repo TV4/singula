@@ -38,22 +38,27 @@ defmodule SmokeTest.Singula do
               }}
   end
 
+  test "Update customer", %{customer_id: customer_id} do
+    customer = %Singula.Customer{id: customer_id, first_name: "Test"}
+    assert Singula.update_customer(customer) == :ok
+  end
+
   describe "Get customer by id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
       assert Singula.customer_fetch(customer_id) ==
                {:ok,
                 %Singula.Customer{
                   active: true,
-                  address_post_code: 12220,
+                  addresses: [%Singula.Address{post_code: 12220, country_code: "SWE"}],
                   custom_attributes: [
-                    %{name: "Accepted Play Terms Date", value: "2020-02-25"},
-                    %{name: "Accepted Play Terms", value: "Telia"}
+                    %{name: "accepted_play_terms_date", value: "2020-02-25"},
+                    %{name: "accepted_play_terms", value: "Telia"}
                   ],
-                  customer_id: customer_id,
+                  id: customer_id,
                   date_of_birth: nil,
                   email: email,
                   external_unique_id: to_string(vimond_id),
-                  first_name: "Forename",
+                  first_name: "Test",
                   last_name: "TV4 Media SmokeTest",
                   username: username
                 }}
@@ -61,7 +66,7 @@ defmodule SmokeTest.Singula do
 
     test "when customer not found" do
       assert Singula.customer_fetch("12345678-90ab-cdef-1234-567890abcdef") ==
-               {:singula_error, :customer_not_found}
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -71,23 +76,23 @@ defmodule SmokeTest.Singula do
                {:ok,
                 %Singula.Customer{
                   active: true,
-                  address_post_code: 12220,
+                  addresses: [%Singula.Address{post_code: 12220, country_code: "SWE"}],
                   custom_attributes: [
-                    %{name: "Accepted Play Terms Date", value: "2020-02-25"},
-                    %{name: "Accepted Play Terms", value: "Telia"}
+                    %{name: "accepted_play_terms_date", value: "2020-02-25"},
+                    %{name: "accepted_play_terms", value: "Telia"}
                   ],
-                  customer_id: customer_id,
+                  id: customer_id,
                   date_of_birth: nil,
                   email: email,
                   external_unique_id: to_string(vimond_id),
-                  first_name: "Forename",
+                  first_name: "Test",
                   last_name: "TV4 Media SmokeTest",
                   username: username
                 }}
     end
 
     test "returns error 90068 when not finding customer" do
-      assert Singula.customer_search(666) == {:singula_error, :customer_not_found}
+      assert Singula.customer_search(666) == {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -97,7 +102,7 @@ defmodule SmokeTest.Singula do
     end
 
     test "returns customer not found passing invalid UUID" do
-      assert Singula.customer_contracts("non_existing_customer_id") == {:singula_error, :customer_not_found}
+      assert Singula.customer_contracts("non_existing_customer_id") == {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -108,7 +113,7 @@ defmodule SmokeTest.Singula do
 
     test "returns customer not found passing invalid UUID" do
       assert Singula.customer_purchases_ppv("non_existing_customer_id") ==
-               {:singula_error, :customer_not_found}
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -139,12 +144,12 @@ defmodule SmokeTest.Singula do
 
     test "returns customer not found passing invalid UUID", %{subscription_item_id: item_id, currency: currency} do
       assert Singula.create_cart_with_item("non_existing_customer_id", item_id, currency) ==
-               {:singula_error, :customer_not_found}
+               {:error, :singula_invalid_customer_id_fault}
     end
 
     test "returns error 90069 for non-existing item code", %{customer_id: customer_id, currency: currency} do
       assert Singula.create_cart_with_item(customer_id, "incorrect_item_id", currency) ==
-               {:singula_error, :incorrect_item}
+               {:error, :singula_unknown_item_code_fault}
     end
   end
 
@@ -220,11 +225,11 @@ defmodule SmokeTest.Singula do
     end
 
     test "returns customer not found passing invalid UUID", %{cart_id: cart_id} do
-      assert Singula.fetch_cart("non_existing_customer_id", cart_id) == {:singula_error, :customer_not_found}
+      assert Singula.fetch_cart("non_existing_customer_id", cart_id) == {:error, :singula_invalid_customer_id_fault}
     end
 
     test "returns error 90040 for non-existing cart", %{customer_id: customer_id} do
-      assert Singula.fetch_cart(customer_id, 666) == {:singula_error, :cart_not_found}
+      assert Singula.fetch_cart(customer_id, 666) == {:error, :singula_no_cart_found_fault}
     end
 
     test "unhandled error for invalid cart id ", %{customer_id: customer_id} do
@@ -239,7 +244,7 @@ defmodule SmokeTest.Singula do
                  "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
              }
 
-      assert Singula.fetch_cart(customer_id, "non-numeric-cart") == {:singula_error, :customer_not_found}
+      assert Singula.fetch_cart(customer_id, "non-numeric-cart") == {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -311,7 +316,7 @@ defmodule SmokeTest.Singula do
                  source: "broken_source",
                  promotion: "invalid_promotion"
                }
-             }) == {:singula_error, :discount_not_found}
+             }) == {:error, :singula_invalid_discount_code_fault}
     end
   end
 
@@ -346,7 +351,7 @@ defmodule SmokeTest.Singula do
       }
 
       assert Singula.customer_redirect_dibs("non_existing_customer_id", currency, dibs_redirect_data) ==
-               {:singula_error, :customer_not_found}
+               {:error, :singula_invalid_customer_id_fault}
     end
 
     test "setting up a dibs payment method returns a payment_method_id",
@@ -494,10 +499,10 @@ defmodule SmokeTest.Singula do
       external_id = unix_time_now
       email = "#{user_id}@bbrtest.se"
       customer_id = create_test_customer(external_id, user_id, email)
-      delete_test_customer(customer_id)
+      Singula.anonymise_customer(customer_id)
 
       assert Singula.create_cart_with_item(customer_id, item_id, currency) ==
-               {:singula_error, :item_not_added_to_cart}
+               {:error, :singula_unable_to_add_items_fault}
     end
   end
 
@@ -625,55 +630,26 @@ defmodule SmokeTest.Singula do
       Logger.info("Deleted contract #{contract_id} for test user: #{customer_id}")
     end)
 
-    delete_test_customer(customer_id)
-    |> case do
-      {:ok, %Response{status_code: 200}} ->
-        Logger.info("Deleted smoke test user: #{customer_id}")
-
-      {:ok, %Singula.Response{json: %{"developerMessage" => reason, "errorCode" => 4644}, status_code: 400}} ->
-        Logger.warn("Failed deleting smoke test user, retrying: #{reason}")
-        :timer.sleep(1000)
-        cancel_contracts(customer_id)
-    end
+    :ok = Singula.anonymise_customer(customer_id)
+    Logger.info("Deleted smoke test user: #{customer_id}")
   end
 
   defp create_test_customer(external_id, user_id, email) do
-    %{"href" => href} =
-      get_post_body(
-        "/apis/customers/v1/customer",
-        %{
-          "externalUniqueIdentifier" => external_id,
-          "username" => user_id,
-          "password" => "Smoke123",
-          "email" => email,
-          "title" => "Mr",
-          "lastName" => "TV4 Media SmokeTest",
-          "addresses" => [
-            %{
-              "countryCode" => "SWE",
-              "postCode" => "12220"
-            }
-          ],
-          "customAttributes" => [
-            %{
-              "name" => "Accepted Play Terms Date",
-              "value" => "2020-02-25"
-            },
-            %{
-              "name" => "Accepted Play Terms",
-              "value" => "Telia"
-            }
-          ],
-          "active" => true
-        }
-      )
+    customer = %Singula.Customer{
+      external_unique_id: external_id,
+      username: user_id,
+      password: "Smoke123",
+      email: email,
+      last_name: "TV4 Media SmokeTest",
+      addresses: [%Singula.Address{post_code: "12220"}],
+      custom_attributes: [
+        %{name: "accepted_play_terms_date", value: "2020-02-25"},
+        %{name: "accepted_play_terms", value: "Telia"}
+      ]
+    }
 
-    customer_id = String.split(href, "/") |> List.last()
+    {:ok, customer_id} = Singula.create_customer(customer)
     customer_id
-  end
-
-  defp delete_test_customer(customer_id) do
-    HTTPClient.post("/apis/customers/v1/customer/#{customer_id}/anonymise", %{})
   end
 
   defp setup_defaults(_context) do
@@ -690,11 +666,6 @@ defmodule SmokeTest.Singula do
       payment_method_receipt: 602_229_546,
       asset: %Singula.Asset{id: 12_345_678, title: "Sportsboll"}
     ]
-  end
-
-  defp get_post_body(path, data) do
-    {:ok, %Response{json: payload}} = HTTPClient.post(path, data)
-    payload
   end
 
   defp save_in_test_context(key, value) do

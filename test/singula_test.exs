@@ -6,6 +6,150 @@ defmodule SingulaTest do
 
   setup :verify_on_exit!
 
+  describe "create customer" do
+    setup do
+      %{
+        customer: %Singula.Customer{
+          external_unique_id: "123",
+          username: "username",
+          email: "user@host.com",
+          password: "IC4nH4zS3cretP4ssword",
+          first_name: "user",
+          last_name: "test",
+          addresses: [%{country_code: "SWE", post_code: "12345"}],
+          date_of_birth: "1990-01-01",
+          custom_attributes: [
+            %{name: "no_ads", value: "false"},
+            %{name: "generic_ads", value: "false"},
+            %{name: "cmore_newsletter", value: "false"},
+            %{name: "accepted_play_terms", value: "2019-10-16"},
+            %{name: "accepted_fotbollskanalen_terms", value: "2012-12-12"},
+            %{name: "accepted_cmore_terms", value: "2018-08-08"}
+          ]
+        }
+      }
+    end
+
+    test "succeeds", %{customer: customer} do
+      MockSingulaHTTPClient
+      |> expect(:post, fn "/apis/customers/v1/customer", payload ->
+        assert payload == %{
+                 addresses: [%{postCode: "12345", countryCode: "SWE"}],
+                 customAttributes: [
+                   %{name: "no_ads", value: "false"},
+                   %{name: "generic_ads", value: "false"},
+                   %{name: "cmore_newsletter", value: "false"},
+                   %{name: "accepted_play_terms", value: "2019-10-16"},
+                   %{name: "accepted_fotbollskanalen_terms", value: "2012-12-12"},
+                   %{name: "accepted_cmore_terms", value: "2018-08-08"}
+                 ],
+                 dateOfBirth: "1990-01-01",
+                 email: "user@host.com",
+                 externalUniqueIdentifier: "123",
+                 title: "-",
+                 firstName: "user",
+                 lastName: "test",
+                 username: "username",
+                 password: "IC4nH4zS3cretP4ssword"
+               }
+
+        data = %{
+          "href" => "/customer/06ac6f40-d290-4ec3-99c7-066303dc667c",
+          "rel" => "Get customer",
+          "type" => "application/json"
+        }
+
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+      end)
+
+      assert Singula.create_customer(customer) == {:ok, "06ac6f40-d290-4ec3-99c7-066303dc667c"}
+    end
+
+    test "username already exists", %{customer: customer} do
+      MockSingulaHTTPClient
+      |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
+        data = %{
+          "developerMessage" => "Username smoke_200624_01 already exists",
+          "errorCode" => 90074,
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+          "userMessage" => "Username provided already exists"
+        }
+
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+      end)
+
+      assert Singula.create_customer(customer) == {:error, :singula_username_exists_failure_fault}
+    end
+
+    test "external unique identifier already exists", %{customer: customer} do
+      MockSingulaHTTPClient
+      |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
+        data = %{
+          "developerMessage" => "External unique identifier ext_smoke_200624_01 already exists",
+          "errorCode" => 90084,
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+          "userMessage" => "External unique identifier provided already exists"
+        }
+
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+      end)
+
+      assert Singula.create_customer(customer) == {:error, :singula_external_unique_identifier_already_exists_fault}
+    end
+
+    test "email already exists", %{customer: customer} do
+      MockSingulaHTTPClient
+      |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
+        data = %{
+          "developerMessage" => "Email address test200624_01@cmore.se already exists",
+          "errorCode" => 90101,
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+          "userMessage" => "Email address provided already exists"
+        }
+
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+      end)
+
+      assert Singula.create_customer(customer) == {:error, :singula_email_address_already_exists_fault}
+    end
+  end
+
+  test "update customer" do
+    MockSingulaHTTPClient
+    |> expect(:patch, fn "/apis/customers/v1/customer/12345", payload ->
+      assert payload == %{firstName: "Tester"}
+
+      data = %{
+        "href" => "/customer/4b7a1fb4-c36f-45bd-8142-309ea57dc3e8",
+        "rel" => "Get customer",
+        "type" => "application/json"
+      }
+
+      {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 201}}
+    end)
+
+    customer = %Customer{id: "12345", first_name: "Tester"}
+    assert Singula.update_customer(customer) == :ok
+  end
+
+  test "anomymise customer" do
+    MockSingulaHTTPClient
+    |> expect(:post, fn "/apis/customers/v1/customer/12345/anonymise", "" ->
+      data = %{
+        "href" => "/customer/4b7a1fb4-c36f-45bd-8142-309ea57dc3e8",
+        "rel" => "Get customer",
+        "type" => "application/json"
+      }
+
+      {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+    end)
+
+    assert Singula.anonymise_customer("12345") == :ok
+  end
+
   describe "get customer" do
     test "succeeds" do
       MockSingulaHTTPClient
@@ -45,9 +189,9 @@ defmodule SingulaTest do
                {:ok,
                 %Customer{
                   active: true,
-                  customer_id: "ff160270-5197-4c90-835c-cd1fff8b19d0",
+                  id: "ff160270-5197-4c90-835c-cd1fff8b19d0",
                   date_of_birth: nil,
-                  address_post_code: "Postcode",
+                  addresses: [%Singula.Address{post_code: "Postcode", country_code: "SWE"}],
                   custom_attributes: [%{name: "accepted_cmore_terms", value: "2018-09-25"}],
                   email: "singula_purchase_test2@cmore.se",
                   external_unique_id: "100471887",
@@ -71,7 +215,8 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Singula.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") == {:singula_error, :customer_not_found}
+      assert Singula.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -114,9 +259,9 @@ defmodule SingulaTest do
                {:ok,
                 %Customer{
                   active: true,
-                  customer_id: "ff160270-5197-4c90-835c-cd1fff8b19d0",
+                  id: "ff160270-5197-4c90-835c-cd1fff8b19d0",
                   date_of_birth: nil,
-                  address_post_code: "Postcode",
+                  addresses: [%Singula.Address{post_code: "Postcode", country_code: "SWE"}],
                   custom_attributes: [%{name: "accepted_cmore_terms", value: "2018-09-25"}],
                   email: "singula_purchase_test2@cmore.se",
                   external_unique_id: "100471887",
@@ -140,7 +285,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Singula.customer_search("666") == {:singula_error, :customer_not_found}
+      assert Singula.customer_search("666") == {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -186,7 +331,7 @@ defmodule SingulaTest do
 
     test "fails" do
       MockSingulaHTTPClient
-      |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true" ->
+      |> expect(:get, fn "/apis/contracts/v1/customer/non_existing_customer_id/contract?activeOnly=true" ->
         data = %{
           "errorCode" => 500,
           "userMessage" => "System Failure - please retry later.",
@@ -198,8 +343,8 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Singula.customer_contracts("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
-               {:singula_error, :customer_not_found}
+      assert Singula.customer_contracts("non_existing_customer_id") ==
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -254,7 +399,7 @@ defmodule SingulaTest do
 
     test "causes system failure" do
       MockSingulaHTTPClient
-      |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738" ->
+      |> expect(:get, fn "/apis/contracts/v1/customer/non_existing_customer_id/contract/9719738" ->
         data = %{
           "errorCode" => 500,
           "userMessage" => "System Failure - please retry later.",
@@ -266,8 +411,8 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Singula.customer_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:singula_error, :customer_not_found}
+      assert Singula.customer_contract("non_existing_customer_id", 9_719_738) ==
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -337,8 +482,7 @@ defmodule SingulaTest do
 
     test "causing system failure" do
       MockSingulaHTTPClient
-      |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
-                          %{type: "PPV"} ->
+      |> expect(:post, fn "/apis/purchases/v1/customer/non_existing_customer_id/purchases/1", %{type: "PPV"} ->
         data = %{
           "errorCode" => 500,
           "userMessage" => "System Failure - please retry later.",
@@ -350,8 +494,8 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Singula.customer_purchases_ppv("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
-               {:singula_error, :customer_not_found}
+      assert Singula.customer_purchases_ppv("non_existing_customer_id") ==
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -423,7 +567,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
       end)
 
-      assert Singula.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:singula_error, :promo_code_not_found}
+      assert Singula.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:error, :singula_no_promo_code_found_fault}
     end
   end
 
@@ -566,7 +710,7 @@ defmodule SingulaTest do
         data = %{
           "errorCode" => 500,
           "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: customer_id",
           "moreInfo" =>
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
@@ -575,7 +719,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
-               {:singula_error, :customer_not_found}
+               {:error, :singula_invalid_customer_id_fault}
     end
 
     test "discount not found" do
@@ -599,7 +743,7 @@ defmodule SingulaTest do
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                discount: %Singula.Discount{discount: "10097"}
-             }) == {:singula_error, :discount_not_found}
+             }) == {:error, :singula_discount_criteria_not_matched_fault}
     end
 
     test "voucher not found" do
@@ -631,7 +775,7 @@ defmodule SingulaTest do
                  source: "broken_source",
                  promotion: "invalid_promotion"
                }
-             }) == {:singula_error, :discount_not_found}
+             }) == {:error, :singula_invalid_discount_code_fault}
     end
 
     test "item not added to cart" do
@@ -653,7 +797,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
-               {:singula_error, :item_not_added_to_cart}
+               {:error, :singula_unable_to_add_items_fault}
     end
 
     test "item not found" do
@@ -674,7 +818,8 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Singula.create_cart_with_item("customer_id", "item_id", "currency") == {:singula_error, :incorrect_item}
+      assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
+               {:error, :singula_unknown_item_code_fault}
     end
   end
 
@@ -731,7 +876,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
       end)
 
-      assert Singula.fetch_cart("customer_id", "121765") == {:singula_error, :cart_not_found}
+      assert Singula.fetch_cart("customer_id", "121765") == {:error, :singula_no_cart_found_fault}
     end
 
     test "causing system failure" do
@@ -740,7 +885,7 @@ defmodule SingulaTest do
         data = %{
           "errorCode" => 500,
           "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: customer_id",
           "moreInfo" =>
             "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
         }
@@ -748,7 +893,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Singula.fetch_cart("customer_id", "121765") == {:singula_error, :customer_not_found}
+      assert Singula.fetch_cart("customer_id", "121765") == {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -893,7 +1038,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.customer_redirect_dibs("non_existing_customer_id", :SEK, %{}) ==
-               {:singula_error, :customer_not_found}
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -960,7 +1105,7 @@ defmodule SingulaTest do
 
     test "causes system failure" do
       MockSingulaHTTPClient
-      |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/redirect", _data ->
+      |> expect(:post, fn "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect", _data ->
         data = %{
           "errorCode" => 500,
           "userMessage" => "System Failure - please retry later.",
@@ -972,8 +1117,8 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert Singula.customer_redirect_klarna("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, %{}) ==
-               {:singula_error, :customer_not_found}
+      assert Singula.customer_redirect_klarna("non_existing_customer_id", :SEK, %{}) ==
+               {:error, :singula_invalid_customer_id_fault}
     end
   end
 
@@ -1038,7 +1183,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
-               {:singula_error, :transaction_not_found}
+               {:error, :singula_payment_method_creation_failed_fault}
     end
 
     test "receipt not found", %{dibs_payment_method: dibs_payment_method} do
@@ -1057,7 +1202,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
-               {:singula_error, :receipt_not_found}
+               {:error, :singula_provider_processing_fault}
     end
   end
 
@@ -1261,7 +1406,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
-               {:singula_error, :cart_not_found}
+               {:error, :singula_no_cart_found_fault}
     end
 
     test "payment authorization fault" do
@@ -1281,7 +1426,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
-               {:singula_error, :payment_authorisation_fault}
+               {:error, :singula_payment_authorisation_fault}
     end
   end
 
@@ -1314,7 +1459,7 @@ defmodule SingulaTest do
       end)
 
       assert Singula.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "2020-02-02") ==
-               {:singula_error, :contract_cancellation_fault}
+               {:error, :singula_contract_cancellation_fault}
     end
   end
 
@@ -1355,7 +1500,7 @@ defmodule SingulaTest do
       )
 
       assert Singula.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:singula_error, :cancellation_withdrawal_fault}
+               {:error, :singula_cancellation_withdrawal_fault}
     end
   end
 
@@ -1397,7 +1542,7 @@ defmodule SingulaTest do
       )
 
       assert Singula.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:singula_error, :change_withdrawal_fault}
+               {:error, :singula_change_withdrawal_fault}
     end
   end
 
@@ -1520,7 +1665,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert_raise RuntimeError, ~r/Incoming item payload was incomplete:/, fn ->
+      assert_raise FunctionClauseError, "no function clause matching in Singula.Item.new/1", fn ->
         Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
       end
     end
@@ -1538,9 +1683,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
       end)
 
-      assert_raise RuntimeError, ~r/item_by_id_and_currency did not get an successful response. Error:/, fn ->
-        Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
-      end
+      assert Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) == {:error, :singula_system_failure_fault}
     end
   end
 end

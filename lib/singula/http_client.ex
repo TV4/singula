@@ -13,12 +13,14 @@ end
 defmodule Singula.HTTPClient do
   require Logger
 
+  @type payload :: map | binary
+
   @callback get(binary) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
   def get(path, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     signed_request(http_client, current_time, :get, path, "", Accept: "application/json")
   end
 
-  @callback patch(binary, map) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
+  @callback patch(binary, payload) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
   def patch(path, data, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     body = if is_map(data), do: Jason.encode!(data), else: data
 
@@ -28,7 +30,7 @@ defmodule Singula.HTTPClient do
     )
   end
 
-  @callback post(binary, map) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
+  @callback post(binary, payload) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
   def post(path, data, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     body = if is_map(data), do: Jason.encode!(data), else: data
 

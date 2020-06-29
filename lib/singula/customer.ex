@@ -1,35 +1,62 @@
+defmodule Singula.Address do
+  defstruct [:post_code, :country_code]
+  @type t :: %__MODULE__{}
+end
+
 defmodule Singula.Customer do
-  @enforce_keys [:customer_id, :active]
   defstruct [
-    :customer_id,
+    :id,
     :external_unique_id,
     :username,
+    :password,
     :first_name,
     :last_name,
     :email,
     :date_of_birth,
-    :address_post_code,
     :active,
+    addresses: [],
     custom_attributes: []
   ]
 
-  @type customer_id :: <<_::288>>
-  @type t :: %__MODULE__{customer_id: customer_id, active: boolean}
+  @type id :: <<_::288>>
+  @type t :: %__MODULE__{id: id | nil, active: boolean | nil, addresses: list(Singula.Address.t())}
 
-  def new(response) do
+  def new(payload) do
     %Singula.Customer{
-      customer_id: Map.get(response, "customerId"),
-      external_unique_id: Map.get(response, "externalUniqueIdentifier") |> to_string(),
-      username: Map.get(response, "username"),
-      first_name: Map.get(response, "firstName"),
-      last_name: Map.get(response, "lastName"),
-      email: Map.get(response, "email"),
-      date_of_birth: Map.get(response, "dateOfBirth"),
-      address_post_code: get_in(response, ["addresses", Access.at(0), "postCode"]),
-      active: Map.get(response, "active"),
+      id: Map.get(payload, "customerId"),
+      external_unique_id: Map.get(payload, "externalUniqueIdentifier") |> to_string(),
+      username: Map.get(payload, "username"),
+      first_name: Map.get(payload, "firstName"),
+      last_name: Map.get(payload, "lastName"),
+      email: Map.get(payload, "email"),
+      date_of_birth: Map.get(payload, "dateOfBirth"),
+      addresses:
+        Map.get(payload, "addresses", [])
+        |> Enum.map(fn address ->
+          %Singula.Address{post_code: address["postCode"], country_code: address["countryCode"]}
+        end),
+      active: Map.get(payload, "active"),
       custom_attributes:
-        Map.get(response, "customAttributes", [])
+        Map.get(payload, "customAttributes", [])
         |> Enum.map(fn %{"name" => name, "value" => value} -> %{name: name, value: value} end)
+    }
+  end
+
+  def to_payload(customer) do
+    %{
+      externalUniqueIdentifier: customer.external_unique_id,
+      username: customer.username,
+      password: customer.password,
+      firstName: customer.first_name,
+      lastName: customer.last_name,
+      email: customer.email,
+      dateOfBirth: customer.date_of_birth,
+      addresses:
+        customer.addresses
+        |> Enum.map(fn address ->
+          %{postCode: address.post_code, countryCode: address.country_code}
+        end),
+      customAttributes: customer.custom_attributes
     }
   end
 end
