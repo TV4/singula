@@ -2,9 +2,6 @@ defmodule SmokeTest.Singula do
   use ExUnit.Case
   require Logger
 
-  alias Singula.Response
-  alias Singula.HTTPClient
-
   setup_all do
     Application.put_all_env(
       singula: [
@@ -66,7 +63,14 @@ defmodule SmokeTest.Singula do
 
     test "when customer not found" do
       assert Singula.customer_fetch("12345678-90ab-cdef-1234-567890abcdef") ==
-               {:error, :singula_invalid_customer_id_fault}
+               {
+                 :error,
+                 %Singula.Error{
+                   code: 90068,
+                   developer_message: "Customer 12345678-90ab-cdef-1234-567890abcdef not located",
+                   user_message: "Customer cannot be located"
+                 }
+               }
     end
   end
 
@@ -92,7 +96,14 @@ defmodule SmokeTest.Singula do
     end
 
     test "returns error 90068 when not finding customer" do
-      assert Singula.customer_search(666) == {:error, :singula_invalid_customer_id_fault}
+      assert Singula.customer_search(666) == {
+               :error,
+               %Singula.Error{
+                 code: 90068,
+                 developer_message: "Customer with external ID 666 not located",
+                 user_message: "Customer cannot be located"
+               }
+             }
     end
   end
 
@@ -102,7 +113,14 @@ defmodule SmokeTest.Singula do
     end
 
     test "returns customer not found passing invalid UUID" do
-      assert Singula.customer_contracts("non_existing_customer_id") == {:error, :singula_invalid_customer_id_fault}
+      assert Singula.customer_contracts("non_existing_customer_id") == {
+               :error,
+               %Singula.Error{
+                 code: 500,
+                 developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                 user_message: "System Failure - please retry later."
+               }
+             }
     end
   end
 
@@ -113,7 +131,13 @@ defmodule SmokeTest.Singula do
 
     test "returns customer not found passing invalid UUID" do
       assert Singula.customer_purchases_ppv("non_existing_customer_id") ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
   end
 
@@ -144,12 +168,23 @@ defmodule SmokeTest.Singula do
 
     test "returns customer not found passing invalid UUID", %{subscription_item_id: item_id, currency: currency} do
       assert Singula.create_cart_with_item("non_existing_customer_id", item_id, currency) ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
 
     test "returns error 90069 for non-existing item code", %{customer_id: customer_id, currency: currency} do
       assert Singula.create_cart_with_item(customer_id, "incorrect_item_id", currency) ==
-               {:error, :singula_unknown_item_code_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90069,
+                  developer_message: "Unable to find sales item with code: incorrect_item_id",
+                  user_message: "No item could be found with the given code"
+                }}
     end
   end
 
@@ -225,26 +260,34 @@ defmodule SmokeTest.Singula do
     end
 
     test "returns customer not found passing invalid UUID", %{cart_id: cart_id} do
-      assert Singula.fetch_cart("non_existing_customer_id", cart_id) == {:error, :singula_invalid_customer_id_fault}
+      assert Singula.fetch_cart("non_existing_customer_id", cart_id) ==
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
 
     test "returns error 90040 for non-existing cart", %{customer_id: customer_id} do
-      assert Singula.fetch_cart(customer_id, 666) == {:error, :singula_no_cart_found_fault}
+      assert Singula.fetch_cart(customer_id, 666) ==
+               {:error,
+                %Singula.Error{
+                  code: 90040,
+                  developer_message: "Unable to get cart 666 for customer #{customer_id}",
+                  user_message: "Cart ID provided is incorrect or does not exist"
+                }}
     end
 
     test "unhandled error for invalid cart id ", %{customer_id: customer_id} do
-      {:ok, %Response{json: data, status_code: 500}} =
-        HTTPClient.get("/apis/purchases/v1/customer/#{customer_id}/cart/non-numeric-cart")
-
-      assert data == %{
-               "errorCode" => 500,
-               "userMessage" => "System Failure - please retry later.",
-               "developerMessage" => "java.lang.NumberFormatException: For input string: \"non-numeric-cart\"",
-               "moreInfo" =>
-                 "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-             }
-
-      assert Singula.fetch_cart(customer_id, "non-numeric-cart") == {:error, :singula_invalid_customer_id_fault}
+      assert Singula.fetch_cart(customer_id, "non-numeric-cart") ==
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message: "java.lang.NumberFormatException: For input string: \"non-numeric-cart\"",
+                  user_message: "System Failure - please retry later."
+                }}
     end
   end
 
@@ -316,7 +359,13 @@ defmodule SmokeTest.Singula do
                  source: "broken_source",
                  promotion: "invalid_promotion"
                }
-             }) == {:error, :singula_invalid_discount_code_fault}
+             }) ==
+               {:error,
+                %Singula.Error{
+                  code: 90022,
+                  developer_message: "Invalid discount code for cart",
+                  user_message: "Discount does not exist"
+                }}
     end
   end
 
@@ -351,7 +400,13 @@ defmodule SmokeTest.Singula do
       }
 
       assert Singula.customer_redirect_dibs("non_existing_customer_id", currency, dibs_redirect_data) ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
 
     test "setting up a dibs payment method returns a payment_method_id",
@@ -502,7 +557,12 @@ defmodule SmokeTest.Singula do
       Singula.anonymise_customer(customer_id)
 
       assert Singula.create_cart_with_item(customer_id, item_id, currency) ==
-               {:error, :singula_unable_to_add_items_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90062,
+                  developer_message: "Unable to add sales item with code: null",
+                  user_message: "Items could not be added"
+                }}
     end
   end
 

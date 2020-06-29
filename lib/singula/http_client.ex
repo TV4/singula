@@ -5,22 +5,23 @@ defmodule Singula.Response do
 end
 
 defmodule Singula.Error do
-  defstruct [:message]
+  defstruct [:code, :developer_message, :user_message]
 
-  @type t :: %__MODULE__{message: any}
+  @type t :: %__MODULE__{code: integer, developer_message: binary | nil, user_message: binary | nil}
 end
 
 defmodule Singula.HTTPClient do
   require Logger
 
   @type payload :: map | binary
+  @type error :: Singula.Error.t() | HTTPoison.Error.t()
 
-  @callback get(binary) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
+  @callback get(binary) :: {:ok, Singula.Response.t()} | {:error, error}
   def get(path, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     signed_request(http_client, current_time, :get, path, "", Accept: "application/json")
   end
 
-  @callback patch(binary, payload) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
+  @callback patch(binary, payload) :: {:ok, Singula.Response.t()} | {:error, error}
   def patch(path, data, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     body = if is_map(data), do: Jason.encode!(data), else: data
 
@@ -30,7 +31,7 @@ defmodule Singula.HTTPClient do
     )
   end
 
-  @callback post(binary, payload) :: {:ok, Singula.Response.t()} | {:error, %HTTPoison.Error{}}
+  @callback post(binary, payload) :: {:ok, Singula.Response.t()} | {:error, error}
   def post(path, data, http_client \\ HTTPoison, current_time \\ &DateTime.utc_now/0) do
     body = if is_map(data), do: Jason.encode!(data), else: data
 
@@ -73,9 +74,7 @@ defmodule Singula.HTTPClient do
     ]
   end
 
-  defp translate_response({:error, %HTTPoison.Error{reason: message}}) do
-    {:error, %Singula.Error{message: message}}
-  end
+  defp translate_response({:error, error}), do: {:error, error}
 
   defp translate_response({:ok, %HTTPoison.Response{body: body, headers: headers, status_code: status_code}}) do
     response = %Singula.Response{body: body, status_code: status_code}
@@ -87,8 +86,14 @@ defmodule Singula.HTTPClient do
         {_, "application/json" <> _charset} -> %Singula.Response{response | json: Jason.decode!(body)}
       end
 
-    {:ok, response}
+    separate_error(response)
   end
+
+  defp separate_error(%Singula.Response{json: %{"errorCode" => code} = json}) do
+    {:error, %Singula.Error{code: code, developer_message: json["developerMessage"], user_message: json["userMessage"]}}
+  end
+
+  defp separate_error(response), do: {:ok, response}
 
   defp singula_url(path), do: Application.get_env(:singula, :base_url) <> path
   defp timeout, do: Application.get_env(:singula, :timeout_ms, 10000)

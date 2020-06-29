@@ -68,52 +68,62 @@ defmodule SingulaTest do
     test "username already exists", %{customer: customer} do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
-        data = %{
-          "developerMessage" => "Username smoke_200624_01 already exists",
-          "errorCode" => 90074,
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-          "userMessage" => "Username provided already exists"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90074,
+           developer_message: "Username smoke_200624_01 already exists",
+           user_message: "Username provided already exists"
+         }}
       end)
 
-      assert Singula.create_customer(customer) == {:error, :singula_username_exists_failure_fault}
+      assert Singula.create_customer(customer) == {
+               :error,
+               %Singula.Error{
+                 code: 90074,
+                 developer_message: "Username smoke_200624_01 already exists",
+                 user_message: "Username provided already exists"
+               }
+             }
     end
 
     test "external unique identifier already exists", %{customer: customer} do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
-        data = %{
-          "developerMessage" => "External unique identifier ext_smoke_200624_01 already exists",
-          "errorCode" => 90084,
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-          "userMessage" => "External unique identifier provided already exists"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90084,
+           developer_message: "External unique identifier ext_smoke_200624_01 already exists",
+           user_message: "External unique identifier provided already exists"
+         }}
       end)
 
-      assert Singula.create_customer(customer) == {:error, :singula_external_unique_identifier_already_exists_fault}
+      assert Singula.create_customer(customer) ==
+               {:error,
+                %Singula.Error{
+                  code: 90084,
+                  developer_message: "External unique identifier ext_smoke_200624_01 already exists",
+                  user_message: "External unique identifier provided already exists"
+                }}
     end
 
     test "email already exists", %{customer: customer} do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
-        data = %{
-          "developerMessage" => "Email address test200624_01@cmore.se already exists",
-          "errorCode" => 90101,
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-          "userMessage" => "Email address provided already exists"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90101,
+           developer_message: "Email address test200624_01@cmore.se already exists",
+           user_message: "Email address provided already exists"
+         }}
       end)
 
-      assert Singula.create_customer(customer) == {:error, :singula_email_address_already_exists_fault}
+      assert Singula.create_customer(customer) ==
+               {:error,
+                %Singula.Error{
+                  code: 90101,
+                  developer_message: "Email address test200624_01@cmore.se already exists",
+                  user_message: "Email address provided already exists"
+                }}
     end
   end
 
@@ -204,19 +214,21 @@ defmodule SingulaTest do
     test "when customer not found" do
       MockSingulaHTTPClient
       |> expect(:get, fn "/apis/customers/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0" ->
-        data = %{
-          "developerMessage" => "Customer 27dc778b-582e-4551-88c6-43806128a1a0 not located",
-          "errorCode" => 90068,
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-          "userMessage" => "Customer cannot be located"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:error,
+         %Singula.Error{
+           code: 90068,
+           developer_message: "Customer 27dc778b-582e-4551-88c6-43806128a1a0 not located",
+           user_message: "Customer cannot be located"
+         }}
       end)
 
       assert Singula.customer_fetch("ff160270-5197-4c90-835c-cd1fff8b19d0") ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90068,
+                  developer_message: "Customer 27dc778b-582e-4551-88c6-43806128a1a0 not located",
+                  user_message: "Customer cannot be located"
+                }}
     end
   end
 
@@ -274,18 +286,21 @@ defmodule SingulaTest do
     test "with an incorrect external customer id" do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => "666"} ->
-        data = %{
-          "errorCode" => 90068,
-          "userMessage" => "Customer cannot be located",
-          "developerMessage" => "Customer with external ID 666 not located",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:error,
+         %Singula.Error{
+           code: 90068,
+           user_message: "Customer cannot be located",
+           developer_message: "Customer with external ID 666 not located"
+         }}
       end)
 
-      assert Singula.customer_search("666") == {:error, :singula_invalid_customer_id_fault}
+      assert Singula.customer_search("666") ==
+               {:error,
+                %Singula.Error{
+                  code: 90068,
+                  user_message: "Customer cannot be located",
+                  developer_message: "Customer with external ID 666 not located"
+                }}
     end
   end
 
@@ -332,19 +347,22 @@ defmodule SingulaTest do
     test "fails" do
       MockSingulaHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/non_existing_customer_id/contract?activeOnly=true" ->
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error,
+         %Singula.Error{
+           code: 500,
+           developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+           user_message: "System Failure - please retry later."
+         }}
       end)
 
       assert Singula.customer_contracts("non_existing_customer_id") ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
   end
 
@@ -400,19 +418,22 @@ defmodule SingulaTest do
     test "causes system failure" do
       MockSingulaHTTPClient
       |> expect(:get, fn "/apis/contracts/v1/customer/non_existing_customer_id/contract/9719738" ->
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error,
+         %Singula.Error{
+           code: 500,
+           developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+           user_message: "System Failure - please retry later."
+         }}
       end)
 
       assert Singula.customer_contract("non_existing_customer_id", 9_719_738) ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
   end
 
@@ -483,19 +504,22 @@ defmodule SingulaTest do
     test "causing system failure" do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/non_existing_customer_id/purchases/1", %{type: "PPV"} ->
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error,
+         %Singula.Error{
+           code: 500,
+           developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+           user_message: "System Failure - please retry later."
+         }}
       end)
 
       assert Singula.customer_purchases_ppv("non_existing_customer_id") ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
   end
 
@@ -556,18 +580,21 @@ defmodule SingulaTest do
     test "fails when promo code does not exists" do
       MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/NON-EXISTING-CODE" ->
-        data = %{
-          "errorCode" => 90123,
-          "userMessage" => "Promo code not found",
-          "developerMessage" => "Error response from promocode service404",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90123,
+           developer_message: "Error response from promocode service404",
+           user_message: "Promo code not found"
+         }}
       end)
 
-      assert Singula.fetch_single_use_promo_code("NON-EXISTING-CODE") == {:error, :singula_no_promo_code_found_fault}
+      assert Singula.fetch_single_use_promo_code("NON-EXISTING-CODE") ==
+               {:error,
+                %Singula.Error{
+                  code: 90123,
+                  developer_message: "Error response from promocode service404",
+                  user_message: "Promo code not found"
+                }}
     end
   end
 
@@ -707,19 +734,21 @@ defmodule SingulaTest do
                  items: [%{itemCode: "item_id", itemData: %{}}]
                }
 
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error,
+         %Singula.Error{
+           code: 500,
+           user_message: "System Failure - please retry later.",
+           developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: customer_id"
+         }}
       end)
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  user_message: "System Failure - please retry later.",
+                  developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: customer_id"
+                }}
     end
 
     test "discount not found" do
@@ -730,20 +759,23 @@ defmodule SingulaTest do
                  discountCode: %{discountId: "10097", promoCode: "NONE", campaignCode: "NONE", sourceCode: "NONE"}
                }
 
-        data = %{
-          "errorCode" => 90115,
-          "developerMessage" => "Discount criteria not matched",
-          "userMessage" => "Discount criteria not matched",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90115,
+           developer_message: "Discount criteria not matched",
+           user_message: "Discount criteria not matched"
+         }}
       end)
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
                discount: %Singula.Discount{discount: "10097"}
-             }) == {:error, :singula_discount_criteria_not_matched_fault}
+             }) ==
+               {:error,
+                %Singula.Error{
+                  code: 90115,
+                  developer_message: "Discount criteria not matched",
+                  user_message: "Discount criteria not matched"
+                }}
     end
 
     test "voucher not found" do
@@ -758,15 +790,12 @@ defmodule SingulaTest do
                  }
                }
 
-        data = %{
-          "errorCode" => 90022,
-          "userMessage" => "Discount does not exist",
-          "developerMessage" => "Invalid discount code for cart",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:error,
+         %Singula.Error{
+           code: 90022,
+           user_message: "Discount does not exist",
+           developer_message: "Invalid discount code for cart"
+         }}
       end)
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency", %Singula.MetaData{
@@ -775,7 +804,13 @@ defmodule SingulaTest do
                  source: "broken_source",
                  promotion: "invalid_promotion"
                }
-             }) == {:error, :singula_invalid_discount_code_fault}
+             }) ==
+               {:error,
+                %Singula.Error{
+                  code: 90022,
+                  user_message: "Discount does not exist",
+                  developer_message: "Invalid discount code for cart"
+                }}
     end
 
     test "item not added to cart" do
@@ -785,19 +820,21 @@ defmodule SingulaTest do
                  items: [%{itemCode: "item_id", itemData: %{}}]
                }
 
-        data = %{
-          "developerMessage" => "Unable to add sales item with code: null",
-          "errorCode" => 90062,
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-          "userMessage" => "Items could not be added"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90062,
+           user_message: "Items could not be added",
+           developer_message: "Unable to add sales item with code: null"
+         }}
       end)
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
-               {:error, :singula_unable_to_add_items_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90062,
+                  user_message: "Items could not be added",
+                  developer_message: "Unable to add sales item with code: null"
+                }}
     end
 
     test "item not found" do
@@ -807,19 +844,21 @@ defmodule SingulaTest do
                  items: [%{itemCode: "item_id", itemData: %{}}]
                }
 
-        data = %{
-          "errorCode" => 90069,
-          "userMessage" => "No item could be found with the given code",
-          "developerMessage" => "Unable to find sales item with code: item_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:error,
+         %Singula.Error{
+           code: 90069,
+           user_message: "No item could be found with the given code",
+           developer_message: "Unable to find sales item with code: item_id"
+         }}
       end)
 
       assert Singula.create_cart_with_item("customer_id", "item_id", "currency") ==
-               {:error, :singula_unknown_item_code_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90069,
+                  user_message: "No item could be found with the given code",
+                  developer_message: "Unable to find sales item with code: item_id"
+                }}
     end
   end
 
@@ -865,35 +904,41 @@ defmodule SingulaTest do
     test "when cart not found" do
       MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
-        data = %{
-          "errorCode" => 90040,
-          "userMessage" => "Cart ID provided is incorrect or does not exist",
-          "developerMessage" => "Unable to get cart 121765 for customer customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:error,
+         %Singula.Error{
+           code: 90040,
+           user_message: "Cart ID provided is incorrect or does not exist",
+           developer_message: "Unable to get cart 121765 for customer customer_id"
+         }}
       end)
 
-      assert Singula.fetch_cart("customer_id", "121765") == {:error, :singula_no_cart_found_fault}
+      assert Singula.fetch_cart("customer_id", "121765") ==
+               {:error,
+                %Singula.Error{
+                  code: 90040,
+                  user_message: "Cart ID provided is incorrect or does not exist",
+                  developer_message: "Unable to get cart 121765 for customer customer_id"
+                }}
     end
 
     test "causing system failure" do
       MockSingulaHTTPClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error,
+         %Singula.Error{
+           code: 500,
+           user_message: "System Failure - please retry later.",
+           developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: customer_id"
+         }}
       end)
 
-      assert Singula.fetch_cart("customer_id", "121765") == {:error, :singula_invalid_customer_id_fault}
+      assert Singula.fetch_cart("customer_id", "121765") ==
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  user_message: "System Failure - please retry later.",
+                  developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: customer_id"
+                }}
     end
   end
 
@@ -1026,19 +1071,21 @@ defmodule SingulaTest do
     test "causes system failure" do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect", _data ->
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error,
+         %Singula.Error{
+           code: 500,
+           user_message: "System Failure - please retry later.",
+           developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id"
+         }}
       end)
 
       assert Singula.customer_redirect_dibs("non_existing_customer_id", :SEK, %{}) ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  user_message: "System Failure - please retry later.",
+                  developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id"
+                }}
     end
   end
 
@@ -1106,19 +1153,22 @@ defmodule SingulaTest do
     test "causes system failure" do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect", _data ->
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "developerMessage" => "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error,
+         %Singula.Error{
+           code: 500,
+           developer_message: "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+           user_message: "System Failure - please retry later."
+         }}
       end)
 
       assert Singula.customer_redirect_klarna("non_existing_customer_id", :SEK, %{}) ==
-               {:error, :singula_invalid_customer_id_fault}
+               {:error,
+                %Singula.Error{
+                  code: 500,
+                  developer_message:
+                    "java.lang.IllegalArgumentException: Invalid UUID string: non_existing_customer_id",
+                  user_message: "System Failure - please retry later."
+                }}
     end
   end
 
@@ -1171,38 +1221,42 @@ defmodule SingulaTest do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
-        data = %{
-          "errorCode" => 90047,
-          "developerMessage" => "Token not generated",
-          "userMessage" => "Payment method creation failure",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90047,
+           developer_message: "Token not generated",
+           user_message: "Payment method creation failure"
+         }}
       end)
 
       assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
-               {:error, :singula_payment_method_creation_failed_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90047,
+                  developer_message: "Token not generated",
+                  user_message: "Payment method creation failure"
+                }}
     end
 
     test "receipt not found", %{dibs_payment_method: dibs_payment_method} do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
-        data = %{
-          "errorCode" => 90054,
-          "userMessage" => "Payment provider cannot complete transaction",
-          "developerMessage" => "Authorisation failed",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90054,
+           developer_message: "Authorisation failed",
+           user_message: "Payment provider cannot complete transaction"
+         }}
       end)
 
       assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
-               {:error, :singula_provider_processing_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90054,
+                  developer_message: "Authorisation failed",
+                  user_message: "Payment provider cannot complete transaction"
+                }}
     end
   end
 
@@ -1394,39 +1448,43 @@ defmodule SingulaTest do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
-        data = %{
-          "errorCode" => 90040,
-          "userMessage" => "Cart ID provided is incorrect or does not exist",
-          "developerMessage" => "No cart found with given ID",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 404}}
+        {:error,
+         %Singula.Error{
+           code: 90040,
+           user_message: "Cart ID provided is incorrect or does not exist",
+           developer_message: "No cart found with given ID"
+         }}
       end)
 
       assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
-               {:error, :singula_no_cart_found_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90040,
+                  user_message: "Cart ID provided is incorrect or does not exist",
+                  developer_message: "No cart found with given ID"
+                }}
     end
 
     test "payment authorization fault" do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
-        data = %{
-          "errorCode" => 90045,
-          "userMessage" => "Payment attempt failed",
-          "developerMessage" =>
-            "Unable to authorise payment: PaymentAttemptFailedException server_error PSP error: 402",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{status_code: 400, body: Jason.encode!(data), json: data}}
+        {:error,
+         %Singula.Error{
+           code: 90045,
+           user_message: "Payment attempt failed",
+           developer_message: "Unable to authorise payment: PaymentAttemptFailedException server_error PSP error: 402"
+         }}
       end)
 
       assert Singula.customer_cart_checkout("ff160270-5197-4c90-835c-cd1fff8b19d0", "118114", 26574) ==
-               {:error, :singula_payment_authorisation_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90045,
+                  user_message: "Payment attempt failed",
+                  developer_message:
+                    "Unable to authorise payment: PaymentAttemptFailedException server_error PSP error: 402"
+                }}
     end
   end
 
@@ -1447,19 +1505,21 @@ defmodule SingulaTest do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
                           %{"cancelDate" => "2020-02-02"} ->
-        data = %{
-          "developerMessage" => "Unable to cancel contract : 9622756",
-          "errorCode" => 90006,
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-          "userMessage" => "Failed to cancel contract"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+        {:error,
+         %Singula.Error{
+           code: 90006,
+           developer_message: "Unable to cancel contract : 9622756",
+           user_message: "Failed to cancel contract"
+         }}
       end)
 
       assert Singula.cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "2020-02-02") ==
-               {:error, :singula_contract_cancellation_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90006,
+                  developer_message: "Unable to cancel contract : 9622756",
+                  user_message: "Failed to cancel contract"
+                }}
     end
   end
 
@@ -1487,20 +1547,22 @@ defmodule SingulaTest do
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
-          data = %{
-            "errorCode" => 90017,
-            "userMessage" => "Contract cannot be changed at this time",
-            "developerMessage" => "Contract cannot be cancelled at this time",
-            "moreInfo" =>
-              "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-          }
-
-          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+          {:error,
+           %Singula.Error{
+             code: 90017,
+             developer_message: "Contract cannot be cancelled at this time",
+             user_message: "Contract cannot be changed at this time"
+           }}
         end
       )
 
       assert Singula.withdraw_cancel_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:error, :singula_cancellation_withdrawal_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90017,
+                  developer_message: "Contract cannot be cancelled at this time",
+                  user_message: "Contract cannot be changed at this time"
+                }}
     end
   end
 
@@ -1528,21 +1590,24 @@ defmodule SingulaTest do
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change/withdraw", %{} ->
-          data = %{
-            "developerMessage" =>
-              "Unable to withdraw change of contract 9719738 for customer ff160270-5197-4c90-835c-cd1fff8b19d0/6296944; invalid state ACTIVE",
-            "errorCode" => 90108,
-            "moreInfo" =>
-              "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
-            "userMessage" => "Unable to withdraw scheduled contract change"
-          }
-
-          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 400}}
+          {:error,
+           %Singula.Error{
+             code: 90108,
+             developer_message:
+               "Unable to withdraw change of contract 9719738 for customer ff160270-5197-4c90-835c-cd1fff8b19d0/6296944; invalid state ACTIVE",
+             user_message: "Unable to withdraw scheduled contract change"
+           }}
         end
       )
 
       assert Singula.withdraw_change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
-               {:error, :singula_change_withdrawal_fault}
+               {:error,
+                %Singula.Error{
+                  code: 90108,
+                  developer_message:
+                    "Unable to withdraw change of contract 9719738 for customer ff160270-5197-4c90-835c-cd1fff8b19d0/6296944; invalid state ACTIVE",
+                  user_message: "Unable to withdraw scheduled contract change"
+                }}
     end
   end
 
@@ -1673,17 +1738,11 @@ defmodule SingulaTest do
     test "causing system failure" do
       MockSingulaHTTPClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
-        data = %{
-          "errorCode" => 500,
-          "userMessage" => "System Failure - please retry later.",
-          "moreInfo" =>
-            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)"
-        }
-
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 500}}
+        {:error, %Singula.Error{code: 500, user_message: "System Failure - please retry later."}}
       end)
 
-      assert Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) == {:error, :singula_system_failure_fault}
+      assert Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
+               {:error, %Singula.Error{code: 500, user_message: "System Failure - please retry later."}}
     end
   end
 end

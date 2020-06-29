@@ -10,7 +10,7 @@ defmodule Singula.HTTPClientTest do
   end
 
   @tag :capture_log
-  test "handle error", %{current_time: current_time} do
+  test "handle network error", %{current_time: current_time} do
     MockHTTPClient
     |> expect(:request, fn
       :get,
@@ -26,7 +26,46 @@ defmodule Singula.HTTPClientTest do
     end)
 
     assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
-             {:error, %Singula.Error{message: :nxdomain}}
+             {:error, %HTTPoison.Error{reason: :nxdomain}}
+  end
+
+  @tag :capture_log
+  test "handle singula error", %{current_time: current_time} do
+    MockHTTPClient
+    |> expect(:request, fn
+      :get,
+      "https://singula.example.b17g.net/api/get/päth",
+      "",
+      [
+        Authorization: "hmac admin:1A9820392174E71E9A66758F29EEC28596FA9DC75A3EC5A29F7EDB6C86A74409",
+        Timestamp: 1_580_674_802,
+        Accept: "application/json"
+      ],
+      [recv_timeout: 10000] ->
+        error = %{
+          "developerMessage" => "Username smoke_200624_01 already exists",
+          "errorCode" => 90074,
+          "moreInfo" =>
+            "Documentation on this failure can be found in SwaggerHub (https://swagger.io/tools/swaggerhub/)",
+          "userMessage" => "Username provided already exists"
+        }
+
+        {:ok,
+         %HTTPoison.Response{
+           body: Jason.encode!(error),
+           status_code: 400,
+           headers: [{"Content-Type", "application/json"}],
+           request: %HTTPoison.Request{url: ""}
+         }}
+    end)
+
+    assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
+             {:error,
+              %Singula.Error{
+                code: 90074,
+                developer_message: "Username smoke_200624_01 already exists",
+                user_message: "Username provided already exists"
+              }}
   end
 
   @tag :capture_log
