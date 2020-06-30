@@ -1,12 +1,12 @@
 defmodule Singula.Telemetry do
   require Logger
 
-  def attach_singula_response_logging do
-    :telemetry.attach("singula-response-logging", [:singula, :response], &handle_event/4, nil)
+  def attach_singula_response_handler do
+    :telemetry.attach("singula-response-handler", [:singula, :response], &handle_event/4, nil)
   end
 
-  def attach_librato_response_time do
-    :telemetry.attach("librato-response-time", [:singula, :response, :time], &handle_event/4, nil)
+  def attach_librato_response_handler do
+    :telemetry.attach("librato-response-handler", [:singula, :response, :time], &handle_event/4, nil)
   end
 
   def emit_response_event(response) do
@@ -22,7 +22,7 @@ defmodule Singula.Telemetry do
   end
 
   def handle_event([:singula, :response, :time], %{time: time}, %{name: name}, _config) do
-    Logger.info("measure#singula.#{name}=#{time}ms count#singula.#{name}=1")
+    Logger.info("measure#singula.#{name}.time=#{time}ms count#singula.#{name}.count=1")
   end
 
   def handle_event(_event, _measurement, _meta_data, _config), do: nil

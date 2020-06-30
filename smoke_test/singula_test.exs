@@ -3,8 +3,8 @@ defmodule SmokeTest.Singula do
   require Logger
 
   setup_all do
-    :ok = Singula.Telemetry.attach_singula_response_logging()
-    :ok = Singula.Telemetry.attach_librato_response_time()
+    :ok = Singula.Telemetry.attach_singula_response_handler()
+    :ok = Singula.Telemetry.attach_librato_response_handler()
 
     Application.put_all_env(
       singula: [
