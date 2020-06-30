@@ -540,10 +540,7 @@ defmodule SmokeTest.Singula do
       ppv_order_id: order_id
     } do
       assert Singula.customer_purchases_ppv(customer_id) ==
-               {:ok,
-                [
-                  %Singula.PPV{asset: asset, item_id: item_id, order_id: order_id}
-                ]}
+               {:ok, [%Singula.PPV{asset: asset, item_id: item_id, order_id: order_id}]}
     end
   end
 
