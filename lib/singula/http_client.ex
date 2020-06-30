@@ -47,7 +47,7 @@ defmodule Singula.HTTPClient do
 
     response = http_client.request(method, url, body, headers, options)
 
-    :telemetry.execute([:singula, :response], %{response: response})
+    Singula.Telemetry.emit_response_event(%{response: response})
 
     translate_response(response)
   end

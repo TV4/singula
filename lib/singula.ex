@@ -344,7 +344,7 @@ defmodule Singula do
   defp log(name, request_function) do
     {time, response} = :timer.tc(request_function)
 
-    :telemetry.execute([:singula, :response, :time], %{time: div(time, 1000)}, %{name: name})
+    Singula.Telemetry.emit_response_time(name, div(time, 1000))
 
     response
   end
