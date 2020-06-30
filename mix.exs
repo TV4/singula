@@ -29,6 +29,7 @@ defmodule Singula.MixProject do
       {:httpoison, "~> 1.6"},
       {:elixir_uuid, "~> 1.2"},
       {:timex, "~> 3.6"},
+      {:telemetry, "~> 0.4.2"},
       {:mix_test_watch, "~> 1.0", only: :test},
       {:hammox, "~> 0.2", only: :test}
     ]

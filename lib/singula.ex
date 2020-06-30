@@ -21,7 +21,7 @@ defmodule Singula do
     payload = Customer.to_payload(customer) |> Map.put(:title, "-")
 
     with {:ok, %Singula.Response{json: %{"href" => href}, status_code: 201}} <-
-           http_client().post("/apis/customers/v1/customer", payload) do
+           log(:create_customer, fn -> http_client().post("/apis/customers/v1/customer", payload) end) do
       customer_id = String.split(href, "/") |> List.last()
       {:ok, customer_id}
     end
@@ -35,7 +35,7 @@ defmodule Singula do
       |> Map.new()
 
     with {:ok, %Singula.Response{status_code: 201}} <-
-           http_client().patch("/apis/customers/v1/customer/#{customer.id}", payload) do
+           log(:update_customer, fn -> http_client().patch("/apis/customers/v1/customer/#{customer.id}", payload) end) do
       :ok
     end
   end
@@ -43,7 +43,9 @@ defmodule Singula do
   @callback anonymise_customer(Customer.id()) :: :ok | {:error, error}
   def anonymise_customer(customer_id) do
     with {:ok, %Singula.Response{status_code: 200}} <-
-           http_client().post("/apis/customers/v1/customer/#{customer_id}/anonymise", "") do
+           log(:anonymise_customer, fn ->
+             http_client().post("/apis/customers/v1/customer/#{customer_id}/anonymise", "")
+           end) do
       :ok
     end
   end
@@ -51,7 +53,7 @@ defmodule Singula do
   @callback customer_fetch(Customer.id()) :: {:ok, Customer.t()} | {:error, error}
   def customer_fetch(customer_id) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().get("/apis/customers/v1/customer/#{customer_id}") do
+           log(:customer_fetch, fn -> http_client().get("/apis/customers/v1/customer/#{customer_id}") end) do
       {:ok, Customer.new(data)}
     end
   end
@@ -59,7 +61,9 @@ defmodule Singula do
   @callback customer_search(binary) :: {:ok, Customer.t()} | {:error, error}
   def customer_search(external_id) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().post("/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => external_id}) do
+           log(:customer_search, fn ->
+             http_client().post("/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => external_id})
+           end) do
       {:ok, Customer.new(data)}
     end
   end
@@ -68,7 +72,9 @@ defmodule Singula do
               {:ok, list(Contract.t())} | {:error, error}
   def customer_contracts(customer_id, active_only \\ true) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract?activeOnly=#{active_only}") do
+           log(:customer_contracts, fn ->
+             http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract?activeOnly=#{active_only}")
+           end) do
       {:ok, Contract.new(data)}
     end
   end
@@ -77,7 +83,9 @@ defmodule Singula do
               {:ok, ContractDetails.t()} | {:error, error}
   def customer_contract(customer_id, contract_id) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}") do
+           log(:customer_contract, fn ->
+             http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}")
+           end) do
       {:ok, ContractDetails.new(data)}
     end
   end
@@ -92,7 +100,7 @@ defmodule Singula do
               {:ok, map} | {:error, error}
   def fetch_single_use_promo_code(promo_code) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().get("/apis/purchases/v1/promocode/#{promo_code}") do
+           log(:fetcH_single_use_promo_code, fn -> http_client().get("/apis/purchases/v1/promocode/#{promo_code}") end) do
       {:ok, data}
     end
   end
@@ -103,10 +111,12 @@ defmodule Singula do
               {:ok, cart_id :: binary} | {:error, error}
   def create_cart_with_item(customer_id, item_id, currency, meta_data \\ %MetaData{}) do
     with {:ok, %Singula.Response{json: %{"href" => href}, status_code: 201}} <-
-           http_client().post(
-             "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
-             cart_items_with_discount(item_id, meta_data)
-           ) do
+           log(:create_cart_with_item, fn ->
+             http_client().post(
+               "/apis/purchases/v1/customer/#{customer_id}/cart/currency/#{currency}",
+               cart_items_with_discount(item_id, meta_data)
+             )
+           end) do
       cart_id = String.split(href, "/") |> List.last()
       {:ok, cart_id}
     end
@@ -116,7 +126,7 @@ defmodule Singula do
               {:ok, CartDetail.t()} | {:error, error}
   def fetch_cart(customer_id, cart_id) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}") do
+           log(:fetch_cart, fn -> http_client().get("/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}") end) do
       {:ok, CartDetail.new(data)}
     end
   end
@@ -125,7 +135,9 @@ defmodule Singula do
               {:ok, list} | {:error, error}
   def fetch_item_discounts(item_id, currency) do
     with {:ok, %Singula.Response{json: %{"discounts" => discounts}, status_code: 200}} <-
-           http_client().get("/apis/catalogue/v1/item/#{item_id}/discounts?currency=#{currency}") do
+           log(:fetch_item_discounts, fn ->
+             http_client().get("/apis/catalogue/v1/item/#{item_id}/discounts?currency=#{currency}")
+           end) do
       {:ok, discounts}
     end
   end
@@ -134,10 +146,12 @@ defmodule Singula do
               {:ok, map} | {:error, error}
   def customer_redirect_dibs(customer_id, currency, redirect_data) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().post(
-             "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
-             Digest.generate(:DIBS, currency, redirect_data)
-           ) do
+           log(:customer_redirect_dibs, fn ->
+             http_client().post(
+               "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
+               Digest.generate(:DIBS, currency, redirect_data)
+             )
+           end) do
       {:ok, data}
     end
   end
@@ -146,10 +160,12 @@ defmodule Singula do
               {:ok, map} | {:error, error}
   def customer_redirect_klarna(customer_id, currency, redirect_data) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().post(
-             "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
-             Digest.generate(:KLARNA, currency, redirect_data)
-           ) do
+           log(:customer_redirect_klarna, fn ->
+             http_client().post(
+               "/apis/payment-methods/v1/customer/#{customer_id}/redirect",
+               Digest.generate(:KLARNA, currency, redirect_data)
+             )
+           end) do
       {:ok, data}
     end
   end
@@ -172,10 +188,12 @@ defmodule Singula do
               {:ok, CartDetail.t()} | {:error, error}
   def customer_cart_checkout(customer_id, cart_id, payment_method_id) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().post(
-             "/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}/checkout",
-             %{"paymentMethodId" => payment_method_id}
-           ) do
+           log(:customer_cart_checkout, fn ->
+             http_client().post(
+               "/apis/purchases/v1/customer/#{customer_id}/cart/#{cart_id}/checkout",
+               %{"paymentMethodId" => payment_method_id}
+             )
+           end) do
       {:ok, CartDetail.new(data)}
     end
   end
@@ -184,9 +202,11 @@ defmodule Singula do
               {:ok, cancellation_date :: Date.t()} | {:error, error}
   def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
     with {:ok, %Singula.Response{json: %{"cancellationDate" => cancellation_date}, status_code: 200}} <-
-           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
-             "cancelDate" => cancel_date
-           }) do
+           log(:cancel_contract, fn ->
+             http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel", %{
+               "cancelDate" => cancel_date
+             })
+           end) do
       Date.from_iso8601(cancellation_date)
     end
   end
@@ -195,7 +215,12 @@ defmodule Singula do
               :ok | {:error, error}
   def withdraw_cancel_contract(customer_id, contract_id) do
     with {:ok, %Singula.Response{status_code: 200}} <-
-           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel/withdraw", %{}) do
+           log(:withdraw_cancel_contract, fn ->
+             http_client().post(
+               "/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel/withdraw",
+               %{}
+             )
+           end) do
       :ok
     end
   end
@@ -204,7 +229,9 @@ defmodule Singula do
               {:ok, list(Singula.Crossgrade.t())} | {:error, error}
   def crossgrades_for_contract(customer_id, contract_id) do
     with {:ok, %Singula.Response{json: %{"crossgradePaths" => crossgrade_paths}, status_code: 200}} <-
-           http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change") do
+           log(:crossgrades_for_contract, fn ->
+             http_client().get("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change")
+           end) do
       crossgrades = Enum.map(crossgrade_paths, fn crossgrade_path -> Singula.Crossgrade.new(crossgrade_path) end)
       {:ok, crossgrades}
     end
@@ -214,9 +241,11 @@ defmodule Singula do
               :ok | {:error, error}
   def change_contract(customer_id, contract_id, item_id) do
     with {:ok, %Singula.Response{status_code: 200}} <-
-           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change", %{
-             itemCode: item_id
-           }) do
+           log(:change_contract, fn ->
+             http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change", %{
+               itemCode: item_id
+             })
+           end) do
       :ok
     end
   end
@@ -225,7 +254,12 @@ defmodule Singula do
               :ok | {:error, error}
   def withdraw_change_contract(customer_id, contract_id) do
     with {:ok, %Singula.Response{status_code: 200}} <-
-           http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change/withdraw", %{}) do
+           log(:withdraw_change_contract, fn ->
+             http_client().post(
+               "/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change/withdraw",
+               %{}
+             )
+           end) do
       :ok
     end
   end
@@ -234,7 +268,9 @@ defmodule Singula do
               {:ok, Item.t()} | {:error, error}
   def item_by_id_and_currency(item_id, currency) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
-           http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}") do
+           log(:item_by_id_and_currency, fn ->
+             http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}")
+           end) do
       {:ok, Item.new(data)}
     end
   end
@@ -267,7 +303,9 @@ defmodule Singula do
 
   defp create_payment_method(customer_id, digest) do
     with {:ok, %Singula.Response{json: %{"paymentMethodId" => payment_method_id}, status_code: 200}} <-
-           http_client().post("/apis/payment-methods/v1/customer/#{customer_id}/paymentmethod", digest) do
+           log(:create_payment_method, fn ->
+             http_client().post("/apis/payment-methods/v1/customer/#{customer_id}/paymentmethod", digest)
+           end) do
       {:ok, payment_method_id}
     end
   end
@@ -291,7 +329,8 @@ defmodule Singula do
   end
 
   defp items_pager(path_prefix, path, payload, acc \\ []) do
-    with {:ok, %Singula.Response{json: data, status_code: 200}} <- http_client().post(path_prefix <> path, payload) do
+    with {:ok, %Singula.Response{json: data, status_code: 200}} <-
+           log(:customer_paged_purchases, fn -> http_client().post(path_prefix <> path, payload) end) do
       items = Map.get(data, "items", [])
       acc = acc ++ items
 
@@ -300,6 +339,14 @@ defmodule Singula do
         _ -> {:ok, PPV.new(acc)}
       end
     end
+  end
+
+  defp log(name, request_function) do
+    {time, response} = :timer.tc(request_function)
+
+    :telemetry.execute([:singula, :response, :time], %{time: div(time, 1000)}, %{name: name})
+
+    response
   end
 
   defp http_client, do: Application.get_env(:singula, :http_client, Singula.HTTPClient)

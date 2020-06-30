@@ -45,15 +45,9 @@ defmodule Singula.HTTPClient do
     headers = Keyword.merge(signed_headers(method, path, current_time), headers)
     options = Keyword.merge(options, recv_timeout: timeout())
 
-    Logger.debug(
-      "Singula request: #{
-        inspect(%HTTPoison.Request{method: method, url: url, body: body, headers: headers, options: options})
-      }"
-    )
+    response = http_client.request(method, url, body, headers, options)
 
-    {time, response} = :timer.tc(fn -> http_client.request(method, url, body, headers, options) end)
-    Logger.debug("Singula response: #{inspect(response)}")
-    Logger.info("Singula request time: measure#singula.request=#{div(time, 1000)}ms")
+    :telemetry.execute([:singula, :response], %{response: response})
 
     translate_response(response)
   end

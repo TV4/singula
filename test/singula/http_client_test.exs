@@ -9,7 +9,6 @@ defmodule Singula.HTTPClientTest do
     {:ok, current_time: fn -> ~U[2020-02-02 20:20:02.02Z] end}
   end
 
-  @tag :capture_log
   test "handle network error", %{current_time: current_time} do
     MockHTTPClient
     |> expect(:request, fn
@@ -29,7 +28,6 @@ defmodule Singula.HTTPClientTest do
              {:error, %HTTPoison.Error{reason: :nxdomain}}
   end
 
-  @tag :capture_log
   test "handle singula error", %{current_time: current_time} do
     MockHTTPClient
     |> expect(:request, fn
@@ -68,7 +66,6 @@ defmodule Singula.HTTPClientTest do
               }}
   end
 
-  @tag :capture_log
   test "signed get", %{current_time: current_time} do
     MockHTTPClient
     |> expect(:request, fn
@@ -94,7 +91,6 @@ defmodule Singula.HTTPClientTest do
              {:ok, %Singula.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
   end
 
-  @tag :capture_log
   test "signed patch", %{current_time: current_time} do
     MockHTTPClient
     |> expect(:request, fn
@@ -121,7 +117,6 @@ defmodule Singula.HTTPClientTest do
              {:ok, %Singula.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
   end
 
-  @tag :capture_log
   test "signed post", %{current_time: current_time} do
     MockHTTPClient
     |> expect(:request, fn
