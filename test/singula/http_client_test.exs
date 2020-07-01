@@ -16,7 +16,7 @@ defmodule Singula.HTTPClientTest do
       "https://singula.example.b17g.net/api/get/päth",
       "",
       [
-        Authorization: "hmac admin:1A9820392174E71E9A66758F29EEC28596FA9DC75A3EC5A29F7EDB6C86A74409",
+        Authorization: "hmac key:F1DDF5074C308F8AE0FBC9276B2DD4BE32BC7AD6EB5EA95A5B2DEEA3A21ADB1F",
         Timestamp: 1_580_674_802,
         Accept: "application/json"
       ],
@@ -35,7 +35,7 @@ defmodule Singula.HTTPClientTest do
       "https://singula.example.b17g.net/api/get/päth",
       "",
       [
-        Authorization: "hmac admin:1A9820392174E71E9A66758F29EEC28596FA9DC75A3EC5A29F7EDB6C86A74409",
+        Authorization: "hmac key:F1DDF5074C308F8AE0FBC9276B2DD4BE32BC7AD6EB5EA95A5B2DEEA3A21ADB1F",
         Timestamp: 1_580_674_802,
         Accept: "application/json"
       ],
@@ -73,7 +73,7 @@ defmodule Singula.HTTPClientTest do
       "https://singula.example.b17g.net/api/get/päth",
       "",
       [
-        Authorization: "hmac admin:1A9820392174E71E9A66758F29EEC28596FA9DC75A3EC5A29F7EDB6C86A74409",
+        Authorization: "hmac key:F1DDF5074C308F8AE0FBC9276B2DD4BE32BC7AD6EB5EA95A5B2DEEA3A21ADB1F",
         Timestamp: 1_580_674_802,
         Accept: "application/json"
       ],
@@ -98,7 +98,7 @@ defmodule Singula.HTTPClientTest do
       "https://singula.example.b17g.net/api/get/päth",
       "{\"key\":\"value\"}",
       [
-        Authorization: "hmac admin:B65D6E5E74DEA8CC585D779DE815AF965F774A4CC3870CB5839D5784B5733134",
+        Authorization: "hmac key:DDB91529F8F7DB674697CCB147041673AFB3810CF30A52EF147F42045D01C400",
         Timestamp: 1_580_674_802,
         "Content-Type": "application/json; charset=utf-8",
         Accept: "application/json"
@@ -124,7 +124,7 @@ defmodule Singula.HTTPClientTest do
       "https://singula.example.b17g.net/api/get/päth",
       "{\"key\":\"value\"}",
       [
-        Authorization: "hmac admin:67A59DAFC94D26EAA8B12178D6FDED3257E19F69485FDBEEBD129266F41A519A",
+        Authorization: "hmac key:EF6FEE99F26A66493D12D350BEEC335E38B70F11F54BA46CCF688EC1AFDB8E16",
         Timestamp: 1_580_674_802,
         "Content-Type": "application/json; charset=utf-8",
         Accept: "application/json"
