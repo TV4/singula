@@ -38,6 +38,16 @@ defmodule SmokeTest.Singula do
               }}
   end
 
+  test "Get non-existing item by id and currency", %{currency: currency} do
+    assert Singula.item_by_id_and_currency("non-existing", currency) ==
+             {:error,
+              %Singula.Error{
+                code: 90069,
+                developer_message: "Catalogue item not found",
+                user_message: "No item could be found with the given code"
+              }}
+  end
+
   test "Update customer", %{customer_id: customer_id} do
     customer = %Singula.Customer{id: customer_id, first_name: "Test"}
     assert Singula.update_customer(customer) == :ok

@@ -1734,15 +1734,5 @@ defmodule SingulaTest do
         Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
       end
     end
-
-    test "causing system failure" do
-      MockSingulaHTTPClient
-      |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
-        {:error, %Singula.Error{code: 500, user_message: "System Failure - please retry later."}}
-      end)
-
-      assert Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
-               {:error, %Singula.Error{code: 500, user_message: "System Failure - please retry later."}}
-    end
   end
 end
