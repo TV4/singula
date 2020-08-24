@@ -61,8 +61,8 @@ defmodule SmokeTest.Singula do
                   active: true,
                   addresses: [%Singula.Address{post_code: 12220, country_code: "SWE"}],
                   custom_attributes: [
-                    %{name: "accepted_play_terms_date", value: "2020-02-25"},
-                    %{name: "accepted_play_terms", value: "Telia"}
+                    %{name: "accepted_play_terms", value: "Telia"},
+                    %{name: "accepted_play_terms_date", value: "2020-02-25"}
                   ],
                   id: customer_id,
                   date_of_birth: nil,
@@ -95,8 +95,8 @@ defmodule SmokeTest.Singula do
                   active: true,
                   addresses: [%Singula.Address{post_code: 12220, country_code: "SWE"}],
                   custom_attributes: [
-                    %{name: "accepted_play_terms_date", value: "2020-02-25"},
-                    %{name: "accepted_play_terms", value: "Telia"}
+                    %{name: "accepted_play_terms", value: "Telia"},
+                    %{name: "accepted_play_terms_date", value: "2020-02-25"}
                   ],
                   id: customer_id,
                   date_of_birth: nil,
@@ -621,7 +621,6 @@ defmodule SmokeTest.Singula do
                 id: contract_id,
                 item_id: "4151C241C3DD41529A87",
                 item_name: "C More All Sport",
-                minimum_term: %{frequency: :MONTH, length: 1},
                 paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
                 recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
                 start_date: Date.utc_today(),
@@ -645,7 +644,6 @@ defmodule SmokeTest.Singula do
                 id: contract_id,
                 item_id: "4151C241C3DD41529A87",
                 item_name: "C More All Sport",
-                minimum_term: %{frequency: :MONTH, length: 1},
                 paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
                 recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
                 start_date: Date.utc_today(),
