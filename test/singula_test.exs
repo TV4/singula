@@ -1734,5 +1734,25 @@ defmodule SingulaTest do
         Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK)
       end
     end
+
+    test "fails" do
+      MockSingulaHTTPClient
+      |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
+        {:error,
+         %Singula.Error{
+           code: 90069,
+           developer_message: "Catalogue item not found",
+           user_message: "No item could be found with the given code"
+         }}
+      end)
+
+      assert Singula.item_by_id_and_currency("6D3A56FF5065478ABD61", :SEK) ==
+               {:error,
+                %Singula.Error{
+                  code: 90069,
+                  developer_message: "Catalogue item not found",
+                  user_message: "No item could be found with the given code"
+                }}
+    end
   end
 end

@@ -264,8 +264,7 @@ defmodule Singula do
     end
   end
 
-  @callback item_by_id_and_currency(item_id :: binary, Item.currency()) ::
-              {:ok, Item.t()} | {:error, error}
+  @callback item_by_id_and_currency(item_id :: binary, Item.currency()) :: {:ok, Item.t()} | {:error, error}
   def item_by_id_and_currency(item_id, currency) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
            log(:item_by_id_and_currency, fn ->
