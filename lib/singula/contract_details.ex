@@ -1,6 +1,7 @@
 defmodule Singula.ContractDetails do
   defstruct [
     :id,
+    :order_id,
     :item_id,
     :item_name,
     :recurring_billing,
@@ -18,6 +19,7 @@ defmodule Singula.ContractDetails do
   def new(response) do
     %__MODULE__{
       id: response["contractId"],
+      order_id: response["orderId"],
       item_id: response["itemCode"],
       item_name: response["name"],
       balance: amount(response["balance"]),

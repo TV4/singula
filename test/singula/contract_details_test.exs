@@ -24,6 +24,7 @@ defmodule Singula.ContractDetailsTest do
       "minimumTerm" => %{"frequency" => "MONTH", "length" => 24},
       "name" => "Field Sales - All Sport 12 plus 12",
       "nextPaymentDate" => "2020-04-22",
+      "orderId" => 112_707,
       "paidUpToDate" => "2020-04-22",
       "paymentMethodId" => 3_070_939,
       "startDate" => "2020-04-22",
@@ -32,6 +33,7 @@ defmodule Singula.ContractDetailsTest do
 
     assert ContractDetails.new(payload) == %Singula.ContractDetails{
              id: 9_622_082,
+             order_id: 112_707,
              item_id: "4FC7D926073348038362",
              item_name: "Field Sales - All Sport 12 plus 12",
              minimum_term: %{frequency: :MONTH, length: 24},
@@ -121,6 +123,7 @@ defmodule Singula.ContractDetailsTest do
 
     assert ContractDetails.new(payload) == %Singula.ContractDetails{
              id: 19844,
+             order_id: 112_863,
              item_id: "6D3A56FF5065478ABD61",
              item_name: "C More TV4",
              status: :ACTIVE,
@@ -177,6 +180,7 @@ defmodule Singula.ContractDetailsTest do
              id: 19846,
              item_name: "C More TV4",
              minimum_term: nil,
+             order_id: 112_865,
              paid_up_to_date: ~D[2020-05-19],
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
@@ -229,6 +233,7 @@ defmodule Singula.ContractDetailsTest do
              item_id: "8FB4E247D57B40E09FA7",
              item_name: "Field Sales - All Sport 12 plus 12 Apple TV full price",
              minimum_term: %{frequency: :MONTH, length: 24},
+             order_id: 112_868,
              paid_up_to_date: ~D[2020-05-19],
              recurring_billing: %{
                amount: "399.00",
