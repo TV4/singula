@@ -542,6 +542,7 @@ defmodule SmokeTest.Singula do
                   item_name: "C More TV4",
                   paid_up_to_date: Date.utc_today() |> Date.add(14),
                   recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+                  upcoming_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
                   start_date: Date.utc_today(),
                   status: :ACTIVE
                 }}
@@ -630,6 +631,7 @@ defmodule SmokeTest.Singula do
              item_name: "C More All Sport",
              paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
              recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
              status: :ACTIVE
            }
@@ -656,6 +658,7 @@ defmodule SmokeTest.Singula do
              item_name: "C More All Sport",
              paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
              recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
              status: :DOWNGRADE_SCHEDULED
            }

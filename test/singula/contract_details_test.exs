@@ -131,6 +131,7 @@ defmodule Singula.ContractDetailsTest do
              minimum_term: nil,
              paid_up_to_date: ~D[2020-06-02],
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19]
            }
   end
@@ -183,6 +184,7 @@ defmodule Singula.ContractDetailsTest do
              order_id: 112_865,
              paid_up_to_date: ~D[2020-05-19],
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
              status: :ACTIVE
            }
@@ -235,13 +237,63 @@ defmodule Singula.ContractDetailsTest do
              minimum_term: %{frequency: :MONTH, length: 24},
              order_id: 112_868,
              paid_up_to_date: ~D[2020-05-19],
-             recurring_billing: %{
-               amount: "399.00",
-               currency: :SEK,
-               frequency: :MONTH,
-               length: 1
-             },
+             recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
+             status: :ACTIVE
+           }
+  end
+
+  test "parse with expiring discount" do
+    payload = %{
+      "active" => true,
+      "auditInfo" => %{
+        "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "creationDate" => "2020-08-25T10:00:55+02:00",
+        "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "modifiedDate" => "2020-08-25T10:00:58+02:00"
+      },
+      "balance" => %{"amount" => "0.00", "currency" => "SEK"},
+      "billing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "449.00", "currency" => "SEK"},
+        "upcoming" => %{"amount" => "349.00", "currency" => "SEK"}
+      },
+      "contractId" => 20673,
+      "discount" => %{
+        "discountAmount" => %{"amount" => "100.00", "currency" => "SEK"},
+        "discountEndDate" => "2021-07-25",
+        "discountName" => "12 occurrences 100 SEK off",
+        "indefinite" => false,
+        "itemCode" => "C943A5FED47E444B96E1",
+        "numberOfOccurrences" => 12
+      },
+      "discountCode" => "",
+      "entitlements" => [%{"id" => 5963, "name" => "C More All Sport"}],
+      "itemCode" => "C943A5FED47E444B96E1",
+      "lastPaymentDate" => "2020-08-25",
+      "minimumTerm" => %{"frequency" => "MONTH", "length" => 12},
+      "name" => "C More All Sport - 12 months",
+      "nextPaymentDate" => "2020-09-25",
+      "orderId" => 113_983,
+      "paidUpToDate" => "2020-09-25",
+      "paymentMethodId" => 28390,
+      "startDate" => "2020-08-25",
+      "status" => "ACTIVE"
+    }
+
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
+             balance: %{amount: "0.00", currency: :SEK},
+             id: 20673,
+             item_id: "C943A5FED47E444B96E1",
+             item_name: "C More All Sport - 12 months",
+             minimum_term: %{frequency: :MONTH, length: 12},
+             order_id: 113_983,
+             paid_up_to_date: ~D[2020-09-25],
+             recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: "349.00", currency: :SEK, frequency: :MONTH, length: 1},
+             start_date: ~D[2020-08-25],
              status: :ACTIVE
            }
   end

@@ -5,6 +5,7 @@ defmodule Singula.ContractDetails do
     :item_id,
     :item_name,
     :recurring_billing,
+    :upcoming_billing,
     :balance,
     :minimum_term,
     :status,
@@ -23,7 +24,8 @@ defmodule Singula.ContractDetails do
       item_id: response["itemCode"],
       item_name: response["name"],
       balance: amount(response["balance"]),
-      recurring_billing: recurring_billing(response["billing"]),
+      recurring_billing: billing(response["billing"], "recurring"),
+      upcoming_billing: billing(response["billing"], "upcoming"),
       minimum_term: frequency(response["minimumTerm"]),
       status: String.to_atom(response["status"]),
       start_date: date(response["startDate"]),
@@ -37,8 +39,10 @@ defmodule Singula.ContractDetails do
     %{amount: amount, currency: currency_term(currency)}
   end
 
-  defp recurring_billing(%{"recurring" => recurring, "frequency" => frequency}) do
-    amount(recurring) |> Map.merge(frequency(frequency))
+  defp billing(%{"frequency" => frequency} = billing, type) do
+    if billing_type = Map.get(billing, type) do
+      amount(billing_type) |> Map.merge(frequency(frequency))
+    end
   end
 
   defp frequency(%{"frequency" => frequency, "length" => length}) do
