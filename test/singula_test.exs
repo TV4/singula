@@ -1755,4 +1755,88 @@ defmodule SingulaTest do
                 }}
     end
   end
+
+  describe "get payment methods" do
+    test "succeeds" do
+      MockSingulaHTTPClient
+      |> expect(:get, fn "/apis/payment-methods/v1/customer/76f8f800-e51d-4093-b573-31e4226a0da8/list" ->
+        data = %{
+          "PaymentMethod" => [
+            %{
+              "cardType" => "Visa",
+              "defaultMethod" => true,
+              "expiryDate" => "12/2023",
+              "maskedCard" => "402005*** **** 0000",
+              "paymentMethodId" => 28604,
+              "provider" => "DIBS",
+              "tokenId" => "eJ0cAVyX-JKzz2u7c-V"
+            },
+            %{
+              "defaultMethod" => false,
+              "email" => "test@cmore.se",
+              "paymentMethodId" => 28646,
+              "provider" => "KLARNA",
+              "tokenId" => "nSX2OIPMS48UcL35aRv"
+            }
+          ]
+        }
+
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+      end)
+
+      assert Singula.payment_methods("76f8f800-e51d-4093-b573-31e4226a0da8") ==
+               {:ok,
+                [
+                  %Singula.DibsPaymentMethod{
+                    id: 28604,
+                    default: true,
+                    expiry_date: "12/2023",
+                    masked_card: "402005*** **** 0000"
+                  },
+                  %Singula.KlarnaPaymentMethod{id: 28646, default: false}
+                ]}
+    end
+
+    test "filter out unsupported payment methods" do
+      MockSingulaHTTPClient
+      |> expect(:get, fn "/apis/payment-methods/v1/customer/76f8f800-e51d-4093-b573-31e4226a0da8/list" ->
+        data = %{
+          "PaymentMethod" => [
+            %{
+              "cardType" => "Visa",
+              "defaultMethod" => true,
+              "expiryDate" => "12/2023",
+              "maskedCard" => "402005*** **** 0000",
+              "paymentMethodId" => 28604,
+              "provider" => "DIBS",
+              "tokenId" => "eJ0cAVyX-JKzz2u7c-V"
+            },
+            %{
+              "paymentMethodId" => 100_000,
+              "provider" => "DIAGNAL",
+              "cardType" => "VISA",
+              "maskedCard" => "426397xxxx1307",
+              "expiryDate" => "01/2021",
+              "email" => "customer@singuladecisions.com",
+              "tokenId" => "string",
+              "defaultMethod" => true
+            }
+          ]
+        }
+
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+      end)
+
+      assert Singula.payment_methods("76f8f800-e51d-4093-b573-31e4226a0da8") ==
+               {:ok,
+                [
+                  %Singula.DibsPaymentMethod{
+                    id: 28604,
+                    default: true,
+                    expiry_date: "12/2023",
+                    masked_card: "402005*** **** 0000"
+                  }
+                ]}
+    end
+  end
 end

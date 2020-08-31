@@ -447,6 +447,19 @@ defmodule SmokeTest.Singula do
       save_in_test_context(:payment_method_id, payment_method_id)
     end
 
+    test "list payment methods", %{customer_id: customer_id, payment_method_id: payment_method_id} do
+      assert Singula.payment_methods(customer_id) ==
+               {:ok,
+                [
+                  %Singula.DibsPaymentMethod{
+                    id: payment_method_id,
+                    default: true,
+                    masked_card: "457110*** **** 0000",
+                    expiry_date: "12/2021"
+                  }
+                ]}
+    end
+
     test "checking out subscription cart returns cart details", %{
       customer_id: customer_id,
       cart_id: cart_id,

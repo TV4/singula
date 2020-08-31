@@ -170,12 +170,22 @@ defmodule Singula do
     end
   end
 
-  def customer_payment_methods(customer_id) do
-    with {:ok, %Singula.Response{json: data, status_code: 200}} <-
+  @callback payment_methods(Customer.id()) ::
+              {:ok, [Singula.DibsPaymentMethod | Singula.KlarnaPaymentMethod]} | {:error, error}
+  def payment_methods(customer_id) do
+    with {:ok, %Singula.Response{json: %{"PaymentMethod" => payment_methods}, status_code: 200}} <-
            log(:customer_payment_methods, fn ->
              http_client().get("/apis/payment-methods/v1/customer/#{customer_id}/list")
            end) do
-      {:ok, data}
+      payment_methods =
+        Enum.reduce(payment_methods, [], fn
+          %{"provider" => "DIBS"} = payment_method, acc -> [Singula.DibsPaymentMethod.new(payment_method) | acc]
+          %{"provider" => "KLARNA"} = payment_method, acc -> [Singula.KlarnaPaymentMethod.new(payment_method) | acc]
+          _, acc -> acc
+        end)
+        |> Enum.reverse()
+
+      {:ok, payment_methods}
     end
   end
 
