@@ -1,4 +1,4 @@
-defmodule Singula.KlarnaPaymentMethod do
+defmodule Singula.AddKlarnaPaymentMethod do
   defstruct [:receipt, :transactionId, :redirectUrl, order_lines: [], locale: "sv-SE"]
 
   alias Singula.CartDetail

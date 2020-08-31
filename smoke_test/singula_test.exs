@@ -432,7 +432,7 @@ defmodule SmokeTest.Singula do
       # TODO: The receipt is returned once the pre-populated form-data gets submitted.
       #       A hard coded receipt is used for testing until its properly received.
 
-      dibs_payment_method = %Singula.DibsPaymentMethod{
+      dibs_payment_method = %Singula.AddDibsPaymentMethod{
         dibs_ccPart: "**** **** **** 0000",
         dibs_ccPrefix: "457110",
         dibs_ccType: "Visa",

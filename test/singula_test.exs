@@ -2,7 +2,7 @@ defmodule SingulaTest do
   use ExUnit.Case
   import Hammox
 
-  alias Singula.{Asset, CartDetail, Customer, DibsPaymentMethod}
+  alias Singula.{Asset, CartDetail, Customer, AddDibsPaymentMethod}
 
   setup :verify_on_exit!
 
@@ -1174,7 +1174,7 @@ defmodule SingulaTest do
 
   describe "add dibs payment method to customer" do
     setup do
-      dibs_payment_method = %DibsPaymentMethod{
+      dibs_payment_method = %AddDibsPaymentMethod{
         dibs_ccPart: "**** **** **** 0000",
         dibs_ccPrefix: "457110",
         dibs_ccType: "Visa",
@@ -1288,7 +1288,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      payment_method = %Singula.KlarnaPaymentMethod{
+      payment_method = %Singula.AddKlarnaPaymentMethod{
         receipt: "dea12664-6e1f-1aef-bfb0-e9968842f32c",
         transactionId: "2m56mfCGyV7VWh96k",
         redirectUrl: "http://localhost:4000",

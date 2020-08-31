@@ -4,10 +4,10 @@ defmodule Singula do
     Contract,
     ContractDetails,
     Customer,
-    DibsPaymentMethod,
+    AddDibsPaymentMethod,
     Digest,
     Item,
-    KlarnaPaymentMethod,
+    AddKlarnaPaymentMethod,
     MetaData,
     PPV
   }
@@ -170,17 +170,26 @@ defmodule Singula do
     end
   end
 
-  @callback customer_payment_method(Customer.id(), Item.currency(), DibsPaymentMethod.t()) ::
+  def customer_payment_methods(customer_id) do
+    with {:ok, %Singula.Response{json: data, status_code: 200}} <-
+           log(:customer_payment_methods, fn ->
+             http_client().get("/apis/payment-methods/v1/customer/#{customer_id}/list")
+           end) do
+      {:ok, data}
+    end
+  end
+
+  @callback customer_payment_method(Customer.id(), Item.currency(), AddDibsPaymentMethod.t()) ::
               {:ok, payment_method_id :: integer} | {:error, error}
-  def customer_payment_method(customer_id, currency, %DibsPaymentMethod{} = dibs_payment_method) do
+  def customer_payment_method(customer_id, currency, %AddDibsPaymentMethod{} = dibs_payment_method) do
     digest = Digest.generate(:DIBS, currency, Map.from_struct(dibs_payment_method))
     create_payment_method(customer_id, digest)
   end
 
-  @callback customer_payment_method(Customer.id(), Item.currency(), KlarnaPaymentMethod.t()) ::
+  @callback customer_payment_method(Customer.id(), Item.currency(), AddKlarnaPaymentMethod.t()) ::
               {:ok, payment_method_id :: integer} | {:error, error}
-  def customer_payment_method(customer_id, currency, %KlarnaPaymentMethod{} = klarna_payment_method) do
-    digest = Digest.generate(:KLARNA, currency, KlarnaPaymentMethod.to_provider_data(klarna_payment_method))
+  def customer_payment_method(customer_id, currency, %AddKlarnaPaymentMethod{} = klarna_payment_method) do
+    digest = Digest.generate(:KLARNA, currency, AddKlarnaPaymentMethod.to_provider_data(klarna_payment_method))
     create_payment_method(customer_id, digest)
   end
 
