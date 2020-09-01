@@ -531,7 +531,8 @@ defmodule SmokeTest.Singula do
       customer_id: customer_id,
       subscription_item_id: item_id,
       contract_id: contract_id,
-      order_id: order_id
+      order_id: order_id,
+      payment_method_id: payment_method_id
     } do
       assert Singula.customer_contracts(customer_id) ==
                {:ok,
@@ -557,7 +558,8 @@ defmodule SmokeTest.Singula do
                   recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
                   upcoming_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
                   start_date: Date.utc_today(),
-                  status: :ACTIVE
+                  status: :ACTIVE,
+                  payment_method_id: payment_method_id
                 }}
     end
 
@@ -629,7 +631,8 @@ defmodule SmokeTest.Singula do
   test "Change a contract changes immediately for upgrades", %{
     customer_id: customer_id,
     contract_id: contract_id,
-    order_id: order_id
+    order_id: order_id,
+    payment_method_id: payment_method_id
   } do
     assert Singula.change_contract(customer_id, contract_id, "4151C241C3DD41529A87") == :ok
 
@@ -646,7 +649,8 @@ defmodule SmokeTest.Singula do
              recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
              upcoming_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
-             status: :ACTIVE
+             status: :ACTIVE,
+             payment_method_id: payment_method_id
            }
   end
 
@@ -654,7 +658,8 @@ defmodule SmokeTest.Singula do
     customer_id: customer_id,
     contract_id: contract_id,
     subscription_item_id: item_id,
-    order_id: order_id
+    order_id: order_id,
+    payment_method_id: payment_method_id
   } do
     assert Singula.change_contract(customer_id, contract_id, item_id) == :ok
 
@@ -673,7 +678,8 @@ defmodule SmokeTest.Singula do
              recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
              upcoming_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
-             status: :DOWNGRADE_SCHEDULED
+             status: :DOWNGRADE_SCHEDULED,
+             payment_method_id: payment_method_id
            }
   end
 

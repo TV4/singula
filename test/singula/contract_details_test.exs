@@ -41,7 +41,8 @@ defmodule Singula.ContractDetailsTest do
              recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 24},
              status: :ACTIVE,
              start_date: ~D[2020-04-22],
-             paid_up_to_date: ~D[2020-04-22]
+             paid_up_to_date: ~D[2020-04-22],
+             payment_method_id: 3_070_939
            }
   end
 
@@ -79,7 +80,8 @@ defmodule Singula.ContractDetailsTest do
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
              status: :ACTIVE,
              start_date: ~D[2020-04-20],
-             paid_up_to_date: ~D[2020-05-04]
+             paid_up_to_date: ~D[2020-05-04],
+             payment_method_id: 10_246_312
            }
   end
 
@@ -132,7 +134,8 @@ defmodule Singula.ContractDetailsTest do
              paid_up_to_date: ~D[2020-06-02],
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
              upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
-             start_date: ~D[2020-05-19]
+             start_date: ~D[2020-05-19],
+             payment_method_id: 27541
            }
   end
 
@@ -186,7 +189,8 @@ defmodule Singula.ContractDetailsTest do
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
              upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
-             status: :ACTIVE
+             status: :ACTIVE,
+             payment_method_id: 27543
            }
   end
 
@@ -240,7 +244,8 @@ defmodule Singula.ContractDetailsTest do
              recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 1},
              upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
-             status: :ACTIVE
+             status: :ACTIVE,
+             payment_method_id: 27545
            }
   end
 
@@ -294,7 +299,8 @@ defmodule Singula.ContractDetailsTest do
              recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
              upcoming_billing: %{amount: "349.00", currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-08-25],
-             status: :ACTIVE
+             status: :ACTIVE,
+             payment_method_id: 28390
            }
   end
 
@@ -336,7 +342,8 @@ defmodule Singula.ContractDetailsTest do
              recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
              status: :DOWNGRADE_SCHEDULED,
              start_date: ~D[2020-04-20],
-             paid_up_to_date: ~D[2020-05-04]
+             paid_up_to_date: ~D[2020-05-04],
+             payment_method_id: 10_246_312
            }
   end
 end

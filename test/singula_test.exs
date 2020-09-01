@@ -411,7 +411,8 @@ defmodule SingulaTest do
                   minimum_term: %{frequency: :MONTH, length: 24},
                   status: :ACTIVE,
                   start_date: ~D[2020-04-22],
-                  paid_up_to_date: ~D[2020-04-22]
+                  paid_up_to_date: ~D[2020-04-22],
+                  payment_method_id: 3_070_939
                 }}
     end
 

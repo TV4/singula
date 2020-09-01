@@ -12,7 +12,8 @@ defmodule Singula.ContractDetails do
     :start_date,
     :paid_up_to_date,
     :change_date,
-    :change_to_item_id
+    :change_to_item_id,
+    :payment_method_id
   ]
 
   @type t :: %__MODULE__{}
@@ -31,7 +32,8 @@ defmodule Singula.ContractDetails do
       start_date: date(response["startDate"]),
       paid_up_to_date: date(response["paidUpToDate"]),
       change_date: date(response["changeDate"]),
-      change_to_item_id: response["changeToItem"]
+      change_to_item_id: response["changeToItem"],
+      payment_method_id: response["paymentMethodId"]
     }
   end
 
