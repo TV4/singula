@@ -171,7 +171,7 @@ defmodule Singula do
   end
 
   @callback payment_methods(Customer.id()) ::
-              {:ok, [Singula.DibsPaymentMethod | Singula.KlarnaPaymentMethod]} | {:error, error}
+              {:ok, [Singula.DibsPaymentMethod.t() | Singula.KlarnaPaymentMethod.t()]} | {:error, error}
   def payment_methods(customer_id) do
     with {:ok, %Singula.Response{json: %{"PaymentMethod" => payment_methods}, status_code: 200}} <-
            log(:customer_payment_methods, fn ->

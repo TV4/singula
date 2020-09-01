@@ -1,6 +1,8 @@
 defmodule Singula.DibsPaymentMethod do
   defstruct [:id, :default, :expiry_date, :masked_card]
 
+  @type t :: %__MODULE__{}
+
   def new(%{
         "defaultMethod" => default_method,
         "expiryDate" => expiry_date,
