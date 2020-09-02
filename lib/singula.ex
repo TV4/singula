@@ -189,7 +189,7 @@ defmodule Singula do
     end
   end
 
-  @callback update_payment_method(Customer.id(), Contract.contract_id(), integer) :: :ok
+  @callback update_payment_method(Customer.id(), Contract.contract_id(), integer) :: :ok | {:error, error}
   def update_payment_method(customer_id, contract_id, payment_method_id) do
     with {:ok, %Singula.Response{status_code: 200}} <-
            log(:update_payment_method, fn ->
