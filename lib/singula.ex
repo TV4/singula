@@ -189,6 +189,18 @@ defmodule Singula do
     end
   end
 
+  @callback update_payment_method(Customer.id(), Contract.contract_id(), integer) :: :ok
+  def update_payment_method(customer_id, contract_id, payment_method_id) do
+    with {:ok, %Singula.Response{status_code: 200}} <-
+           log(:update_payment_method, fn ->
+             http_client().post("/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/paymentmethod", %{
+               paymentMethodId: payment_method_id
+             })
+           end) do
+      :ok
+    end
+  end
+
   @callback customer_payment_method(Customer.id(), Item.currency(), AddDibsPaymentMethod.t()) ::
               {:ok, payment_method_id :: integer} | {:error, error}
   def customer_payment_method(customer_id, currency, %AddDibsPaymentMethod{} = dibs_payment_method) do

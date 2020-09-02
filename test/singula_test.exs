@@ -1310,6 +1310,28 @@ defmodule SingulaTest do
     end
   end
 
+  describe "set dibs payment method on contract" do
+    test "success" do
+      MockSingulaHTTPClient
+      |> expect(
+        :post,
+        fn "/apis/contracts/v1/customer/83315a42-af04-4e59-949a-ef2b3e7bf3dd/contract/20919/paymentmethod",
+           %{
+             paymentMethodId: 67890
+           } ->
+          {:ok,
+           %Singula.Response{
+             status_code: 200,
+             body:
+               "{\"rel\":\"Get contract details\",\"href\":\"\\/customer\\/83315a42-af04-4e59-949a-ef2b3e7bf3dd\\/contract\\/20919\",\"type\":\"application\\/json\"}"
+           }}
+        end
+      )
+
+      assert Singula.update_payment_method("83315a42-af04-4e59-949a-ef2b3e7bf3dd", 20919, 67890) == :ok
+    end
+  end
+
   describe "checkout cart" do
     test "success for subscription that supports free trial" do
       MockSingulaHTTPClient

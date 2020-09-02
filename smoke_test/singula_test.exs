@@ -698,6 +698,41 @@ defmodule SmokeTest.Singula do
            ]
   end
 
+  test "Update contract with new payment method", %{
+    customer_id: customer_id,
+    contract_id: contract_id,
+    payment_method_receipt: payment_method_receipt,
+    currency: currency
+  } do
+    dibs_redirect_data = %{
+      itemDescription: "REGISTER_CARD",
+      amount: "1.00",
+      payment_method: "cc.test",
+      billing_city: "Stockholm"
+    }
+
+    assert {:ok, %{"transactionId" => transaction_id}} =
+             Singula.customer_redirect_dibs(customer_id, currency, dibs_redirect_data)
+
+    dibs_payment_method = %Singula.AddDibsPaymentMethod{
+      dibs_ccPart: "**** **** **** 0000",
+      dibs_ccPrefix: "457110",
+      dibs_ccType: "Visa",
+      dibs_expM: "12",
+      dibs_expY: "21",
+      receipt: payment_method_receipt,
+      transactionId: transaction_id
+    }
+
+    {:ok, payment_method_id} = Singula.customer_payment_method(customer_id, currency, dibs_payment_method)
+
+    :ok = Singula.update_payment_method(customer_id, contract_id, payment_method_id)
+
+    {:ok, contract_detail} = Singula.customer_contract(customer_id, contract_id)
+
+    assert contract_detail.payment_method_id == payment_method_id
+  end
+
   defp setup_test_customer(_context) do
     unix_time_now = DateTime.to_unix(DateTime.utc_now())
     user_id = "smoke_test_#{unix_time_now}"
