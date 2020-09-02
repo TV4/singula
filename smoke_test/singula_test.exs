@@ -442,7 +442,7 @@ defmodule SmokeTest.Singula do
         transactionId: transaction_id
       }
 
-      assert {:ok, payment_method_id} = Singula.customer_payment_method(customer_id, currency, dibs_payment_method)
+      assert {:ok, payment_method_id} = Singula.add_payment_method(customer_id, currency, dibs_payment_method)
 
       save_in_test_context(:payment_method_id, payment_method_id)
     end
@@ -724,7 +724,7 @@ defmodule SmokeTest.Singula do
       transactionId: transaction_id
     }
 
-    {:ok, payment_method_id} = Singula.customer_payment_method(customer_id, currency, dibs_payment_method)
+    {:ok, payment_method_id} = Singula.add_payment_method(customer_id, currency, dibs_payment_method)
 
     :ok = Singula.update_payment_method(customer_id, contract_id, payment_method_id)
 

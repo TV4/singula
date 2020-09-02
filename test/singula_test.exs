@@ -1214,7 +1214,7 @@ defmodule SingulaTest do
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
       end)
 
-      assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
+      assert Singula.add_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
                {:ok, 26574}
     end
 
@@ -1230,7 +1230,7 @@ defmodule SingulaTest do
          }}
       end)
 
-      assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
+      assert Singula.add_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
                {:error,
                 %Singula.Error{
                   code: 90047,
@@ -1251,7 +1251,7 @@ defmodule SingulaTest do
          }}
       end)
 
-      assert Singula.customer_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
+      assert Singula.add_payment_method("ff160270-5197-4c90-835c-cd1fff8b19d0", :SEK, dibs_payment_method) ==
                {:error,
                 %Singula.Error{
                   code: 90054,
@@ -1305,7 +1305,7 @@ defmodule SingulaTest do
         ]
       }
 
-      assert Singula.customer_payment_method("4ad58d9d-8976-47c0-af2c-35debf38d0eb", :SEK, payment_method) ==
+      assert Singula.add_payment_method("4ad58d9d-8976-47c0-af2c-35debf38d0eb", :SEK, payment_method) ==
                {:ok, 654_321}
     end
   end

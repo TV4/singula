@@ -201,18 +201,18 @@ defmodule Singula do
     end
   end
 
-  @callback customer_payment_method(Customer.id(), Item.currency(), AddDibsPaymentMethod.t()) ::
+  @callback add_payment_method(Customer.id(), Item.currency(), AddDibsPaymentMethod.t()) ::
               {:ok, payment_method_id :: integer} | {:error, error}
-  def customer_payment_method(customer_id, currency, %AddDibsPaymentMethod{} = dibs_payment_method) do
+  def add_payment_method(customer_id, currency, %AddDibsPaymentMethod{} = dibs_payment_method) do
     digest = Digest.generate(:DIBS, currency, Map.from_struct(dibs_payment_method))
-    create_payment_method(customer_id, digest)
+    add_payment_method(customer_id, digest)
   end
 
-  @callback customer_payment_method(Customer.id(), Item.currency(), AddKlarnaPaymentMethod.t()) ::
+  @callback add_payment_method(Customer.id(), Item.currency(), AddKlarnaPaymentMethod.t()) ::
               {:ok, payment_method_id :: integer} | {:error, error}
-  def customer_payment_method(customer_id, currency, %AddKlarnaPaymentMethod{} = klarna_payment_method) do
+  def add_payment_method(customer_id, currency, %AddKlarnaPaymentMethod{} = klarna_payment_method) do
     digest = Digest.generate(:KLARNA, currency, AddKlarnaPaymentMethod.to_provider_data(klarna_payment_method))
-    create_payment_method(customer_id, digest)
+    add_payment_method(customer_id, digest)
   end
 
   @callback customer_cart_checkout(Customer.id(), binary, integer) ::
@@ -331,9 +331,9 @@ defmodule Singula do
     |> Map.new()
   end
 
-  defp create_payment_method(customer_id, digest) do
+  defp add_payment_method(customer_id, digest) do
     with {:ok, %Singula.Response{json: %{"paymentMethodId" => payment_method_id}, status_code: 200}} <-
-           log(:create_payment_method, fn ->
+           log(:add_payment_method, fn ->
              http_client().post("/apis/payment-methods/v1/customer/#{customer_id}/paymentmethod", digest)
            end) do
       {:ok, payment_method_id}
