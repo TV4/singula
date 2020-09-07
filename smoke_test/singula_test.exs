@@ -581,7 +581,7 @@ defmodule SmokeTest.Singula do
       external_id = unix_time_now
       email = "#{user_id}@bbrtest.se"
       customer_id = create_test_customer(external_id, user_id, email)
-      Singula.anonymise_customer(customer_id)
+      :ok = Singula.anonymise_customer(customer_id)
 
       assert Singula.create_cart_with_item(customer_id, item_id, currency) ==
                {:error,
@@ -691,10 +691,10 @@ defmodule SmokeTest.Singula do
     assert {:ok, crossgrades} = Singula.crossgrades_for_contract(customer_id, contract_id)
 
     assert Enum.sort_by(crossgrades, & &1.item_id) == [
-             %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4"},
-             %Singula.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61"},
-             %Singula.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96"},
-             %Singula.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1"}
+             %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4", change_type: :DOWNGRADE},
+             %Singula.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61", change_type: :DOWNGRADE},
+             %Singula.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96", change_type: :DOWNGRADE},
+             %Singula.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1", change_type: :UPGRADE}
            ]
   end
 
