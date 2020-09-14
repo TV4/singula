@@ -27,7 +27,7 @@ defmodule SmokeTest.Singula do
     assert Singula.item_by_id_and_currency(item_id, currency) ==
              {:ok,
               %Singula.Item{
-                category_id: 101,
+                category_id: 257,
                 currency: :SEK,
                 entitlements: [5960],
                 id: "6D3A56FF5065478ABD61",
@@ -264,7 +264,7 @@ defmodule SmokeTest.Singula do
                       asset: asset,
                       cost: "149.00",
                       item_id: ppv_item_id,
-                      item_name: "PPV - 149",
+                      item_name: "Matchbiljett - 149",
                       quantity: 1
                     }
                   ],
@@ -512,7 +512,7 @@ defmodule SmokeTest.Singula do
                  %Singula.CartDetail.Item{
                    cost: "149.00",
                    item_id: item_id,
-                   item_name: "PPV - 149",
+                   item_name: "Matchbiljett - 149",
                    asset: asset,
                    quantity: 1
                  }
@@ -690,12 +690,177 @@ defmodule SmokeTest.Singula do
   test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
     assert {:ok, crossgrades} = Singula.crossgrades_for_contract(customer_id, contract_id)
 
-    assert Enum.sort_by(crossgrades, & &1.item_id) == [
-             %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4", change_type: :DOWNGRADE},
-             %Singula.Crossgrade{currency: :SEK, item_id: "6D3A56FF5065478ABD61", change_type: :DOWNGRADE},
-             %Singula.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96", change_type: :DOWNGRADE},
-             %Singula.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1", change_type: :UPGRADE}
-           ]
+    assert Enum.sort_by(crossgrades, & &1.item_id) ==
+             [
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "037D06379053404B8FC8"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "03863D682F0049ABA2C8"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "2999.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "0A1A547FC01A46D4A3D0"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "0BE20AE03D334CD18447"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "12967A09C6C44B2A9950"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-340.00",
+                 change_type: :DOWNGRADE,
+                 currency: :SEK,
+                 item_id: "180B2AD9332349E6A7A4"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "24DF803D4BC948EFB837"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "2BD58C5154F341DCB606"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "36B752B6B3CD40A699B6"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "37E26B6AD1214C4A9276"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "58BF0607E86644889933"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "6838D06EC841414CAA30"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "6B0BE9013DCE491099D8"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-310.00",
+                 change_type: :DOWNGRADE,
+                 currency: :SEK,
+                 item_id: "6D3A56FF5065478ABD61"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "6DD0D69D458B4BEC9D44"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "715C85E8D4AE4A699A2B"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "7D07EBD1378D4DC89C7D"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "8AD52F8EC492438DAA6E"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "8D605899B9FC4F9780DC"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "914360ADD2984908A83D"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :DOWNGRADE,
+                 currency: :SEK,
+                 item_id: "9781F421A5894FC0AA96"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "A19FA17111874ABC9A8B"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "0.00",
+                 change_type: :UPGRADE,
+                 currency: :SEK,
+                 item_id: "C943A5FED47E444B96E1"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "CF0ABB1831974F6EBF44"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "DDCCDD281F2F48C3BA5F"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "E890A479D3CA409C945C"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "2999.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "F52CDAC531E243DCB6EB"
+               },
+               %Singula.Crossgrade{
+                 change_cost: "-250.00",
+                 change_type: :CROSSGRADE,
+                 currency: :SEK,
+                 item_id: "F8A8F3623E9B4FB8BB4D"
+               }
+             ]
   end
 
   test "Update contract with new payment method", %{

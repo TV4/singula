@@ -1675,10 +1675,10 @@ defmodule SingulaTest do
     assert Singula.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) ==
              {:ok,
               [
-                %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4", change_type: :DOWNGRADE},
-                %Singula.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1", change_type: :CROSSGRADE},
-                %Singula.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96", change_type: :UPGRADE},
-                %Singula.Crossgrade{currency: :SEK, item_id: "4151C241C3DD41529A87", change_type: :UPGRADE}
+                %Singula.Crossgrade{currency: :SEK, item_id: "180B2AD9332349E6A7A4", change_type: :DOWNGRADE, change_cost: "109.00" },
+                %Singula.Crossgrade{currency: :SEK, item_id: "C943A5FED47E444B96E1", change_type: :CROSSGRADE, change_cost: "449.00"},
+                %Singula.Crossgrade{currency: :SEK, item_id: "9781F421A5894FC0AA96", change_type: :UPGRADE, change_cost: "199.00"},
+                %Singula.Crossgrade{currency: :SEK, item_id: "4151C241C3DD41529A87", change_type: :UPGRADE, change_cost: "449.00"}
               ]}
   end
 
