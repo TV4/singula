@@ -8,8 +8,16 @@ defmodule Singula.Crossgrade do
           change_cost: binary
         }
 
-  def new(%{"itemCode" => item_id, "changeCost" => %{"currency" => currency, "amount" => amount}, "changeType" => change_type}) do
-    %__MODULE__{item_id: item_id, currency: String.to_atom(currency), change_type: String.to_atom(change_type),
-    change_cost: amount}
+  def new(%{
+        "itemCode" => item_id,
+        "changeCost" => %{"currency" => currency, "amount" => amount},
+        "changeType" => change_type
+      }) do
+    %__MODULE__{
+      item_id: item_id,
+      currency: String.to_atom(currency),
+      change_type: String.to_atom(change_type),
+      change_cost: amount
+    }
   end
 end
