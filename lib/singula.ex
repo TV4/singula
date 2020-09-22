@@ -68,8 +68,8 @@ defmodule Singula do
     end
   end
 
-  @callback customer_contracts(Customer.id()) ::
-              {:ok, list(Contract.t())} | {:error, error}
+  @callback customer_contracts(Customer.id()) :: {:ok, list(Contract.t())} | {:error, error}
+  @callback customer_contracts(Customer.id(), active_only :: boolean) :: {:ok, list(Contract.t())} | {:error, error}
   def customer_contracts(customer_id, active_only \\ true) do
     with {:ok, %Singula.Response{json: data, status_code: 200}} <-
            log(:customer_contracts, fn ->
