@@ -1,3 +1,18 @@
+defmodule Singula.Category do
+  defstruct [:id, :name, categories: []]
+  @type t :: %__MODULE__{}
+
+  def new(payload) do
+    categories = Map.get(payload, "categories", [])
+
+    %__MODULE__{
+      id: payload["categoryId"],
+      name: payload["name"],
+      categories: Enum.map(categories, fn category -> new(category) end)
+    }
+  end
+end
+
 defmodule Singula do
   alias Singula.{
     CartDetail,
@@ -302,6 +317,17 @@ defmodule Singula do
              http_client().get("/apis/catalogue/v1/item/#{item_id}?currency=#{currency}")
            end) do
       {:ok, Item.new(data)}
+    end
+  end
+
+  @callback category(category_id :: binary | integer, limited :: boolean) ::
+              {:ok, %Singula.Category{}} | {:error, error}
+  def category(category_id, limited \\ true) do
+    with {:ok, %Singula.Response{json: data, status_code: 200}} <-
+           log(:category, fn ->
+             http_client().get("/apis/catalogue/v1/category/#{category_id}?limited=#{limited}")
+           end) do
+      {:ok, Singula.Category.new(data)}
     end
   end
 

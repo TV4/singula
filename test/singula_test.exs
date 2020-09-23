@@ -1882,4 +1882,75 @@ defmodule SingulaTest do
                 ]}
     end
   end
+
+  test "get category" do
+    MockSingulaHTTPClient
+    |> expect(:get, fn "/apis/catalogue/v1/category/224?limited=false" ->
+      data = %{
+        "categories" => [
+          %{
+            "categories" => [
+              %{"categoryId" => 256, "name" => "C+More"},
+              %{"categoryId" => 259, "name" => "C+More+All+Sport"},
+              %{"categoryId" => 258, "name" => "C+More+Mycket+Sport"},
+              %{"categoryId" => 257, "name" => "C+More+TV4"}
+            ],
+            "categoryId" => 227,
+            "name" => "Sweden"
+          },
+          %{
+            "categories" => [
+              %{"categoryId" => 261, "name" => "C+More+Film+og+Serier+DK"}
+            ],
+            "categoryId" => 229,
+            "name" => "Denmark"
+          },
+          %{
+            "categories" => [
+              %{"categoryId" => 260, "name" => "C+More+Film+og+Serier+NO"}
+            ],
+            "categoryId" => 228,
+            "name" => "Norway"
+          }
+        ],
+        "categoryId" => 224,
+        "name" => "Subscription"
+      }
+
+      {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+    end)
+
+    assert Singula.category(224, false) ==
+             {:ok,
+              %Singula.Category{
+                categories: [
+                  %Singula.Category{
+                    categories: [
+                      %Singula.Category{id: 256, name: "C+More"},
+                      %Singula.Category{id: 259, name: "C+More+All+Sport"},
+                      %Singula.Category{id: 258, name: "C+More+Mycket+Sport"},
+                      %Singula.Category{id: 257, name: "C+More+TV4"}
+                    ],
+                    id: 227,
+                    name: "Sweden"
+                  },
+                  %Singula.Category{
+                    categories: [
+                      %Singula.Category{id: 261, name: "C+More+Film+og+Serier+DK"}
+                    ],
+                    id: 229,
+                    name: "Denmark"
+                  },
+                  %Singula.Category{
+                    categories: [
+                      %Singula.Category{id: 260, name: "C+More+Film+og+Serier+NO"}
+                    ],
+                    id: 228,
+                    name: "Norway"
+                  }
+                ],
+                id: 224,
+                name: "Subscription"
+              }}
+  end
 end
