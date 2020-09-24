@@ -38,8 +38,11 @@ defmodule Singula.ContractDetails do
   end
 
   defp amount(%{"amount" => amount, "currency" => currency}) do
-    %{amount: amount, currency: currency_term(currency)}
+    %{amount: format_amount(amount), currency: currency_term(currency)}
   end
+
+  defp format_amount(amount) when is_binary(amount), do: String.to_float(amount)
+  defp format_amount(amount) when is_float(amount), do: amount
 
   defp billing(%{"frequency" => frequency} = billing, type) do
     if billing_type = Map.get(billing, type) do

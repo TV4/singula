@@ -37,8 +37,8 @@ defmodule Singula.ContractDetailsTest do
              item_id: "4FC7D926073348038362",
              item_name: "Field Sales - All Sport 12 plus 12",
              minimum_term: %{frequency: :MONTH, length: 24},
-             balance: %{amount: "-399.00", currency: :SEK},
-             recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 24},
+             balance: %{amount: -399.00, currency: :SEK},
+             recurring_billing: %{amount: 399.0, currency: :SEK, frequency: :MONTH, length: 24},
              status: :ACTIVE,
              start_date: ~D[2020-04-22],
              paid_up_to_date: ~D[2020-04-22],
@@ -76,8 +76,8 @@ defmodule Singula.ContractDetailsTest do
              id: 9_719_738,
              item_id: "6D3A56FF5065478ABD61",
              item_name: "C More TV4",
-             balance: %{amount: "0.00", currency: :SEK},
-             recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+             balance: %{amount: 0.00, currency: :SEK},
+             recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
              status: :ACTIVE,
              start_date: ~D[2020-04-20],
              paid_up_to_date: ~D[2020-05-04],
@@ -129,11 +129,11 @@ defmodule Singula.ContractDetailsTest do
              item_id: "6D3A56FF5065478ABD61",
              item_name: "C More TV4",
              status: :ACTIVE,
-             balance: %{amount: "0.00", currency: :SEK},
+             balance: %{amount: 0.00, currency: :SEK},
              minimum_term: nil,
              paid_up_to_date: ~D[2020-06-02],
-             recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
-             upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
+             recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: 0.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
              payment_method_id: 27541
            }
@@ -179,15 +179,15 @@ defmodule Singula.ContractDetailsTest do
     }
 
     assert ContractDetails.new(payload) == %Singula.ContractDetails{
-             balance: %{amount: "0.00", currency: :SEK},
+             balance: %{amount: 0.00, currency: :SEK},
              item_id: "6D3A56FF5065478ABD61",
              id: 19846,
              item_name: "C More TV4",
              minimum_term: nil,
              order_id: 112_865,
              paid_up_to_date: ~D[2020-05-19],
-             recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
-             upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
+             recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: 0.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
              status: :ACTIVE,
              payment_method_id: 27543
@@ -234,15 +234,15 @@ defmodule Singula.ContractDetailsTest do
     }
 
     assert ContractDetails.new(payload) == %Singula.ContractDetails{
-             balance: %{amount: "-2189.00", currency: :SEK},
+             balance: %{amount: -2189.00, currency: :SEK},
              id: 19848,
              item_id: "8FB4E247D57B40E09FA7",
              item_name: "Field Sales - All Sport 12 plus 12 Apple TV full price",
              minimum_term: %{frequency: :MONTH, length: 24},
              order_id: 112_868,
              paid_up_to_date: ~D[2020-05-19],
-             recurring_billing: %{amount: "399.00", currency: :SEK, frequency: :MONTH, length: 1},
-             upcoming_billing: %{amount: "0.00", currency: :SEK, frequency: :MONTH, length: 1},
+             recurring_billing: %{amount: 399.00, currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: 0.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
              status: :ACTIVE,
              payment_method_id: 27545
@@ -289,15 +289,15 @@ defmodule Singula.ContractDetailsTest do
     }
 
     assert ContractDetails.new(payload) == %Singula.ContractDetails{
-             balance: %{amount: "0.00", currency: :SEK},
+             balance: %{amount: 0.00, currency: :SEK},
              id: 20673,
              item_id: "C943A5FED47E444B96E1",
              item_name: "C More All Sport - 12 months",
              minimum_term: %{frequency: :MONTH, length: 12},
              order_id: 113_983,
              paid_up_to_date: ~D[2020-09-25],
-             recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
-             upcoming_billing: %{amount: "349.00", currency: :SEK, frequency: :MONTH, length: 1},
+             recurring_billing: %{amount: 449.00, currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: 349.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-08-25],
              status: :ACTIVE,
              payment_method_id: 28390
@@ -336,11 +336,50 @@ defmodule Singula.ContractDetailsTest do
              id: 9_719_738,
              item_id: "6D3A56FF5065478ABD61",
              item_name: "C More TV4",
-             balance: %{amount: "0.00", currency: :SEK},
+             balance: %{amount: 0.00, currency: :SEK},
              change_date: ~D[2020-05-04],
              change_to_item_id: "180B2AD9332349E6A7A4",
-             recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+             recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
              status: :DOWNGRADE_SCHEDULED,
+             start_date: ~D[2020-04-20],
+             paid_up_to_date: ~D[2020-05-04],
+             payment_method_id: 10_246_312
+           }
+  end
+
+  test "parse with amount as float or string return float" do
+    payload = %{
+      "active" => true,
+      "auditInfo" => %{
+        "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "creationDate" => "2020-04-20T10:01:48+02:00",
+        "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "modifiedDate" => "2020-04-20T10:01:48+02:00"
+      },
+      "balance" => %{"amount" => "0.00", "currency" => "SEK"},
+      "billing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => 139.00, "currency" => "SEK"}
+      },
+      "contractId" => 9_719_738,
+      "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+      "itemCode" => "6D3A56FF5065478ABD61",
+      "name" => "C More TV4",
+      "nextPaymentDate" => "2020-05-04",
+      "paidUpToDate" => "2020-05-04",
+      "paymentMethodId" => 10_246_312,
+      "startDate" => "2020-04-20",
+      "status" => "ACTIVE"
+    }
+
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
+             id: 9_719_738,
+             item_id: "6D3A56FF5065478ABD61",
+             item_name: "C More TV4",
+             balance: %{amount: 0.00, currency: :SEK},
+             recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
+             status: :ACTIVE,
              start_date: ~D[2020-04-20],
              paid_up_to_date: ~D[2020-05-04],
              payment_method_id: 10_246_312

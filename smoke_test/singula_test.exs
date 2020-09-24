@@ -549,14 +549,14 @@ defmodule SmokeTest.Singula do
       assert Singula.customer_contract(customer_id, contract_id) ==
                {:ok,
                 %Singula.ContractDetails{
-                  balance: %{amount: "0.00", currency: :SEK},
+                  balance: %{amount: 0.00, currency: :SEK},
                   id: contract_id,
                   order_id: order_id,
                   item_id: item_id,
                   item_name: "C More TV4",
                   paid_up_to_date: Date.utc_today() |> Date.add(14),
-                  recurring_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
-                  upcoming_billing: %{amount: "139.00", currency: :SEK, frequency: :MONTH, length: 1},
+                  recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
+                  upcoming_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
                   start_date: Date.utc_today(),
                   status: :ACTIVE,
                   payment_method_id: payment_method_id
@@ -640,14 +640,14 @@ defmodule SmokeTest.Singula do
     assert contract.order_id > order_id
 
     assert contract == %Singula.ContractDetails{
-             balance: %{amount: "0.00", currency: :SEK},
+             balance: %{amount: 0.00, currency: :SEK},
              id: contract_id,
              order_id: contract.order_id,
              item_id: "4151C241C3DD41529A87",
              item_name: "C More All Sport",
              paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
-             recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
-             upcoming_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
+             recurring_billing: %{amount: 449.00, currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: 449.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
              status: :ACTIVE,
              payment_method_id: payment_method_id
@@ -667,7 +667,7 @@ defmodule SmokeTest.Singula do
     assert contract.order_id > order_id
 
     assert contract == %Singula.ContractDetails{
-             balance: %{amount: "0.00", currency: :SEK},
+             balance: %{amount: 0.00, currency: :SEK},
              change_date: Date.utc_today() |> Timex.shift(months: 1),
              change_to_item_id: item_id,
              id: contract_id,
@@ -675,8 +675,8 @@ defmodule SmokeTest.Singula do
              item_id: "4151C241C3DD41529A87",
              item_name: "C More All Sport",
              paid_up_to_date: Date.utc_today() |> Timex.shift(months: 1),
-             recurring_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
-             upcoming_billing: %{amount: "449.00", currency: :SEK, frequency: :MONTH, length: 1},
+             recurring_billing: %{amount: 449.00, currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: 449.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
              status: :DOWNGRADE_SCHEDULED,
              payment_method_id: payment_method_id
