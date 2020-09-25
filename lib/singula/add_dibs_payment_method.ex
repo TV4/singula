@@ -16,7 +16,7 @@ defmodule Singula.AddDibsPaymentMethod do
     %__MODULE__{
       transactionId: transactionId,
       receipt: receipt,
-      dibs_ccPart: dibs_ccPart,
+      dibs_ccPart: String.replace(dibs_ccPart, " ", ""),
       dibs_ccPrefix: dibs_ccPrefix,
       dibs_ccType: dibs_ccType,
       dibs_expM: dibs_expM,

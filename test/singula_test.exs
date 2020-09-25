@@ -1175,15 +1175,16 @@ defmodule SingulaTest do
 
   describe "add dibs payment method to customer" do
     setup do
-      dibs_payment_method = %AddDibsPaymentMethod{
-        dibs_ccPart: "**** **** **** 0000",
-        dibs_ccPrefix: "457110",
-        dibs_ccType: "Visa",
-        dibs_expM: "12",
-        dibs_expY: "21",
-        transactionId: "HrE7FZvc16lUo1ASCLt",
-        receipt: "617371666"
-      }
+      dibs_payment_method =
+        AddDibsPaymentMethod.new(
+          "HrE7FZvc16lUo1ASCLt",
+          "617371666",
+          "**** **** **** 0000",
+          "457110",
+          "Visa",
+          "12",
+          "21"
+        )
 
       {:ok, dibs_payment_method: dibs_payment_method}
     end
@@ -1196,7 +1197,7 @@ defmodule SingulaTest do
                  "currencyCode" => :SEK,
                  "data" => [
                    %{key: :defaultMethod, value: true},
-                   %{key: :dibs_ccPart, value: "**** **** **** 0000"},
+                   %{key: :dibs_ccPart, value: "************0000"},
                    %{key: :dibs_ccPrefix, value: "457110"},
                    %{key: :dibs_ccType, value: "Visa"},
                    %{key: :dibs_expM, value: "12"},
