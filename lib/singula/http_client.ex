@@ -45,8 +45,7 @@ defmodule Singula.HTTPClient do
     headers = Keyword.merge(signed_headers(method, path, current_time), headers)
     options = Keyword.merge(options, recv_timeout: timeout())
 
-    response =
-      http_client.request(method, url, body, headers, options)
+    response = http_client.request(method, url, body, headers, options)
 
     Singula.Telemetry.emit_response_event(%{response: response})
 
