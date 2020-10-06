@@ -1,3 +1,9 @@
+defmodule Singula.AddNotProvidedPaymentMethod do
+  defstruct []
+
+  @type t :: %__MODULE__{}
+end
+
 defmodule Singula.Category do
   defstruct [:id, :name, categories: []]
   @type t :: %__MODULE__{}
@@ -15,14 +21,15 @@ end
 
 defmodule Singula do
   alias Singula.{
+    AddDibsPaymentMethod,
+    AddKlarnaPaymentMethod,
+    AddNotProvidedPaymentMethod,
     CartDetail,
     Contract,
     ContractDetails,
     Customer,
-    AddDibsPaymentMethod,
     Digest,
     Item,
-    AddKlarnaPaymentMethod,
     MetaData,
     PPV
   }
@@ -227,6 +234,13 @@ defmodule Singula do
               {:ok, payment_method_id :: integer} | {:error, error}
   def add_payment_method(customer_id, currency, %AddKlarnaPaymentMethod{} = klarna_payment_method) do
     digest = Digest.generate(:KLARNA, currency, AddKlarnaPaymentMethod.to_provider_data(klarna_payment_method))
+    add_payment_method(customer_id, digest)
+  end
+
+  @callback add_payment_method(Customer.id(), Item.currency(), AddNotProvidedPaymentMethod.t()) ::
+              {:ok, payment_method_id :: integer} | {:error, error}
+  def add_payment_method(customer_id, currency, %AddNotProvidedPaymentMethod{}) do
+    digest = Digest.generate(:NOT_PROVIDED, currency, %{})
     add_payment_method(customer_id, digest)
   end
 
