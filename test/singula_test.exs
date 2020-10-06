@@ -1311,6 +1311,30 @@ defmodule SingulaTest do
     end
   end
 
+  test "add not provided payment method to customer" do
+    MockSingulaHTTPClient
+    |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod", data ->
+      assert data == %{
+               "currencyCode" => :SEK,
+               "data" => [],
+               "digest" => "7e842b89f8d45d4162f32a197d5fc61b0d025a33672808b6fc35c6ee6deddccd",
+               "merchantCode" => "BBR",
+               "provider" => :NOT_PROVIDED,
+               "uuid" => "30f86e79-ed75-4022-a16e-d55d9f09af8d"
+             }
+
+      data = %{"paymentMethodId" => 26574}
+      {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+    end)
+
+    assert Singula.add_payment_method(
+             "ff160270-5197-4c90-835c-cd1fff8b19d0",
+             :SEK,
+             %Singula.AddNotProvidedPaymentMethod{}
+           ) ==
+             {:ok, 26574}
+  end
+
   describe "set dibs payment method on contract" do
     test "success" do
       MockSingulaHTTPClient

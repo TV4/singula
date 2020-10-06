@@ -1,24 +1,3 @@
-defmodule Singula.AddNotProvidedPaymentMethod do
-  defstruct []
-
-  @type t :: %__MODULE__{}
-end
-
-defmodule Singula.Category do
-  defstruct [:id, :name, categories: []]
-  @type t :: %__MODULE__{}
-
-  def new(payload) do
-    categories = Map.get(payload, "categories", [])
-
-    %__MODULE__{
-      id: payload["categoryId"],
-      name: payload["name"],
-      categories: Enum.map(categories, fn category -> new(category) end)
-    }
-  end
-end
-
 defmodule Singula do
   alias Singula.{
     AddDibsPaymentMethod,
@@ -223,24 +202,20 @@ defmodule Singula do
     end
   end
 
-  @callback add_payment_method(Customer.id(), Item.currency(), AddDibsPaymentMethod.t()) ::
+  @callback add_payment_method(
+              Customer.id(),
+              Item.currency(),
+              AddDibsPaymentMethod.t() | AddKlarnaPaymentMethod.t() | AddNotProvidedPaymentMethod.t()
+            ) ::
               {:ok, payment_method_id :: integer} | {:error, error}
-  def add_payment_method(customer_id, currency, %AddDibsPaymentMethod{} = dibs_payment_method) do
-    digest = Digest.generate(:DIBS, currency, Map.from_struct(dibs_payment_method))
-    add_payment_method(customer_id, digest)
-  end
+  def add_payment_method(customer_id, currency, payment_method) do
+    digest =
+      Digest.generate(
+        Singula.AddPaymentMethod.provider(payment_method),
+        currency,
+        Singula.AddPaymentMethod.to_provider_data(payment_method)
+      )
 
-  @callback add_payment_method(Customer.id(), Item.currency(), AddKlarnaPaymentMethod.t()) ::
-              {:ok, payment_method_id :: integer} | {:error, error}
-  def add_payment_method(customer_id, currency, %AddKlarnaPaymentMethod{} = klarna_payment_method) do
-    digest = Digest.generate(:KLARNA, currency, AddKlarnaPaymentMethod.to_provider_data(klarna_payment_method))
-    add_payment_method(customer_id, digest)
-  end
-
-  @callback add_payment_method(Customer.id(), Item.currency(), AddNotProvidedPaymentMethod.t()) ::
-              {:ok, payment_method_id :: integer} | {:error, error}
-  def add_payment_method(customer_id, currency, %AddNotProvidedPaymentMethod{}) do
-    digest = Digest.generate(:NOT_PROVIDED, currency, %{})
     add_payment_method(customer_id, digest)
   end
 
