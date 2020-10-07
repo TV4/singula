@@ -1,19 +1,5 @@
 defmodule Singula do
-  alias Singula.{
-    AddDibsPaymentMethod,
-    AddKlarnaPaymentMethod,
-    AddNotProvidedPaymentMethod,
-    CartDetail,
-    Contract,
-    ContractDetails,
-    Customer,
-    Digest,
-    Item,
-    MetaData,
-    PaymentMethodProvider,
-    PPV
-  }
-
+  alias Singula.{CartDetail, Contract, ContractDetails, Customer, Digest, Item, MetaData, PaymentMethodProvider, PPV}
   require Logger
 
   @type error :: Singula.Error.t() | HTTPoison.Error.t()
