@@ -10,6 +10,7 @@ defmodule Singula do
     Digest,
     Item,
     MetaData,
+    PaymentMethodProvider,
     PPV
   }
 
@@ -205,16 +206,12 @@ defmodule Singula do
   @callback add_payment_method(
               Customer.id(),
               Item.currency(),
-              AddDibsPaymentMethod.t() | AddKlarnaPaymentMethod.t() | AddNotProvidedPaymentMethod.t()
+              AddDibsPaymentMethod.t() | AddKlarnaPaymentMethod.t() | AddNoPaymentMethod.t()
             ) ::
               {:ok, payment_method_id :: integer} | {:error, error}
   def add_payment_method(customer_id, currency, payment_method) do
     digest =
-      Digest.generate(
-        Singula.AddPaymentMethod.provider(payment_method),
-        currency,
-        Singula.AddPaymentMethod.to_provider_data(payment_method)
-      )
+      Digest.generate(PaymentMethodProvider.name(payment_method), currency, PaymentMethodProvider.data(payment_method))
 
     add_payment_method(customer_id, digest)
   end

@@ -1,4 +1,4 @@
-defmodule Singula.AddKlarnaPaymentMethod do
+defmodule Singula.PaymentMethodProvider.Klarna do
   defstruct [
     :receipt,
     :transactionId,
@@ -10,14 +10,14 @@ defmodule Singula.AddKlarnaPaymentMethod do
   @type t :: %__MODULE__{}
 
   def new(transaction_id, receipt, order_lines) do
-    %Singula.AddKlarnaPaymentMethod{receipt: receipt, transactionId: transaction_id, order_lines: order_lines}
+    %__MODULE__{receipt: receipt, transactionId: transaction_id, order_lines: order_lines}
   end
 end
 
-defimpl Singula.AddPaymentMethod, for: Singula.AddKlarnaPaymentMethod do
-  def provider(_payment_method), do: :KLARNA
+defimpl Singula.PaymentMethodProvider, for: Singula.PaymentMethodProvider.Klarna do
+  def name(_payment_method), do: :KLARNA
 
-  def to_provider_data(payment_method) do
+  def data(payment_method) do
     payment_method
     |> Map.take([:receipt, :transactionId, :redirectUrl, :locale])
     |> Map.put(:order_lines, Jason.encode!(payment_method.order_lines))

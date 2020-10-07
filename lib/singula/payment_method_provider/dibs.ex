@@ -1,4 +1,4 @@
-defmodule Singula.AddDibsPaymentMethod do
+defmodule Singula.PaymentMethodProvider.Dibs do
   defstruct [
     :dibs_ccPart,
     :dibs_ccPrefix,
@@ -25,7 +25,7 @@ defmodule Singula.AddDibsPaymentMethod do
   end
 end
 
-defimpl Singula.AddPaymentMethod, for: Singula.AddDibsPaymentMethod do
-  def provider(_payment_method), do: :DIBS
-  def to_provider_data(payment_method), do: Map.from_struct(payment_method)
+defimpl Singula.PaymentMethodProvider, for: Singula.PaymentMethodProvider.Dibs do
+  def name(_payment_method), do: :DIBS
+  def data(payment_method), do: Map.from_struct(payment_method)
 end

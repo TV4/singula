@@ -23,7 +23,7 @@ defmodule SmokeTest.Singula do
   setup_all [:setup_test_customer, :setup_defaults]
   setup :merge_saved_test_context
 
-  test "Get item by id and currency", %{subscription_item_id: item_id, currency: currency} do
+  test "get item by id and currency", %{subscription_item_id: item_id, currency: currency} do
     assert Singula.item_by_id_and_currency(item_id, currency) ==
              {:ok,
               %Singula.Item{
@@ -38,7 +38,7 @@ defmodule SmokeTest.Singula do
               }}
   end
 
-  test "Get non-existing item by id and currency", %{currency: currency} do
+  test "get non-existing item by id and currency", %{currency: currency} do
     assert Singula.item_by_id_and_currency("non-existing", currency) ==
              {:error,
               %Singula.Error{
@@ -48,12 +48,12 @@ defmodule SmokeTest.Singula do
               }}
   end
 
-  test "Update customer", %{customer_id: customer_id} do
+  test "update customer", %{customer_id: customer_id} do
     customer = %Singula.Customer{id: customer_id, first_name: "Test"}
     assert Singula.update_customer(customer) == :ok
   end
 
-  describe "Get customer by id" do
+  describe "get customer by id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
       assert Singula.customer_fetch(customer_id) ==
                {:ok,
@@ -87,7 +87,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Searching external id" do
+  describe "search external id" do
     test "returns set parameters", %{customer_id: customer_id, email: email, username: username, vimond_id: vimond_id} do
       assert Singula.customer_search(vimond_id) ==
                {:ok,
@@ -120,7 +120,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Fetching customer contracts" do
+  describe "fetch customer contracts" do
     test "returns 0 when no contracts", %{customer_id: customer_id} do
       assert Singula.customer_contracts(customer_id) == {:ok, []}
     end
@@ -137,7 +137,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Fetching customer PPV purchases" do
+  describe "fetch customer PPV purchases" do
     test "returns 0 when no purchases", %{customer_id: customer_id} do
       assert Singula.customer_purchases_ppv(customer_id) == {:ok, []}
     end
@@ -154,7 +154,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Creating cart with an item" do
+  describe "create cart with an item" do
     test "returns new cart with passed customer_id", %{
       customer_id: customer_id,
       subscription_item_id: subscription_item_id,
@@ -201,7 +201,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Fetching cart details" do
+  describe "fetch cart details" do
     test "returns no free trial subscription", %{
       customer_id: customer_id,
       currency: currency,
@@ -304,7 +304,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Fetching item on sale" do
+  describe "fetch item on sale" do
     test "returns empty list for item without discount", %{no_discount_item_id: item_id, currency: currency} do
       assert Singula.fetch_item_discounts(item_id, currency) == {:ok, []}
     end
@@ -382,7 +382,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Checking out cart" do
+  describe "check out cart with Dibs" do
     test "redirect returns an transaction_id with redirect URL", %{customer_id: customer_id, currency: currency} do
       # BUG: Can return: "com.mgt.util.exception.system.SystemException: Error connecting to provider"
 
@@ -432,7 +432,7 @@ defmodule SmokeTest.Singula do
       # TODO: The receipt is returned once the pre-populated form-data gets submitted.
       #       A hard coded receipt is used for testing until its properly received.
 
-      dibs_payment_method = %Singula.AddDibsPaymentMethod{
+      dibs_payment_method = %Singula.PaymentMethodProvider.Dibs{
         dibs_ccPart: "**** **** **** 0000",
         dibs_ccPrefix: "457110",
         dibs_ccType: "Visa",
@@ -526,7 +526,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Fetching customer contracts after checkout" do
+  describe "fetch customer contracts after checkout" do
     test "returns purchased subscription", %{
       customer_id: customer_id,
       subscription_item_id: item_id,
@@ -574,7 +574,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Creating cart with an item for a deleted customer" do
+  describe "create a cart with an item for a deleted customer" do
     test "returns error 90062", %{subscription_item_id: item_id, currency: currency} do
       unix_time_now = DateTime.to_unix(DateTime.utc_now())
       user_id = "smoke_test_#{unix_time_now}"
@@ -593,7 +593,7 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  describe "Checking out cart - Klarna" do
+  describe "check out cart with Klarna" do
     test "create a klarna session", %{customer_id: customer_id, currency: currency} do
       klarna_redirect_data = %{
         itemDescription: "REGISTER_CARD",
@@ -620,15 +620,15 @@ defmodule SmokeTest.Singula do
     end
   end
 
-  test "Cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
+  test "cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
     assert Singula.cancel_contract(customer_id, contract_id) == {:ok, Date.utc_today() |> Date.add(14)}
   end
 
-  test "Withdraw cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
+  test "withdraw cancel contract", %{customer_id: customer_id, contract_id: contract_id} do
     assert Singula.withdraw_cancel_contract(customer_id, contract_id) == :ok
   end
 
-  test "Change a contract changes immediately for upgrades", %{
+  test "change a contract changes immediately for upgrades", %{
     customer_id: customer_id,
     contract_id: contract_id,
     order_id: order_id,
@@ -654,7 +654,7 @@ defmodule SmokeTest.Singula do
            }
   end
 
-  test "Change a contract is scheduled for downgrades", %{
+  test "change a contract that is scheduled for downgrades", %{
     customer_id: customer_id,
     contract_id: contract_id,
     subscription_item_id: item_id,
@@ -683,11 +683,14 @@ defmodule SmokeTest.Singula do
            }
   end
 
-  test "Withdraw a contract that is scheduled for downgrades", %{customer_id: customer_id, contract_id: contract_id} do
+  test "withdraw a contract change that is scheduled for downgrade", %{
+    customer_id: customer_id,
+    contract_id: contract_id
+  } do
     assert Singula.withdraw_change_contract(customer_id, contract_id) == :ok
   end
 
-  test "Get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
+  test "get available crossgrades for a contract", %{customer_id: customer_id, contract_id: contract_id} do
     assert {:ok, crossgrades} = Singula.crossgrades_for_contract(customer_id, contract_id)
 
     assert crossgrades
@@ -720,7 +723,7 @@ defmodule SmokeTest.Singula do
            ]
   end
 
-  test "Update contract with new payment method", %{
+  test "update contract with new payment method", %{
     customer_id: customer_id,
     contract_id: contract_id,
     payment_method_receipt: payment_method_receipt,
@@ -736,7 +739,7 @@ defmodule SmokeTest.Singula do
     assert {:ok, %{"transactionId" => transaction_id}} =
              Singula.customer_redirect_dibs(customer_id, currency, dibs_redirect_data)
 
-    dibs_payment_method = %Singula.AddDibsPaymentMethod{
+    dibs_payment_method = %Singula.PaymentMethodProvider.Dibs{
       dibs_ccPart: "**** **** **** 0000",
       dibs_ccPrefix: "457110",
       dibs_ccType: "Visa",
