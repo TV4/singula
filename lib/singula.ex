@@ -189,11 +189,7 @@ defmodule Singula do
     end
   end
 
-  @callback add_payment_method(
-              Customer.id(),
-              Item.currency(),
-              AddDibsPaymentMethod.t() | AddKlarnaPaymentMethod.t() | AddNoPaymentMethod.t()
-            ) ::
+  @callback add_payment_method(Customer.id(), Item.currency(), PaymentMethodProvider.t()) ::
               {:ok, payment_method_id :: integer} | {:error, error}
   def add_payment_method(customer_id, currency, payment_method) do
     digest =
