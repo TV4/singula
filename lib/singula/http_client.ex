@@ -7,7 +7,7 @@ end
 defmodule Singula.Error do
   defstruct [:code, :developer_message, :user_message]
 
-  @type t :: %__MODULE__{code: integer, developer_message: binary | nil, user_message: binary | nil}
+  @type t :: %__MODULE__{code: integer | nil, developer_message: binary | nil, user_message: binary | nil}
 end
 
 defmodule Singula.HTTPClient do
