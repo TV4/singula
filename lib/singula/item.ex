@@ -9,7 +9,7 @@ defmodule Singula.Item do
     :recurring_billing,
     :one_off_price,
     :minimum_term_month_count,
-    entitlements: []
+    :entitlements
   ]
 
   @type currency :: :DKK | :NOK | :SEK
@@ -39,7 +39,9 @@ defmodule Singula.Item do
   defp currency(%{"recurring" => %{"currency" => currency}}), do: String.to_atom(currency)
   defp currency(%{"oneOff" => %{"currency" => currency}}), do: String.to_atom(currency)
 
-  defp entitlements(entitlements), do: Enum.map(entitlements, & &1["id"])
+  defp entitlements(entitlements) do
+     Enum.map(entitlements, fn entitlement -> Singula.Entitlement.new(entitlement) end)
+  end
 
   defp month_count(%{"frequency" => "MONTH", "length" => months}), do: months
   defp month_count(%{"frequency" => "YEAR", "length" => years}), do: years * 12

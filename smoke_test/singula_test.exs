@@ -29,7 +29,7 @@ defmodule SmokeTest.Singula do
               %Singula.Item{
                 category_id: 257,
                 currency: :SEK,
-                entitlements: [5960],
+                entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}],
                 id: "6D3A56FF5065478ABD61",
                 minimum_term_month_count: nil,
                 name: "C More TV4",

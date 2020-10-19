@@ -19,7 +19,7 @@ defmodule Singula.ItemTest do
              currency: :SEK,
              category_id: 213,
              name: "PPV - 249",
-             entitlements: [5961],
+             entitlements: [%Singula.Entitlement{id: 5961, name: "Matchbiljett 249 kr"}],
              one_off_price: "149.00"
            }
   end
@@ -46,7 +46,7 @@ defmodule Singula.ItemTest do
              currency: :SEK,
              category_id: 101,
              name: "C More TV4",
-             entitlements: [5960],
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}],
              recurring_billing: %{amount: "139.00", month_count: 1}
            }
   end
@@ -74,7 +74,7 @@ defmodule Singula.ItemTest do
              currency: :SEK,
              category_id: 226,
              name: "Field Sales - All Sport 12 plus 12",
-             entitlements: [5963],
+             entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}],
              recurring_billing: %{amount: "399.00", month_count: 1},
              minimum_term_month_count: 24
            }
@@ -103,7 +103,7 @@ defmodule Singula.ItemTest do
              currency: :SEK,
              category_id: 226,
              name: "Field Sales - All Sport 12 plus 12 Apple TV full price",
-             entitlements: [5963],
+             entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}],
              recurring_billing: %{amount: "399.00", month_count: 1},
              one_off_price: "1990.00",
              minimum_term_month_count: 24

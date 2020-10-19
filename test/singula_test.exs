@@ -1775,7 +1775,7 @@ defmodule SingulaTest do
                   category_id: 101,
                   currency: :SEK,
                   name: "C More TV4",
-                  entitlements: [5960],
+                  entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}],
                   recurring_billing: %{amount: "139.00", month_count: 1}
                 }}
     end
