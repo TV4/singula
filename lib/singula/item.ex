@@ -40,7 +40,7 @@ defmodule Singula.Item do
   defp currency(%{"oneOff" => %{"currency" => currency}}), do: String.to_atom(currency)
 
   defp entitlements(entitlements) do
-     Enum.map(entitlements, fn entitlement -> Singula.Entitlement.new(entitlement) end)
+    Enum.map(entitlements, fn entitlement -> Singula.Entitlement.new(entitlement) end)
   end
 
   defp month_count(%{"frequency" => "MONTH", "length" => months}), do: months
