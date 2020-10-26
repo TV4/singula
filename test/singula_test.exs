@@ -1539,7 +1539,8 @@ defmodule SingulaTest do
     test "successfully" do
       MockSingulaHTTPClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
-                          %{"cancelDate" => ""} ->
+                          data ->
+        assert data == %{}
         data = %{"status" => "CUSTOMER_CANCELLED", "cancellationDate" => "2020-05-12"}
 
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}

@@ -9,7 +9,7 @@ defmodule Singula.Item do
     :recurring_billing,
     :one_off_price,
     :minimum_term_month_count,
-    :entitlements
+    entitlements: []
   ]
 
   @type currency :: :DKK | :NOK | :SEK

@@ -222,12 +222,16 @@ defmodule Singula do
 
   @callback cancel_contract(Customer.id(), Contract.contract_id()) ::
               {:ok, cancellation_date :: Date.t()} | {:error, error}
-  def cancel_contract(customer_id, contract_id, cancel_date \\ "") do
+  @callback cancel_contract(Customer.id(), Contract.contract_id(), cancel_date :: Date.t()) ::
+              {:ok, cancellation_date :: Date.t()} | {:error, error}
+  def cancel_contract(customer_id, contract_id, cancel_date \\ nil) do
+    data = if cancel_date, do: %{"cancelDate" => cancel_date}, else: %{}
+
     with {:ok, %Singula.Response{json: %{"cancellationDate" => cancellation_date}}} <-
            post(
              :cancel_contract,
              "/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/cancel",
-             %{"cancelDate" => cancel_date},
+             data,
              200
            ) do
       Date.from_iso8601(cancellation_date)
