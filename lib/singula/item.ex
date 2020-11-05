@@ -13,7 +13,7 @@ defmodule Singula.Item do
   ]
 
   @type currency :: :DKK | :NOK | :SEK
-  @type t :: %__MODULE__{id: binary, currency: currency}
+  @type t :: %__MODULE__{id: binary, currency: currency, entitlements: [Singula.Entitlement.t()]}
 
   def new(
         %{

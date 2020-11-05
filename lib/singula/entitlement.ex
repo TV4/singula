@@ -4,10 +4,5 @@ defmodule Singula.Entitlement do
 
   @type t :: %__MODULE__{id: integer, name: binary}
 
-  def new(%{"id" => id, "name" => name}) do
-    %__MODULE__{
-      id: id,
-      name: name
-    }
-  end
+  def new(%{"id" => id, "name" => name}), do: %__MODULE__{id: id, name: name}
 end
