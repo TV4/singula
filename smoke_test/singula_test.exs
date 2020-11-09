@@ -34,7 +34,8 @@ defmodule SmokeTest.Singula do
                 minimum_term_month_count: nil,
                 name: "C More TV4",
                 one_off_price: nil,
-                recurring_billing: %{amount: "139.00", month_count: 1}
+                recurring_billing: %{amount: "139.00", month_count: 1},
+                free_trial: %Singula.FreeTrial{number_of_days: 14},
               }}
   end
 
