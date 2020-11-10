@@ -48,7 +48,7 @@ defmodule Singula do
     end
   end
 
-  @callback customer_search(binary) :: {:ok, Customer.t()} | {:error, error}
+  @callback customer_search(binary :: binary()) :: {:ok, Customer.t()} | {:error, error}
   def customer_search(external_id) when is_binary(external_id) do
     customer_search(%{"externalUniqueIdentifier" => external_id})
   end
