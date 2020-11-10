@@ -48,12 +48,11 @@ defmodule Singula do
     end
   end
 
-  @callback customer_search(external_id :: String.t()) :: {:ok, Customer.t()} | {:error, error}
+  @callback customer_search(String.t() | map()) :: {:ok, Customer.t()} | {:error, error}
   def customer_search(external_id) when is_binary(external_id) do
     customer_search(%{"externalUniqueIdentifier" => external_id})
   end
 
-  @callback customer_search(query :: Map.t()) :: {:ok, Customer.t()} | {:error, error}
   def customer_search(query) when is_map(query) do
     with :ok <- validate_query(query),
          {:ok, %Singula.Response{json: data}} <-
