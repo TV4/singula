@@ -9,11 +9,35 @@ defmodule Singula.Item do
     :recurring_billing,
     :one_off_price,
     :minimum_term_month_count,
+    :free_trial,
     entitlements: []
   ]
 
   @type currency :: :DKK | :NOK | :SEK
   @type t :: %__MODULE__{id: binary, currency: currency, entitlements: [Singula.Entitlement.t()]}
+
+  def new(
+        %{
+          "itemId" => id,
+          "categoryId" => category_id,
+          "name" => name,
+          "pricing" => pricing,
+          "entitlements" => entitlements,
+          "freeTrial" => free_trial
+        } = payload
+      ) do
+    %__MODULE__{
+      id: id,
+      currency: currency(pricing),
+      category_id: category_id,
+      name: name,
+      recurring_billing: recurring_billing(pricing),
+      one_off_price: one_off_price(pricing),
+      entitlements: entitlements(entitlements),
+      minimum_term_month_count: month_count(payload["minimumTerm"]),
+      free_trial: free_trial(free_trial)
+    }
+  end
 
   def new(
         %{
@@ -60,4 +84,12 @@ defmodule Singula.Item do
   end
 
   defp recurring_billing(_), do: nil
+
+  defp free_trial(%{"active" => true, "numberOfDays" => number_of_days}) do
+    Singula.FreeTrial.new(number_of_days)
+  end
+
+  defp free_trial(_) do
+    nil
+  end
 end

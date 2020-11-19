@@ -302,6 +302,78 @@ defmodule SingulaTest do
                   developer_message: "Customer with external ID 666 not located"
                 }}
     end
+
+    test "by customerId, email and externalUniqueIdentifier" do
+      MockSingulaHTTPClient
+      |> expect(:post, fn "/apis/customers/v1/customer/search",
+                          %{
+                            "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
+                            "email" => "singula_purchase_test2@cmore.se",
+                            "externalUniqueIdentifier" => "100_471_887"
+                          } ->
+        data = %{
+          "active" => true,
+          "addresses" => [
+            %{
+              "addressType" => "HOME",
+              "countryCode" => "SWE",
+              "line1" => "Address Line 1",
+              "postCode" => "Postcode"
+            }
+          ],
+          "auditInfo" => %{
+            "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "creationDate" => "2020-03-22T07:19:21+01:00",
+            "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+            "modifiedDate" => "2020-03-22T07:19:21+01:00"
+          },
+          "customAttributes" => [%{"name" => "accepted_cmore_terms", "value" => "2018-09-25"}],
+          "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
+          "email" => "singula_purchase_test2@cmore.se",
+          "externalUniqueIdentifier" => 100_471_887,
+          "firstName" => "Singula_purchase_test2@cmore.se",
+          "lastName" => "Singula_purchase_test2@cmore.se",
+          "phone" => 0,
+          "referAFriend" => %{"active" => false, "code" => "PIh70mZL"},
+          "title" => "-",
+          "username" => "singula_purchase_test2@cmore.se"
+        }
+
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+      end)
+
+      assert Singula.customer_search(%{
+               "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
+               "email" => "singula_purchase_test2@cmore.se",
+               "externalUniqueIdentifier" => "100_471_887"
+             }) ==
+               {:ok,
+                %Customer{
+                  active: true,
+                  id: "ff160270-5197-4c90-835c-cd1fff8b19d0",
+                  date_of_birth: nil,
+                  addresses: [%Singula.Address{post_code: "Postcode", country_code: "SWE"}],
+                  custom_attributes: [%{name: "accepted_cmore_terms", value: "2018-09-25"}],
+                  email: "singula_purchase_test2@cmore.se",
+                  external_unique_id: "100471887",
+                  first_name: "Singula_purchase_test2@cmore.se",
+                  last_name: "Singula_purchase_test2@cmore.se",
+                  username: "singula_purchase_test2@cmore.se"
+                }}
+    end
+
+    test "by unknown field" do
+      assert Singula.customer_search(%{
+               "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
+               "email" => "singula_purchase_test2@cmore.se",
+               "externalUniqueIdentifier" => "100_471_887",
+               "eyeColor" => "blue"
+             }) ==
+               {:error,
+                %Singula.Error{
+                  developer_message: "Following key(s) are invalid: [\"eyeColor\"]",
+                }}
+    end
   end
 
   describe "get contracts" do
@@ -1777,7 +1849,8 @@ defmodule SingulaTest do
                   currency: :SEK,
                   name: "C More TV4",
                   entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}],
-                  recurring_billing: %{amount: "139.00", month_count: 1}
+                  recurring_billing: %{amount: "139.00", month_count: 1},
+                  free_trial: %Singula.FreeTrial{number_of_days: 14}
                 }}
     end
 

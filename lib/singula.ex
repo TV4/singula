@@ -48,16 +48,35 @@ defmodule Singula do
     end
   end
 
-  @callback customer_search(binary) :: {:ok, Customer.t()} | {:error, error}
-  def customer_search(external_id) do
-    with {:ok, %Singula.Response{json: data}} <-
+  @callback customer_search(String.t() | map()) :: {:ok, Customer.t()} | {:error, error}
+  def customer_search(external_id) when is_binary(external_id) do
+    customer_search(%{"externalUniqueIdentifier" => external_id})
+  end
+
+  def customer_search(query) when is_map(query) do
+    with :ok <- validate_query(query),
+         {:ok, %Singula.Response{json: data}} <-
            post(
              :customer_search,
              "/apis/customers/v1/customer/search",
-             %{"externalUniqueIdentifier" => external_id},
+             query,
              200
            ) do
       {:ok, Customer.new(data)}
+    end
+  end
+
+  defp validate_query(query) do
+    Map.keys(query)
+    |> Enum.reject(fn key ->
+      Enum.member?(["customerId", "email", "externalUniqueIdentifier"], key)
+    end)
+    |> case do
+      [] ->
+        :ok
+
+      invalid_keys ->
+        {:error, %Singula.Error{developer_message: "Following key(s) are invalid: #{inspect(invalid_keys)}"}}
     end
   end
 
