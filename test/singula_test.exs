@@ -371,7 +371,7 @@ defmodule SingulaTest do
              }) ==
                {:error,
                 %Singula.Error{
-                  developer_message: "Following key(s) are invalid: [\"eyeColor\"]",
+                  developer_message: "Following key(s) are invalid: [\"eyeColor\"]"
                 }}
     end
   end
