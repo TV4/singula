@@ -519,7 +519,7 @@ defmodule SingulaTest do
           "currentPage" => 1,
           "items" => [
             %{
-              "entitlements" => 5961,
+              "entitlements" => [%{"id" => 5961, "name" => "Matchbiljett 249 kr"}],
               "itemData" => %{"id" => 1, "name" => "1"},
               "orderId" => 112_233,
               "purchaseDate" => "2020-04-01T13:04:29+02:00",
@@ -541,7 +541,7 @@ defmodule SingulaTest do
           "currentPage" => 2,
           "items" => [
             %{
-              "entitlements" => 5961,
+              "entitlements" => [%{"id" => 5961, "name" => "Matchbiljett 249 kr"}],
               "itemData" => %{"id" => 2, "name" => "2"},
               "orderId" => 445_566,
               "purchaseDate" => "2020-04-01T13:10:10+02:00",
@@ -564,12 +564,14 @@ defmodule SingulaTest do
                   %Singula.PPV{
                     order_id: 112_233,
                     asset: %Singula.Asset{id: 1, title: "1"},
-                    item_id: "A2D895F14D6B4F2DA03C"
+                    item_id: "A2D895F14D6B4F2DA03C",
+                    entitlements: [%Singula.Entitlement{id: 5961, name: "Matchbiljett 249 kr"}]
                   },
                   %Singula.PPV{
                     order_id: 445_566,
                     asset: %Singula.Asset{id: 2, title: "2"},
-                    item_id: "A2D895F14D6B4F2DA03C"
+                    item_id: "A2D895F14D6B4F2DA03C",
+                    entitlements: [%Singula.Entitlement{id: 5961, name: "Matchbiljett 249 kr"}]
                   }
                 ]}
     end
