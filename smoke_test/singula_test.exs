@@ -68,7 +68,7 @@ defmodule SmokeTest.Singula do
                   id: customer_id,
                   date_of_birth: nil,
                   email: email,
-                  external_unique_id: to_string(vimond_id),
+                  external_unique_id: vimond_id,
                   first_name: "Test",
                   last_name: "TV4 Media SmokeTest",
                   username: username
@@ -102,7 +102,7 @@ defmodule SmokeTest.Singula do
                   id: customer_id,
                   date_of_birth: nil,
                   email: email,
-                  external_unique_id: to_string(vimond_id),
+                  external_unique_id: vimond_id,
                   first_name: "Test",
                   last_name: "TV4 Media SmokeTest",
                   username: username
@@ -110,7 +110,7 @@ defmodule SmokeTest.Singula do
     end
 
     test "returns error 90068 when not finding customer" do
-      assert Singula.customer_search(666) == {
+      assert Singula.customer_search("666") == {
                :error,
                %Singula.Error{
                  code: 90068,
@@ -714,12 +714,6 @@ defmodule SmokeTest.Singula do
                item_id: "9781F421A5894FC0AA96",
                change_type: :DOWNGRADE,
                change_cost: "-250.00"
-             },
-             %Singula.Crossgrade{
-               currency: :SEK,
-               item_id: "C943A5FED47E444B96E1",
-               change_type: :UPGRADE,
-               change_cost: "0.00"
              }
            ]
   end
@@ -762,7 +756,7 @@ defmodule SmokeTest.Singula do
   defp setup_test_customer(_context) do
     unix_time_now = DateTime.to_unix(DateTime.utc_now())
     user_id = "smoke_test_#{unix_time_now}"
-    external_id = unix_time_now
+    external_id = to_string(unix_time_now)
     email = "#{user_id}@bbrtest.se"
 
     customer_id = create_test_customer(external_id, user_id, email)
