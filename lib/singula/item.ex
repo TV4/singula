@@ -17,14 +17,8 @@ defmodule Singula.Item do
   @type t :: %__MODULE__{id: binary, currency: currency, entitlements: [Singula.Entitlement.t()]}
 
   def new(
-        %{
-          "itemId" => id,
-          "categoryId" => category_id,
-          "name" => name,
-          "pricing" => pricing,
-          "entitlements" => entitlements,
-          "freeTrial" => free_trial
-        } = payload
+        %{"itemId" => id, "categoryId" => category_id, "name" => name, "pricing" => pricing, "freeTrial" => free_trial} =
+          payload
       ) do
     %__MODULE__{
       id: id,
@@ -33,21 +27,13 @@ defmodule Singula.Item do
       name: name,
       recurring_billing: recurring_billing(pricing),
       one_off_price: one_off_price(pricing),
-      entitlements: entitlements(entitlements),
+      entitlements: entitlements(payload["entitlements"]),
       minimum_term_month_count: month_count(payload["minimumTerm"]),
       free_trial: free_trial(free_trial)
     }
   end
 
-  def new(
-        %{
-          "itemId" => id,
-          "categoryId" => category_id,
-          "name" => name,
-          "pricing" => pricing,
-          "entitlements" => entitlements
-        } = payload
-      ) do
+  def new(%{"itemId" => id, "categoryId" => category_id, "name" => name, "pricing" => pricing} = payload) do
     %__MODULE__{
       id: id,
       currency: currency(pricing),
@@ -55,7 +41,7 @@ defmodule Singula.Item do
       name: name,
       recurring_billing: recurring_billing(pricing),
       one_off_price: one_off_price(pricing),
-      entitlements: entitlements(entitlements),
+      entitlements: entitlements(payload["entitlements"]),
       minimum_term_month_count: month_count(payload["minimumTerm"])
     }
   end
