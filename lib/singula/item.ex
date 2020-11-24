@@ -27,7 +27,7 @@ defmodule Singula.Item do
       name: name,
       recurring_billing: recurring_billing(pricing),
       one_off_price: one_off_price(pricing),
-      entitlements: entitlements(payload["entitlements"]),
+      entitlements: entitlements(Map.get(payload, "entitlements", [])),
       minimum_term_month_count: month_count(payload["minimumTerm"]),
       free_trial: free_trial(free_trial)
     }
@@ -41,7 +41,7 @@ defmodule Singula.Item do
       name: name,
       recurring_billing: recurring_billing(pricing),
       one_off_price: one_off_price(pricing),
-      entitlements: entitlements(payload["entitlements"]),
+      entitlements: entitlements(Map.get(payload, "entitlements", [])),
       minimum_term_month_count: month_count(payload["minimumTerm"])
     }
   end

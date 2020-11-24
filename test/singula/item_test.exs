@@ -14,7 +14,7 @@ defmodule Singula.ItemTest do
       "pricing" => %{"oneOff" => %{"amount" => "149.00", "currency" => "SEK"}}
     }
 
-    assert Item.new(payload) == %Singula.Item{
+    assert Item.new(payload) == %Item{
              id: "A2D895F14D6B4F2DA03C",
              currency: :SEK,
              category_id: 213,
@@ -41,7 +41,7 @@ defmodule Singula.ItemTest do
       }
     }
 
-    assert Item.new(payload) == %Singula.Item{
+    assert Item.new(payload) == %Item{
              id: "6D3A56FF5065478ABD61",
              currency: :SEK,
              category_id: 101,
@@ -70,7 +70,7 @@ defmodule Singula.ItemTest do
       }
     }
 
-    assert Item.new(payload) == %Singula.Item{
+    assert Item.new(payload) == %Item{
              id: "4FC7D926073348038362",
              currency: :SEK,
              category_id: 226,
@@ -99,7 +99,7 @@ defmodule Singula.ItemTest do
       }
     }
 
-    assert Item.new(payload) == %Singula.Item{
+    assert Item.new(payload) == %Item{
              id: "8FB4E247D57B40E09FA7",
              currency: :SEK,
              category_id: 226,
@@ -108,6 +108,35 @@ defmodule Singula.ItemTest do
              recurring_billing: %{amount: "399.00", month_count: 1},
              one_off_price: "1990.00",
              minimum_term_month_count: 24
+           }
+  end
+
+  test "service without entitlements" do
+    payload = %{
+      "active" => true,
+      "categoryId" => 275,
+      "description" => "C More - TVE",
+      "itemId" => "9AB5E7C5C9FE4B55AAA4",
+      "itemType" => "SERVICE",
+      "minimumTerm" => %{"frequency" => "MONTH", "length" => 1},
+      "name" => "C More - TVE",
+      "pricing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "0.00", "currency" => "SEK"}
+      }
+    }
+
+    assert Item.new(payload) == %Item{
+             category_id: 275,
+             currency: :SEK,
+             entitlements: [],
+             free_trial: nil,
+             id: "9AB5E7C5C9FE4B55AAA4",
+             minimum_term_month_count: 1,
+             name: "C More - TVE",
+             one_off_price: nil,
+             recurring_billing: %{amount: "0.00", month_count: 1}
            }
   end
 end
