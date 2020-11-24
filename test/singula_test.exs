@@ -1801,6 +1801,19 @@ defmodule SingulaTest do
               ]}
   end
 
+  test "crossgrades for contract without crossgrades" do
+    MockSingulaHTTPClient
+    |> expect(
+      :get,
+      fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change" ->
+        data = %{}
+        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+      end
+    )
+
+    assert Singula.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, []}
+  end
+
   test "change a contract" do
     MockSingulaHTTPClient
     |> expect(

@@ -273,14 +273,16 @@ defmodule Singula do
   @callback crossgrades_for_contract(Customer.id(), Contract.contract_id()) ::
               {:ok, list(Singula.Crossgrade.t())} | {:error, error}
   def crossgrades_for_contract(customer_id, contract_id) do
-    with {:ok, %Singula.Response{json: %{"crossgradePaths" => crossgrade_paths}}} <-
+    with {:ok, %Singula.Response{json: json}} <-
            get(
              :crossgrades_for_contract,
              "/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change",
              200
            ) do
       crossgrades =
-        Enum.map(crossgrade_paths, fn crossgrade_path ->
+        json
+        |> Map.get("crossgradePaths", [])
+        |> Enum.map(fn crossgrade_path ->
           Singula.Crossgrade.new(crossgrade_path)
         end)
 
