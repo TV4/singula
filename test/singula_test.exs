@@ -1933,6 +1933,12 @@ defmodule SingulaTest do
               "paymentMethodId" => 28646,
               "provider" => "KLARNA",
               "tokenId" => "nSX2OIPMS48UcL35aRv"
+            },
+            %{
+              "cardType" => "MC",
+              "defaultMethod" => false,
+              "paymentMethodId" => 28647,
+              "provider" => "DIBS"
             }
           ]
         }
@@ -1949,7 +1955,8 @@ defmodule SingulaTest do
                     expiry_date: "12/2023",
                     masked_card: "402005*** **** 0000"
                   },
-                  %Singula.KlarnaPaymentMethod{id: 28646, default: false}
+                  %Singula.KlarnaPaymentMethod{id: 28646, default: false},
+                  %Singula.DibsPaymentMethod{id: 28647, default: false}
                 ]}
     end
 

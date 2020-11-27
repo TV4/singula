@@ -3,12 +3,12 @@ defmodule Singula.DibsPaymentMethod do
 
   @type t :: %__MODULE__{}
 
-  def new(%{
-        "defaultMethod" => default_method,
-        "expiryDate" => expiry_date,
-        "maskedCard" => masked_card,
-        "paymentMethodId" => payment_method_id
-      }) do
-    %__MODULE__{id: payment_method_id, default: default_method, expiry_date: expiry_date, masked_card: masked_card}
+  def new(%{"defaultMethod" => default_method, "paymentMethodId" => payment_method_id} = payment_method) do
+    %__MODULE__{
+      id: payment_method_id,
+      default: default_method,
+      expiry_date: payment_method["expiryDate"],
+      masked_card: payment_method["maskedCard"]
+    }
   end
 end
