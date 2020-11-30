@@ -35,7 +35,7 @@ defmodule SmokeTest.Singula do
                 name: "C More TV4",
                 one_off_price: nil,
                 recurring_billing: %{amount: "139.00", month_count: 1},
-                free_trial: %Singula.FreeTrial{number_of_days: 14},
+                free_trial: %Singula.FreeTrial{number_of_days: 14}
               }}
   end
 
@@ -554,6 +554,7 @@ defmodule SmokeTest.Singula do
                   id: contract_id,
                   order_id: order_id,
                   item_id: item_id,
+                  entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}],
                   item_name: "C More TV4",
                   paid_up_to_date: Date.utc_today() |> Date.add(14),
                   recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
@@ -571,7 +572,15 @@ defmodule SmokeTest.Singula do
       ppv_order_id: order_id
     } do
       assert Singula.customer_purchases_ppv(customer_id) ==
-               {:ok, [%Singula.PPV{asset: asset, item_id: item_id, order_id: order_id,  entitlements: [%Singula.Entitlement{id: 5967, name: "Matchbiljett 149 kr"}]}]}
+               {:ok,
+                [
+                  %Singula.PPV{
+                    asset: asset,
+                    item_id: item_id,
+                    order_id: order_id,
+                    entitlements: [%Singula.Entitlement{id: 5967, name: "Matchbiljett 149 kr"}]
+                  }
+                ]}
     end
   end
 
@@ -651,7 +660,8 @@ defmodule SmokeTest.Singula do
              upcoming_billing: %{amount: 449.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
              status: :ACTIVE,
-             payment_method_id: payment_method_id
+             payment_method_id: payment_method_id,
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
            }
   end
 
@@ -680,7 +690,8 @@ defmodule SmokeTest.Singula do
              upcoming_billing: %{amount: 449.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: Date.utc_today(),
              status: :DOWNGRADE_SCHEDULED,
-             payment_method_id: payment_method_id
+             payment_method_id: payment_method_id,
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
            }
   end
 
