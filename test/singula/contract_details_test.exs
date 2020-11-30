@@ -42,7 +42,8 @@ defmodule Singula.ContractDetailsTest do
              status: :ACTIVE,
              start_date: ~D[2020-04-22],
              paid_up_to_date: ~D[2020-04-22],
-             payment_method_id: 3_070_939
+             payment_method_id: 3_070_939,
+             entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}]
            }
   end
 
@@ -81,7 +82,8 @@ defmodule Singula.ContractDetailsTest do
              status: :ACTIVE,
              start_date: ~D[2020-04-20],
              paid_up_to_date: ~D[2020-05-04],
-             payment_method_id: 10_246_312
+             payment_method_id: 10_246_312,
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
            }
   end
 
@@ -135,7 +137,8 @@ defmodule Singula.ContractDetailsTest do
              recurring_billing: %{amount: 139.00, currency: :SEK, frequency: :MONTH, length: 1},
              upcoming_billing: %{amount: 0.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
-             payment_method_id: 27541
+             payment_method_id: 27541,
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
            }
   end
 
@@ -190,7 +193,8 @@ defmodule Singula.ContractDetailsTest do
              upcoming_billing: %{amount: 0.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
              status: :ACTIVE,
-             payment_method_id: 27543
+             payment_method_id: 27543,
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
            }
   end
 
@@ -245,7 +249,8 @@ defmodule Singula.ContractDetailsTest do
              upcoming_billing: %{amount: 0.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-05-19],
              status: :ACTIVE,
-             payment_method_id: 27545
+             payment_method_id: 27545,
+             entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}]
            }
   end
 
@@ -300,7 +305,8 @@ defmodule Singula.ContractDetailsTest do
              upcoming_billing: %{amount: 349.00, currency: :SEK, frequency: :MONTH, length: 1},
              start_date: ~D[2020-08-25],
              status: :ACTIVE,
-             payment_method_id: 28390
+             payment_method_id: 28390,
+             entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}]
            }
   end
 
@@ -343,7 +349,8 @@ defmodule Singula.ContractDetailsTest do
              status: :DOWNGRADE_SCHEDULED,
              start_date: ~D[2020-04-20],
              paid_up_to_date: ~D[2020-05-04],
-             payment_method_id: 10_246_312
+             payment_method_id: 10_246_312,
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
            }
   end
 
@@ -382,7 +389,8 @@ defmodule Singula.ContractDetailsTest do
              status: :ACTIVE,
              start_date: ~D[2020-04-20],
              paid_up_to_date: ~D[2020-05-04],
-             payment_method_id: 10_246_312
+             payment_method_id: 10_246_312,
+             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
            }
   end
 end

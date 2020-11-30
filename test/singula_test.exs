@@ -484,7 +484,8 @@ defmodule SingulaTest do
                   status: :ACTIVE,
                   start_date: ~D[2020-04-22],
                   paid_up_to_date: ~D[2020-04-22],
-                  payment_method_id: 3_070_939
+                  payment_method_id: 3_070_939,
+                  entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}]
                 }}
     end
 

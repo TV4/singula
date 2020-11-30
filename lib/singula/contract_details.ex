@@ -13,7 +13,8 @@ defmodule Singula.ContractDetails do
     :paid_up_to_date,
     :change_date,
     :change_to_item_id,
-    :payment_method_id
+    :payment_method_id,
+    :entitlements
   ]
 
   @type t :: %__MODULE__{}
@@ -33,7 +34,8 @@ defmodule Singula.ContractDetails do
       paid_up_to_date: date(response["paidUpToDate"]),
       change_date: date(response["changeDate"]),
       change_to_item_id: response["changeToItem"],
-      payment_method_id: response["paymentMethodId"]
+      payment_method_id: response["paymentMethodId"],
+      entitlements: Enum.map(response["entitlements"], &Singula.Entitlement.new/1)
     }
   end
 
