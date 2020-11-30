@@ -661,7 +661,7 @@ defmodule SmokeTest.Singula do
              start_date: Date.utc_today(),
              status: :ACTIVE,
              payment_method_id: payment_method_id,
-             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
+             entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}]
            }
   end
 
@@ -691,7 +691,7 @@ defmodule SmokeTest.Singula do
              start_date: Date.utc_today(),
              status: :DOWNGRADE_SCHEDULED,
              payment_method_id: payment_method_id,
-             entitlements: [%Singula.Entitlement{id: 5960, name: "C More TV4"}]
+             entitlements: [%Singula.Entitlement{id: 5963, name: "C More All Sport"}]
            }
   end
 
