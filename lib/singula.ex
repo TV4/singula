@@ -114,7 +114,7 @@ defmodule Singula do
   @callback fetch_single_use_promo_code(promo_code :: binary) :: {:ok, map} | {:error, error}
   def fetch_single_use_promo_code(promo_code) do
     with {:ok, %Singula.Response{json: data}} <-
-           get(:fetch_single_use_promo_code, "/apis/purchases/v1/promocode/#{promo_code}", 200) do
+           get(:fetch_single_use_promo_code, "/apis/purchases/v1/promocode/#{URI.encode(promo_code)}", 200) do
       {:ok, data}
     end
   end

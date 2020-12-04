@@ -671,6 +671,26 @@ defmodule SingulaTest do
                   user_message: "Promo code not found"
                 }}
     end
+
+    test "url encodes the promocode in the get request" do
+      MockSingulaHTTPClient
+      |> expect(:get, fn "/apis/purchases/v1/promocode/PROMO%20CODE" ->
+        {:error,
+         %Singula.Error{
+           code: 90123,
+           developer_message: "Error response from promocode service404",
+           user_message: "Promo code not found"
+         }}
+      end)
+
+      assert Singula.fetch_single_use_promo_code("PROMO CODE") ==
+               {:error,
+                %Singula.Error{
+                  code: 90123,
+                  developer_message: "Error response from promocode service404",
+                  user_message: "Promo code not found"
+                }}
+    end
   end
 
   describe "create cart" do
