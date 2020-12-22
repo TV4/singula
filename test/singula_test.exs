@@ -530,7 +530,7 @@ defmodule SingulaTest do
           ],
           "nextPageLink" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/2",
           "numberOfPages" => 2,
-          "totalResults" => 2
+          "totalResults" => 3
         }
 
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
@@ -548,11 +548,18 @@ defmodule SingulaTest do
               "salesItemCode" => "A2D895F14D6B4F2DA03C",
               "salesItemName" => "PPV - 249",
               "type" => "PPV"
+            },
+            %{
+              "orderId" => 202_440_389,
+              "purchaseDate" => "2019-03-13T00:00:00+01:00",
+              "salesItemCode" => "F5C55A4FFD044A80816D",
+              "salesItemName" => "Legacy_PPV_Vimond",
+              "type" => "PPV"
             }
           ],
           "numberOfPages" => 2,
           "previousPageLink" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
-          "totalResults" => 2
+          "totalResults" => 3
         }
 
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
@@ -572,6 +579,12 @@ defmodule SingulaTest do
                     asset: %Singula.Asset{id: 2, title: "2"},
                     item_id: "A2D895F14D6B4F2DA03C",
                     entitlements: [%Singula.Entitlement{id: 5961, name: "Matchbiljett 249 kr"}]
+                  },
+                  %Singula.PPV{
+                    asset: %Singula.Asset{id: nil, title: nil},
+                    entitlements: [],
+                    item_id: "F5C55A4FFD044A80816D",
+                    order_id: 202_440_389
                   }
                 ]}
     end

@@ -12,8 +12,15 @@ defmodule Singula.PPV do
         order_id: purchase["orderId"],
         item_id: purchase["salesItemCode"],
         asset: %Asset{id: purchase["itemData"]["id"], title: purchase["itemData"]["name"]},
-        entitlements: Enum.map(purchase["entitlements"], fn entitlement -> Singula.Entitlement.new(entitlement) end)
+        entitlements: entitlements(purchase)
       }
     end)
+  end
+
+  defp entitlements(purchase) do
+    case purchase["entitlements"] do
+      nil -> []
+      entitlements -> Enum.map(entitlements, fn entitlement -> Singula.Entitlement.new(entitlement) end)
+    end
   end
 end
