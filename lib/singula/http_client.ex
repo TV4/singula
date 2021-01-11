@@ -75,8 +75,15 @@ defmodule Singula.HTTPClient do
     response =
       Enum.find(headers, fn {key, _value} -> String.downcase(key) == "content-type" end)
       |> case do
-        nil -> response
-        {_, "application/json" <> _charset} -> %Singula.Response{response | json: Jason.decode!(body)}
+        nil ->
+          response
+
+        {_, "application/json" <> _charset} ->
+          %Singula.Response{response | json: Jason.decode!(body)}
+
+        _otherwise ->
+          Logger.error("Unknown Singula response: #{inspect(response)}")
+          response
       end
 
     separate_error(response)
