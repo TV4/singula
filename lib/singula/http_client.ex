@@ -59,7 +59,7 @@ defmodule Singula.HTTPClient do
     api_secret = Application.get_env(:singula, :api_secret)
     path = URI.parse(path).path
 
-    signature = :crypto.hmac(:sha256, api_secret, "#{timestamp}#{method}#{path}") |> Base.encode16()
+    signature = :crypto.mac(:hmac, :sha256, api_secret, "#{timestamp}#{method}#{path}") |> Base.encode16()
 
     [
       Authorization: "hmac #{api_key}:#{signature}",
