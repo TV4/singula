@@ -1847,23 +1847,49 @@ defmodule SingulaTest do
     assert Singula.crossgrades_for_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738) == {:ok, []}
   end
 
-  test "change a contract" do
-    MockSingulaHTTPClient
-    |> expect(
-      :post,
-      fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change",
-         %{itemCode: "180B2AD9332349E6A7A4"} ->
-        data = %{
-          "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
-          "rel" => "Get contract details",
-          "type" => "application/json"
-        }
+  describe "change contract" do
+    test "succeeds" do
+      MockSingulaHTTPClient
+      |> expect(
+        :post,
+        fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change",
+           %{itemCode: "180B2AD9332349E6A7A4"} ->
+          data = %{
+            "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
+            "rel" => "Get contract details",
+            "type" => "application/json"
+          }
 
-        {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
-      end
-    )
+          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        end
+      )
 
-    assert Singula.change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "180B2AD9332349E6A7A4") == :ok
+      assert Singula.change_contract("ff160270-5197-4c90-835c-cd1fff8b19d0", 9_719_738, "180B2AD9332349E6A7A4") == :ok
+    end
+
+    test "succeeds with referrer" do
+      MockSingulaHTTPClient
+      |> expect(
+        :post,
+        fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change",
+           %{itemCode: "180B2AD9332349E6A7A4", referrerId: "my referrer"} ->
+          data = %{
+            "href" => "/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738",
+            "rel" => "Get contract details",
+            "type" => "application/json"
+          }
+
+          {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
+        end
+      )
+
+      assert Singula.change_contract(
+               "ff160270-5197-4c90-835c-cd1fff8b19d0",
+               9_719_738,
+               "180B2AD9332349E6A7A4",
+               "my referrer"
+             ) == :ok
+    end
   end
 
   describe "get item" do

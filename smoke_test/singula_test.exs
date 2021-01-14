@@ -713,7 +713,7 @@ defmodule SmokeTest.Singula do
                currency: :SEK,
                item_id: "9781F421A5894FC0AA96",
                change_type: :DOWNGRADE,
-               change_cost: "-250.00"
+               change_cost: "-200.00"
              }
            ]
   end

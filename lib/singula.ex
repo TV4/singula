@@ -291,12 +291,23 @@ defmodule Singula do
   end
 
   @callback change_contract(Customer.id(), Contract.contract_id(), item_id :: binary) :: :ok | {:error, error}
-  def change_contract(customer_id, contract_id, item_id) do
+  @callback change_contract(Customer.id(), Contract.contract_id(), item_id :: binary, referrer :: binary | nil) ::
+              :ok | {:error, error}
+  def change_contract(customer_id, contract_id, item_id, referrer \\ nil) do
+    data = %{itemCode: item_id}
+
+    data =
+      if referrer do
+        Map.put(data, :referrerId, referrer)
+      else
+        data
+      end
+
     with {:ok, _response} <-
            post(
              :change_contract,
              "/apis/contracts/v1/customer/#{customer_id}/contract/#{contract_id}/change",
-             %{itemCode: item_id},
+             data,
              200
            ) do
       :ok
