@@ -308,6 +308,62 @@ defmodule Singula.ContractDetailsTest do
            }
   end
 
+  test "parse with indefinite discount" do
+    payload = %{
+      "active" => true,
+      "auditInfo" => %{
+        "createdByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "creationDate" => "2021-02-16T15:44:19+01:00",
+        "modifiedByUser" => "89d83946-b4b5-4a7b-a92d-7b999c62e8a0",
+        "modifiedDate" => "2021-02-16T15:44:19+01:00"
+      },
+      "balance" => %{"amount" => "0.00", "currency" => "SEK"},
+      "billing" => %{
+        "frequency" => %{"frequency" => "MONTH", "length" => 1},
+        "initial" => %{"amount" => "0.00", "currency" => "SEK"},
+        "recurring" => %{"amount" => "139.00", "currency" => "SEK"},
+        "upcoming" => %{"amount" => "69.50", "currency" => "SEK"}
+      },
+      "contractId" => 32783,
+      "discount" => %{
+        "discountAmount" => %{"amount" => "69.50", "currency" => "SEK"},
+        "discountName" => "TestGatedDiscount50%Off",
+        "discountPercentage" => 50,
+        "indefinite" => true,
+        "itemCode" => "6D3A56FF5065478ABD61"
+      },
+      "discountCode" => %{
+        "campaignCode" => "TESTWITHCAMPAIGN",
+        "promoCode" => "PROMO1",
+        "sourceCode" => "TESTWITHSOURCE"
+      },
+      "entitlements" => [%{"id" => 5960, "name" => "C More TV4"}],
+      "itemCode" => "6D3A56FF5065478ABD61",
+      "name" => "C More TV4",
+      "nextPaymentDate" => "2021-03-02",
+      "orderId" => 129_986,
+      "paidUpToDate" => "2021-03-02",
+      "paymentMethodId" => 42752,
+      "startDate" => "2021-02-16",
+      "status" => "ACTIVE"
+    }
+
+    assert ContractDetails.new(payload) == %Singula.ContractDetails{
+             balance: %{amount: 0.0, currency: :SEK},
+             id: 32783,
+             item_id: "6D3A56FF5065478ABD61",
+             item_name: "C More TV4",
+             order_id: 129_986,
+             paid_up_to_date: ~D[2021-03-02],
+             recurring_billing: %{amount: 139.0, currency: :SEK, frequency: :MONTH, length: 1},
+             upcoming_billing: %{amount: 69.5, currency: :SEK, frequency: :MONTH, length: 1},
+             discount: %{amount: 69.5, currency: :SEK, discount_end_date: nil},
+             start_date: ~D[2021-02-16],
+             status: :ACTIVE,
+             payment_method_id: 42752
+           }
+  end
+
   test "parse scheduled contract change" do
     payload = %{
       "active" => true,

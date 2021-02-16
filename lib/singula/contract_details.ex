@@ -65,10 +65,10 @@ defmodule Singula.ContractDetails do
 
   defp discount(nil), do: nil
 
-  defp discount(%{"discountAmount" => discount_amount, "discountEndDate" => end_date}) do
+  defp discount(%{"discountAmount" => discount_amount} = discount) do
     discount_amount
     |> amount()
-    |> Map.put(:discount_end_date, date(end_date))
+    |> Map.put(:discount_end_date, date(discount["discountEndDate"]))
   end
 
   defp date(nil), do: nil
