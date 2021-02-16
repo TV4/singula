@@ -35,7 +35,7 @@ defmodule SmokeTest.Singula do
                 name: "C More TV4",
                 one_off_price: nil,
                 recurring_billing: %{amount: "139.00", month_count: 1},
-                free_trial: %Singula.FreeTrial{number_of_days: 14},
+                free_trial: %Singula.FreeTrial{number_of_days: 14}
               }}
   end
 
@@ -332,7 +332,7 @@ defmodule SmokeTest.Singula do
     test "returns subscription with gated multi use discount", %{
       customer_id: customer_id,
       currency: currency,
-      no_free_trial_item_id: subscription_item_id,
+      subscription_item_id: subscription_item_id,
       discount: discount
     } do
       assert {:ok, cart_id} =
@@ -340,26 +340,27 @@ defmodule SmokeTest.Singula do
                  discount: discount
                })
 
-      assert Singula.fetch_cart(customer_id, cart_id) == {
-               :ok,
-               %Singula.CartDetail{
-                 currency: :SEK,
-                 discount: %Singula.CartDetail.Discount{
-                   discount_amount: "224.50",
-                   discount_end_date: nil
-                 },
-                 id: String.to_integer(cart_id),
-                 items: [
-                   %Singula.CartDetail.Item{
-                     cost: "449.00",
-                     item_id: "4151C241C3DD41529A87",
-                     item_name: "C More All Sport",
-                     quantity: 1
-                   }
-                 ],
-                 total_cost: "224.50"
-               }
-             }
+      assert Singula.fetch_cart(customer_id, cart_id) ==
+               {:ok,
+                %Singula.CartDetail{
+                  currency: :SEK,
+                  discount: %Singula.CartDetail.Discount{discount_amount: "69.50"},
+                  id: String.to_integer(cart_id),
+                  items: [
+                    %Singula.CartDetail.Item{
+                      cost: "0.00",
+                      item_id: "6D3A56FF5065478ABD61",
+                      item_name: "C More TV4",
+                      quantity: 1,
+                      trial: %Singula.CartDetail.Item.Trial{
+                        first_payment_amount: "69.50",
+                        first_payment_date: ~D[2021-03-02],
+                        free_trial: true
+                      }
+                    }
+                  ],
+                  total_cost: "0.00"
+                }}
     end
 
     test "returns error 90022 for non-existing discount code", %{
@@ -571,7 +572,15 @@ defmodule SmokeTest.Singula do
       ppv_order_id: order_id
     } do
       assert Singula.customer_purchases_ppv(customer_id) ==
-               {:ok, [%Singula.PPV{asset: asset, item_id: item_id, order_id: order_id,  entitlements: [%Singula.Entitlement{id: 5967, name: "Matchbiljett 149 kr"}]}]}
+               {:ok,
+                [
+                  %Singula.PPV{
+                    asset: asset,
+                    item_id: item_id,
+                    order_id: order_id,
+                    entitlements: [%Singula.Entitlement{id: 5967, name: "Matchbiljett 149 kr"}]
+                  }
+                ]}
     end
   end
 
