@@ -6,6 +6,7 @@ defmodule Singula.ContractDetails do
     :item_name,
     :recurring_billing,
     :upcoming_billing,
+    :discount,
     :balance,
     :minimum_term,
     :status,
@@ -27,6 +28,7 @@ defmodule Singula.ContractDetails do
       balance: amount(response["balance"]),
       recurring_billing: billing(response["billing"], "recurring"),
       upcoming_billing: billing(response["billing"], "upcoming"),
+      discount: discount(response["discount"]),
       minimum_term: frequency(response["minimumTerm"]),
       status: String.to_atom(response["status"]),
       start_date: date(response["startDate"]),
@@ -60,6 +62,14 @@ defmodule Singula.ContractDetails do
   defp frequency_term("YEAR"), do: :YEAR
 
   defp currency_term(currency), do: String.to_atom(currency)
+
+  defp discount(nil), do: nil
+
+  defp discount(%{"discountAmount" => discount_amount, "discountEndDate" => end_date}) do
+    discount_amount
+    |> amount()
+    |> Map.put(:discount_end_date, date(end_date))
+  end
 
   defp date(nil), do: nil
   defp date(date_string), do: Date.from_iso8601!(date_string)
