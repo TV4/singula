@@ -1,7 +1,7 @@
 os: linux
 language: elixir
-elixir: 1.10.4
-otp_release: 23.0.3
+elixir: 1.11.3
+otp_release: 23.1.2
 cache:
   directories:
     - _build
