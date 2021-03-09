@@ -1,5 +1,25 @@
 defmodule Singula.CartDetail.Discount do
   defstruct [:discount_end_date, :discount_amount]
+
+  def new(discount, items) do
+    discounted_item = items |> Enum.find(fn item -> item.item_id == discount["itemCode"] end)
+
+    %Singula.CartDetail.Discount{
+      discount_end_date: discount_end_date(discount, discounted_item),
+      discount_amount: get_in(discount, ["discountAmount", "amount"])
+    }
+  end
+
+  defp discount_end_date(discount, discounted_item) do
+    trial = Map.get(discounted_item, :trial) || %{}
+    first_payment_date = Map.get(trial, :first_payment_date) || today()
+
+    unless discount["indefinite"] do
+      Timex.shift(first_payment_date, months: discount["numberOfOccurrences"] - 1)
+    end
+  end
+
+  defp today, do: Application.get_env(:singula, :today, &Date.utc_today/0).()
 end
 
 defmodule Singula.CartDetail.Item.Trial do
@@ -70,7 +90,7 @@ defmodule Singula.CartDetail.Item do
 end
 
 defmodule Singula.CartDetail do
-  alias Singula.CartDetail.Item
+  alias Singula.CartDetail.{Discount, Item}
 
   defstruct [:id, :order_id, :contract_id, :total_cost, :currency, :discount, items: []]
 
@@ -83,14 +103,7 @@ defmodule Singula.CartDetail do
 
     discount =
       if discount = cart_payload["discount"] do
-        item = items |> Enum.find(fn item -> item.item_id == discount["itemCode"] end)
-        first_payment_date = (Map.get(item, :trial) || %{}) |> Map.get(:first_payment_date) || today()
-
-        %Singula.CartDetail.Discount{
-          discount_end_date:
-            unless(discount["indefinite"], do: Timex.shift(first_payment_date, months: discount["numberOfOccurrences"])),
-          discount_amount: get_in(discount, ["discountAmount", "amount"])
-        }
+        Discount.new(discount, items)
       end
 
     %__MODULE__{
@@ -103,6 +116,4 @@ defmodule Singula.CartDetail do
       discount: discount
     }
   end
-
-  defp today, do: Application.get_env(:singula, :today, &Date.utc_today/0).()
 end

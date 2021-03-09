@@ -176,7 +176,7 @@ defmodule Singula.CartDetailTest do
       assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_435,
                discount: %Singula.CartDetail.Discount{
-                 discount_end_date: ~D[2022-02-02],
+                 discount_end_date: ~D[2022-01-02],
                  discount_amount: "50.00"
                },
                items: [
@@ -289,7 +289,7 @@ defmodule Singula.CartDetailTest do
       assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_312,
                discount: %Singula.CartDetail.Discount{
-                 discount_end_date: ~D[2020-09-02],
+                 discount_end_date: ~D[2020-08-02],
                  discount_amount: "139.00"
                },
                items: [
@@ -354,7 +354,7 @@ defmodule Singula.CartDetailTest do
                order_id: 112_863,
                contract_id: 19844,
                discount: %Singula.CartDetail.Discount{
-                 discount_end_date: ~D[2020-09-02],
+                 discount_end_date: ~D[2020-08-02],
                  discount_amount: "139.00"
                },
                items: [
@@ -410,7 +410,7 @@ defmodule Singula.CartDetailTest do
                currency: :SEK,
                discount: %Singula.CartDetail.Discount{
                  discount_amount: "139.00",
-                 discount_end_date: ~D[2020-05-02]
+                 discount_end_date: ~D[2020-04-02]
                },
                id: 121_314,
                items: [
@@ -470,7 +470,7 @@ defmodule Singula.CartDetailTest do
                order_id: 112_865,
                contract_id: 19846,
                currency: :SEK,
-               discount: %Singula.CartDetail.Discount{discount_amount: "139.00", discount_end_date: ~D[2020-05-02]},
+               discount: %Singula.CartDetail.Discount{discount_amount: "139.00", discount_end_date: ~D[2020-04-02]},
                items: [
                  %Singula.CartDetail.Item{
                    cost: "139.00",
@@ -516,7 +516,7 @@ defmodule Singula.CartDetailTest do
       assert CartDetail.new(payload) == %Singula.CartDetail{
                id: 121_320,
                currency: :SEK,
-               discount: %Singula.CartDetail.Discount{discount_amount: "200.00", discount_end_date: ~D[2021-02-02]},
+               discount: %Singula.CartDetail.Discount{discount_amount: "200.00", discount_end_date: ~D[2021-01-02]},
                items: [
                  %Singula.CartDetail.Item{
                    cost: "2389.00",
