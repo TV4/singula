@@ -354,7 +354,7 @@ defmodule SmokeTest.Singula do
                       quantity: 1,
                       trial: %Singula.CartDetail.Item.Trial{
                         first_payment_amount: "69.50",
-                        first_payment_date: ~D[2021-03-02],
+                        first_payment_date: Date.utc_today() |> Date.add(14),
                         free_trial: true
                       }
                     }
