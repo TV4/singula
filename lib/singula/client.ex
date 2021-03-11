@@ -10,7 +10,7 @@ defmodule Singula.Error do
   @type t :: %__MODULE__{code: integer | nil, developer_message: binary | nil, user_message: binary | nil}
 end
 
-defmodule Singula.HTTPClient do
+defmodule Singula.Client do
   require Logger
 
   @type payload :: map | binary

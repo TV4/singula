@@ -430,19 +430,19 @@ defmodule Singula do
 
   defp get(label, path, success_status_code) do
     log(label, fn ->
-      request(&http_client().get/1, [path], success_status_code)
+      request(&client().get/1, [path], success_status_code)
     end)
   end
 
   defp post(label, path, body, success_status_code) do
     log(label, fn ->
-      request(&http_client().post/2, [path, body], success_status_code)
+      request(&client().post/2, [path, body], success_status_code)
     end)
   end
 
   defp patch(label, path, body, success_status_code) do
     log(label, fn ->
-      request(&http_client().patch/2, [path, body], success_status_code)
+      request(&client().patch/2, [path, body], success_status_code)
     end)
   end
 
@@ -454,5 +454,5 @@ defmodule Singula do
     response
   end
 
-  defp http_client, do: Application.get_env(:singula, :http_client, Singula.HTTPClient)
+  defp client, do: Application.get_env(:singula, :client, Singula.Client)
 end

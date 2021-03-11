@@ -1,7 +1,7 @@
-defmodule Singula.HTTPClientTest do
+defmodule Singula.ClientTest do
   use ExUnit.Case, async: true
   import Hammox
-  alias Singula.HTTPClient
+  alias Singula.Client
 
   setup :verify_on_exit!
 
@@ -24,7 +24,7 @@ defmodule Singula.HTTPClientTest do
         {:error, %HTTPoison.Error{reason: :nxdomain}}
     end)
 
-    assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
+    assert Client.get("/api/get/päth", MockHTTPClient, current_time) ==
              {:error, %HTTPoison.Error{reason: :nxdomain}}
   end
 
@@ -57,7 +57,7 @@ defmodule Singula.HTTPClientTest do
          }}
     end)
 
-    assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
+    assert Client.get("/api/get/päth", MockHTTPClient, current_time) ==
              {:error,
               %Singula.Error{
                 code: 90074,
@@ -87,7 +87,7 @@ defmodule Singula.HTTPClientTest do
          }}
     end)
 
-    assert HTTPClient.get("/api/get/päth", MockHTTPClient, current_time) ==
+    assert Client.get("/api/get/päth", MockHTTPClient, current_time) ==
              {:ok, %Singula.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
   end
 
@@ -113,7 +113,7 @@ defmodule Singula.HTTPClientTest do
          }}
     end)
 
-    assert HTTPClient.patch("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
+    assert Client.patch("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
              {:ok, %Singula.Response{body: "{\"key\":\"value\"}", json: %{"key" => "value"}, status_code: 200}}
   end
 
@@ -133,7 +133,7 @@ defmodule Singula.HTTPClientTest do
         {:ok, %HTTPoison.Response{body: "", status_code: 200, request: %HTTPoison.Request{url: ""}}}
     end)
 
-    assert HTTPClient.post("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
+    assert Client.post("/api/get/päth", %{key: "value"}, MockHTTPClient, current_time) ==
              {:ok, %Singula.Response{body: "", status_code: 200}}
   end
 end

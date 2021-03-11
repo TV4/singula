@@ -1,6 +1,6 @@
 Application.put_all_env(
   singula: [
-    http_client: Singula.HTTPClient,
+    client: Singula.Client,
     uuid_generator: &UUID.uuid4/0,
     base_url: System.get_env("SINGULA_BASE_URL"),
     api_key: System.get_env("SINGULA_API_KEY"),

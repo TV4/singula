@@ -31,7 +31,7 @@ defmodule SingulaTest do
     end
 
     test "succeeds", %{customer: customer} do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/customers/v1/customer", payload ->
         assert payload == %{
                  addresses: [%{postCode: "12345", countryCode: "SWE"}],
@@ -66,7 +66,7 @@ defmodule SingulaTest do
     end
 
     test "username already exists", %{customer: customer} do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
         {:error,
          %Singula.Error{
@@ -87,7 +87,7 @@ defmodule SingulaTest do
     end
 
     test "external unique identifier already exists", %{customer: customer} do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
         {:error,
          %Singula.Error{
@@ -107,7 +107,7 @@ defmodule SingulaTest do
     end
 
     test "email already exists", %{customer: customer} do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/customers/v1/customer", _payload ->
         {:error,
          %Singula.Error{
@@ -128,7 +128,7 @@ defmodule SingulaTest do
   end
 
   test "update customer" do
-    MockSingulaHTTPClient
+    MockSingulaClient
     |> expect(:patch, fn "/apis/customers/v1/customer/12345", payload ->
       assert payload == %{firstName: "Tester"}
 
@@ -146,7 +146,7 @@ defmodule SingulaTest do
   end
 
   test "anomymise customer" do
-    MockSingulaHTTPClient
+    MockSingulaClient
     |> expect(:post, fn "/apis/customers/v1/customer/12345/anonymise", "" ->
       data = %{
         "href" => "/customer/4b7a1fb4-c36f-45bd-8142-309ea57dc3e8",
@@ -162,7 +162,7 @@ defmodule SingulaTest do
 
   describe "get customer" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/customers/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0" ->
         data = %{
           "active" => true,
@@ -212,7 +212,7 @@ defmodule SingulaTest do
     end
 
     test "when customer not found" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/customers/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0" ->
         {:error,
          %Singula.Error{
@@ -234,7 +234,7 @@ defmodule SingulaTest do
 
   describe "search customer" do
     test "with an existing external customer id" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => "100471887"} ->
         data = %{
           "active" => true,
@@ -284,7 +284,7 @@ defmodule SingulaTest do
     end
 
     test "with an incorrect external customer id" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/customers/v1/customer/search", %{"externalUniqueIdentifier" => "666"} ->
         {:error,
          %Singula.Error{
@@ -304,7 +304,7 @@ defmodule SingulaTest do
     end
 
     test "by customerId, email and externalUniqueIdentifier" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/customers/v1/customer/search",
                           %{
                             "customerId" => "ff160270-5197-4c90-835c-cd1fff8b19d0",
@@ -378,7 +378,7 @@ defmodule SingulaTest do
 
   describe "get contracts" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract?activeOnly=true" ->
         data = %{
           "contractCount" => 1,
@@ -417,7 +417,7 @@ defmodule SingulaTest do
     end
 
     test "fails" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/contracts/v1/customer/non_existing_customer_id/contract?activeOnly=true" ->
         {:error,
          %Singula.Error{
@@ -440,7 +440,7 @@ defmodule SingulaTest do
 
   describe "get contract" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738" ->
         data = %{
           "active" => true,
@@ -489,7 +489,7 @@ defmodule SingulaTest do
     end
 
     test "causes system failure" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/contracts/v1/customer/non_existing_customer_id/contract/9719738" ->
         {:error,
          %Singula.Error{
@@ -512,7 +512,7 @@ defmodule SingulaTest do
 
   describe "get ppv purchases" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/purchases/1",
                           %{type: "PPV"} ->
         data = %{
@@ -590,7 +590,7 @@ defmodule SingulaTest do
     end
 
     test "causing system failure" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/non_existing_customer_id/purchases/1", %{type: "PPV"} ->
         {:error,
          %Singula.Error{
@@ -613,7 +613,7 @@ defmodule SingulaTest do
 
   describe "fetch single use promo code" do
     test "succeeds when promo code exists" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/TESTLM8WVE" ->
         data = %{
           "promoCode" => "TESTLM8WVE",
@@ -666,7 +666,7 @@ defmodule SingulaTest do
     end
 
     test "fails when promo code does not exists" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/NON-EXISTING-CODE" ->
         {:error,
          %Singula.Error{
@@ -686,7 +686,7 @@ defmodule SingulaTest do
     end
 
     test "url encodes the promocode in the get request" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/purchases/v1/promocode/PROMO%20CODE" ->
         {:error,
          %Singula.Error{
@@ -708,7 +708,7 @@ defmodule SingulaTest do
 
   describe "create cart" do
     test "without meta data" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{}}]}
 
@@ -725,7 +725,7 @@ defmodule SingulaTest do
     end
 
     test "with asset" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{id: "654321", name: "Sportsboll"}}]}
 
@@ -744,7 +744,7 @@ defmodule SingulaTest do
     end
 
     test "with referrer" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{items: [%{itemCode: "item_id", itemData: %{referrerId: "A003_FS"}}]}
 
@@ -762,7 +762,7 @@ defmodule SingulaTest do
     end
 
     test "with discount" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -784,7 +784,7 @@ defmodule SingulaTest do
     end
 
     test "with multi-use voucher discount" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -811,7 +811,7 @@ defmodule SingulaTest do
     end
 
     test "with single-use voucher discount" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -836,7 +836,7 @@ defmodule SingulaTest do
     end
 
     test "causing system failure" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}]
@@ -860,7 +860,7 @@ defmodule SingulaTest do
     end
 
     test "discount not found" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -887,7 +887,7 @@ defmodule SingulaTest do
     end
 
     test "voucher not found" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}],
@@ -922,7 +922,7 @@ defmodule SingulaTest do
     end
 
     test "item not added to cart" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}]
@@ -946,7 +946,7 @@ defmodule SingulaTest do
     end
 
     test "item not found" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/customer_id/cart/currency/currency", data ->
         assert data == %{
                  items: [%{itemCode: "item_id", itemData: %{}}]
@@ -972,7 +972,7 @@ defmodule SingulaTest do
 
   describe "get cart" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
         data = %{
           "id" => 121_765,
@@ -1010,7 +1010,7 @@ defmodule SingulaTest do
     end
 
     test "when cart not found" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
         {:error,
          %Singula.Error{
@@ -1030,7 +1030,7 @@ defmodule SingulaTest do
     end
 
     test "causing system failure" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/purchases/v1/customer/customer_id/cart/121765" ->
         {:error,
          %Singula.Error{
@@ -1052,7 +1052,7 @@ defmodule SingulaTest do
 
   describe "get item discounts" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/catalogue/v1/item/item_id/discounts?currency=currency" ->
         data = %{
           "discounts" => [
@@ -1119,7 +1119,7 @@ defmodule SingulaTest do
     end
 
     test "for item without discounts" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/catalogue/v1/item/item_id/discounts?currency=currency" ->
         data = %{"discounts" => []}
         {:ok, %Singula.Response{body: Jason.encode!(data), json: data, status_code: 200}}
@@ -1131,7 +1131,7 @@ defmodule SingulaTest do
 
   describe "create dibs redirect" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/redirect", data ->
         assert data == %{
                  "currencyCode" => :SEK,
@@ -1177,7 +1177,7 @@ defmodule SingulaTest do
     end
 
     test "causes system failure" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect", _data ->
         {:error,
          %Singula.Error{
@@ -1199,7 +1199,7 @@ defmodule SingulaTest do
 
   describe "create klarna redirect" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/redirect", data ->
         assert data == %{
                  "currencyCode" => :SEK,
@@ -1259,7 +1259,7 @@ defmodule SingulaTest do
     end
 
     test "causes system failure" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/non_existing_customer_id/redirect", _data ->
         {:error,
          %Singula.Error{
@@ -1297,7 +1297,7 @@ defmodule SingulaTest do
     end
 
     test "on success", %{dibs_payment_method: dibs_payment_method} do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           data ->
         assert data == %{
@@ -1327,7 +1327,7 @@ defmodule SingulaTest do
     end
 
     test "transaction not found", %{dibs_payment_method: dibs_payment_method} do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
         {:error,
@@ -1348,7 +1348,7 @@ defmodule SingulaTest do
     end
 
     test "receipt not found", %{dibs_payment_method: dibs_payment_method} do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod",
                           _payment_method_data ->
         {:error,
@@ -1371,7 +1371,7 @@ defmodule SingulaTest do
 
   describe "add klarna payment method to customer" do
     test "on success" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/payment-methods/v1/customer/4ad58d9d-8976-47c0-af2c-35debf38d0eb/paymentmethod",
                           data ->
         assert data == %{
@@ -1419,7 +1419,7 @@ defmodule SingulaTest do
   end
 
   test "add not provided payment method to customer" do
-    MockSingulaHTTPClient
+    MockSingulaClient
     |> expect(:post, fn "/apis/payment-methods/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/paymentmethod", data ->
       assert data == %{
                "currencyCode" => :SEK,
@@ -1443,7 +1443,7 @@ defmodule SingulaTest do
 
   describe "set dibs payment method on contract" do
     test "success" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/83315a42-af04-4e59-949a-ef2b3e7bf3dd/contract/20919/paymentmethod",
@@ -1465,7 +1465,7 @@ defmodule SingulaTest do
 
   describe "checkout cart" do
     test "success for subscription that supports free trial" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1521,7 +1521,7 @@ defmodule SingulaTest do
     end
 
     test "success for subscription that don't support free trial" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1561,7 +1561,7 @@ defmodule SingulaTest do
     end
 
     test "success for PPV" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         data = %{
@@ -1599,7 +1599,7 @@ defmodule SingulaTest do
     end
 
     test "cart not found" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         {:error,
@@ -1620,7 +1620,7 @@ defmodule SingulaTest do
     end
 
     test "payment authorization fault" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/purchases/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/cart/118114/checkout",
                           %{"paymentMethodId" => 26574} ->
         {:error,
@@ -1644,7 +1644,7 @@ defmodule SingulaTest do
 
   describe "cancel contract" do
     test "successfully" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
                           data ->
         assert data == %{}
@@ -1657,7 +1657,7 @@ defmodule SingulaTest do
     end
 
     test "when minimum term blocks cancellation" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:post, fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel",
                           %{"cancelDate" => "2020-02-02"} ->
         {:error,
@@ -1680,7 +1680,7 @@ defmodule SingulaTest do
 
   describe "withdraw cancel contract" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
@@ -1698,7 +1698,7 @@ defmodule SingulaTest do
     end
 
     test "fails" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/cancel/withdraw", %{} ->
@@ -1723,7 +1723,7 @@ defmodule SingulaTest do
 
   describe "withdraw change contract" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change/withdraw", %{} ->
@@ -1741,7 +1741,7 @@ defmodule SingulaTest do
     end
 
     test "fails" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change/withdraw", %{} ->
@@ -1767,7 +1767,7 @@ defmodule SingulaTest do
   end
 
   test "crossgrades for contract" do
-    MockSingulaHTTPClient
+    MockSingulaClient
     |> expect(
       :get,
       fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change" ->
@@ -1835,7 +1835,7 @@ defmodule SingulaTest do
   end
 
   test "crossgrades for contract without crossgrades" do
-    MockSingulaHTTPClient
+    MockSingulaClient
     |> expect(
       :get,
       fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change" ->
@@ -1849,7 +1849,7 @@ defmodule SingulaTest do
 
   describe "change contract" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change",
@@ -1868,7 +1868,7 @@ defmodule SingulaTest do
     end
 
     test "succeeds with referrer" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(
         :post,
         fn "/apis/contracts/v1/customer/ff160270-5197-4c90-835c-cd1fff8b19d0/contract/9719738/change",
@@ -1894,7 +1894,7 @@ defmodule SingulaTest do
 
   describe "get item" do
     test "successfully" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
         data = %{
           "active" => true,
@@ -1929,7 +1929,7 @@ defmodule SingulaTest do
     end
 
     test "without required payload" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
         data = %{
           "active" => true,
@@ -1951,7 +1951,7 @@ defmodule SingulaTest do
     end
 
     test "fails" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/catalogue/v1/item/6D3A56FF5065478ABD61?currency=SEK" ->
         {:error,
          %Singula.Error{
@@ -1973,7 +1973,7 @@ defmodule SingulaTest do
 
   describe "get payment methods" do
     test "succeeds" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/payment-methods/v1/customer/76f8f800-e51d-4093-b573-31e4226a0da8/list" ->
         data = %{
           "PaymentMethod" => [
@@ -2020,7 +2020,7 @@ defmodule SingulaTest do
     end
 
     test "filter out unsupported payment methods" do
-      MockSingulaHTTPClient
+      MockSingulaClient
       |> expect(:get, fn "/apis/payment-methods/v1/customer/76f8f800-e51d-4093-b573-31e4226a0da8/list" ->
         data = %{
           "PaymentMethod" => [
@@ -2063,7 +2063,7 @@ defmodule SingulaTest do
   end
 
   test "get category" do
-    MockSingulaHTTPClient
+    MockSingulaClient
     |> expect(:get, fn "/apis/catalogue/v1/category/224?limited=false" ->
       data = %{
         "categories" => [

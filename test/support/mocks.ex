@@ -1,2 +1,2 @@
 Mox.defmock(MockHTTPClient, for: HTTPoison.Base)
-Mox.defmock(MockSingulaHTTPClient, for: Singula.HTTPClient)
+Mox.defmock(MockSingulaClient, for: Singula.Client)
